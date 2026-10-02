@@ -1,0 +1,12 @@
+plugins {
+  // Permet à Gradle de télécharger automatiquement un JDK 21 s'il n'est pas installé.
+  id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = '2dgame'
+
+// Les 3 modules du projet :
+//  - model  : les règles du jeu, en Java pur (aucune dépendance à libGDX) ;
+//  - core   : l'affichage et les entrées, avec libGDX ;
+//  - lwjgl3 : le lanceur desktop.
+include 'model', 'core', 'lwjgl3'

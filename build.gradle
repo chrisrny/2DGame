@@ -1,0 +1,34 @@
+// Configuration commune à tous les modules.
+
+allprojects {
+  // Génère les fichiers de projet pour IntelliJ IDEA et Eclipse.
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
+}
+
+subprojects {
+  apply plugin: 'java-library'
+
+  group = 'game'
+  version = projectVersion
+
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(21)
+    }
+  }
+
+  repositories {
+    mavenCentral()
+  }
+
+  tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+  }
+
+  tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    // Vérifie la syntaxe, les liens et les @param, sans exiger un commentaire sur chaque getter trivial.
+    options.addStringOption('Xdoclint:all,-missing', '-quiet')
+  }
+}

@@ -1,0 +1,84 @@
+# 2D Game — B-OOP-301
+
+Action-roguelite en vue de dessus, en Java 21 avec [libGDX](https://libgdx.com/).
+Une run : trois salles d'ennemis, une relique à choisir après chaque salle, puis un boss en deux phases.
+
+> Projet en cours de développement.
+
+## Prérequis
+
+- Java 21 (`java -version`)
+- Rien d'autre : le wrapper Gradle (`./gradlew`) télécharge Gradle et les dépendances.
+
+## Commandes
+
+| Action | Commande |
+|---|---|
+| Lancer le jeu | `./gradlew lwjgl3:run` |
+| Compiler tout le projet | `./gradlew build` |
+| Lancer les tests du modèle + rapport de couverture | `./gradlew model:test` |
+| Générer la Javadoc | `./gradlew javadoc` |
+| Construire un jar exécutable | `./gradlew lwjgl3:jar` |
+
+- Rapport de couverture : `model/build/reports/jacoco/test/html/index.html`
+- Javadoc : `<module>/build/docs/javadoc/index.html`
+- Jar : `lwjgl3/build/libs/`
+
+## Architecture
+
+Le projet est découpé en trois modules Gradle :
+
+- **`model`** contient toutes les règles du jeu, en Java pur. Il ne dépend pas de libGDX :
+  un `import com.badlogic…` dans ce module ne compile pas. La séparation modèle / vue est
+  donc garantie par le build, et le modèle se teste sans ouvrir de fenêtre.
+- **`core`** affiche le modèle et lui transmet les intentions du joueur. Il ne décide jamais des règles.
+- **`lwjgl3`** est le lanceur desktop.
+
+À chaque image : lecture des entrées → avancée du modèle à pas fixe (1/60 s) → dessin.
+
+```
+.
+├── settings.gradle          déclaration des 3 modules
+├── build.gradle             configuration commune (Java 21, encodage, Javadoc)
+├── gradle.properties        versions (libGDX, LWJGL, JUnit)
+├── gradlew, gradlew.bat, gradle/wrapper/
+├── assets/                  sprites, sons, polices
+│
+├── model/                   règles du jeu, Java pur, AUCUN import libGDX
+│   ├── build.gradle         JUnit 5 + JaCoCo
+│   └── src/
+│       ├── main/java/game/model/
+│       │   ├── commun/        vecteur 2D, configuration, intention du joueur
+│       │   ├── event/         événements et bus d'événements (Observer)
+│       │   ├── entity/        joueur, ennemis, boss
+│       │   ├── player/state/  états du joueur (State)
+│       │   ├── combat/        coups, dégâts, collisions
+│       │   ├── skill/         compétences et recharges
+│       │   ├── relic/         reliques et tirage (Factory)
+│       │   ├── ai/            comportements des ennemis (Strategy)
+│       │   └── world/         salles, vagues, run
+│       └── test/java/game/model/   même arborescence
+│
+├── core/                    libGDX : affiche et écoute, ne décide rien
+│   ├── build.gradle         dépend de :model
+│   └── src/main/java/game/core/
+│       ├── Main.java        gestion des écrans (extends Game)
+│       ├── screen/          titre, partie, pause, options, fin
+│       ├── render/          dessin des entités
+│       ├── input/           clavier / souris / manette → intention du joueur
+│       └── hud/             points de vie, recharges, chiffres de dégâts
+│
+└── lwjgl3/                  lanceur desktop uniquement
+    └── src/main/java/game/lwjgl3/
+        ├── Lwjgl3Launcher.java
+        └── StartupHelper.java
+```
+
+## Conventions
+
+- `main` est toujours jouable ; on n'y pousse jamais directement.
+- Une branche par tâche, nommée d'après son identifiant : `feat/P1-A4-esquive`, `fix/P1-B4-coin-mur`.
+- Commits au format [Conventional Commits](https://www.conventionalcommits.org/fr/) :
+  `feat(player): ajoute l'esquive avec invincibilité`.
+- Chaque fusion passe par une pull request relue par l'autre membre du binôme.
+- Code, commentaires et Javadoc en français.

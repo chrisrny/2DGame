@@ -1,0 +1,40 @@
+## Dossiers et fichiers locaux du projet
+BOOTSTRAP/
+/*.pdf
+/*.pptx
+.vscode/
+
+## Gradle
+.gradle/
+build/
+gradle-app.setting
+local.properties
+
+## Java
+*.class
+hs_err_pid*
+.attach_pid*
+
+## IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+## Eclipse / VS Code (extension Java)
+.classpath
+.project
+.settings/
+bin/
+
+## Système
+.DS_Store
+Icon?
+Thumbs.db
+*.tmp
+*.swp
+*~
+
+## libGDX
+/assets/assets.txt

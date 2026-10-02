@@ -1,0 +1,26 @@
+// Module model : toutes les règles du jeu.
+// Il ne dépend PAS de libGDX : un « import com.badlogic… » ici ne compile pas.
+// C'est ce qui garantit la séparation modèle / vue et rend le modèle testable sans fenêtre.
+
+plugins {
+  id 'jacoco'
+}
+
+dependencies {
+  testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+  useJUnitPlatform()
+  // Le rapport de couverture est produit après chaque passage des tests.
+  finalizedBy 'jacocoTestReport'
+}
+
+tasks.named('jacocoTestReport') {
+  dependsOn 'test'
+  reports {
+    html.required = true
+    xml.required = true
+  }
+}

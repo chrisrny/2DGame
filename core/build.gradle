@@ -1,0 +1,7 @@
+// Module core : écrans, rendu, HUD et entrées, avec libGDX.
+// Il lit le modèle et lui transmet les intentions du joueur ; il ne décide jamais des règles.
+
+dependencies {
+  api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api project(':model')
+}
