@@ -46,4 +46,24 @@ class CollisionsTest {
     void unCercleQuiMordSurLeCoinLeChevauche() {
         assertTrue(Collisions.overlaps(cercle(11f, 11f, 2f), MUR));
     }
+
+    @Test
+    void deuxCerclesQuiSeChevauchent() {
+        assertTrue(Collisions.overlaps(cercle(0f, 0f, 5f), cercle(8f, 0f, 5f)));
+    }
+
+    @Test
+    void deuxCerclesQuiSeTouchentJusteNeSeChevauchentPas() {
+        assertFalse(Collisions.overlaps(cercle(0f, 0f, 5f), cercle(10f, 0f, 5f)));
+    }
+
+    @Test
+    void deuxCerclesEloignesNeSeChevauchentPas() {
+        assertFalse(Collisions.overlaps(cercle(0f, 0f, 5f), cercle(11f, 0f, 5f)));
+    }
+
+    @Test
+    void unPetitCercleDansUnGrandLeChevauche() {
+        assertTrue(Collisions.overlaps(cercle(0f, 0f, 5f), cercle(1f, 1f, 1f)));
+    }
 }

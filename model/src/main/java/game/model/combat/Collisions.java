@@ -26,4 +26,19 @@ public final class Collisions {
         float dy = c.center().y() - closestY;
         return dx * dx + dy * dy < c.radius() * c.radius();
     }
+
+    /**
+     * Indique si deux cercles se chevauchent. Deux cercles qui se touchent juste
+     * ne se chevauchent pas.
+     *
+     * @param a le premier cercle
+     * @param b le second cercle
+     * @return {@code true} si les cercles se chevauchent
+     */
+    public static boolean overlaps(Circle a, Circle b) {
+        float dx = a.center().x() - b.center().x();
+        float dy = a.center().y() - b.center().y();
+        float radii = a.radius() + b.radius();
+        return dx * dx + dy * dy < radii * radii;
+    }
 }
