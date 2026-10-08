@@ -9,6 +9,9 @@ public final class MovingState implements PlayerState {
 
     @Override
     public PlayerState next(Player player, PlayerIntent intent) {
+        if (player.canStartAttack()) {
+            return new AttackingState();
+        }
         if (intent.move().length() == 0f) {
             return new IdleState();
         }

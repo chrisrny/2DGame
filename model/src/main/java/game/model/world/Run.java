@@ -7,6 +7,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.event.EventBus;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Une partie complète, du début à la victoire ou à la défaite.
@@ -23,6 +24,7 @@ public final class Run {
 
     private final GameConfig config;
     private final EventBus events = new EventBus();
+    private final Random random;
     private final Player player;
     private final World world;
     private float elapsed;
@@ -35,7 +37,10 @@ public final class Run {
     public Run(GameConfig config) {
         this.config = Objects.requireNonNull(config, "config");
         Vec2 center = new Vec2(ARENA.x() + ARENA.width() / 2f, ARENA.y() + ARENA.height() / 2f);
-        this.player = new Player(center, config.player());
+        // Une seule source de hasard pour toute la partie, initialisée avec la graine :
+        // le joueur, les ennemis et les vagues doivent tous tirer leur hasard d'ici.
+        this.random = new Random(config.seed());
+        this.player = new Player(center, config.player(), random);
         this.world = new EmptyRoom(ARENA, events, player::position);
     }
 

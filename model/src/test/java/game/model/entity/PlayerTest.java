@@ -14,6 +14,7 @@ import game.model.commun.Vec2;
 import game.model.world.FakeWorld;
 import game.model.world.World;
 import java.util.List;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 /** Tests du joueur. */
@@ -23,7 +24,7 @@ class PlayerTest {
     private static final float VITESSE = PlayerStats.defaults().speed();
 
     private static Player joueur(Vec2 position) {
-        return new Player(position, PlayerStats.defaults());
+        return new Player(position, PlayerStats.defaults(), new Random(42L));
     }
 
     private static PlayerIntent bouger(float x, float y) {

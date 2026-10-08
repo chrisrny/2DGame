@@ -13,6 +13,7 @@ import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.world.FakeWorld;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 /** Tests des états du joueur, vus à travers le joueur. */
@@ -23,7 +24,7 @@ class PlayerStateTest {
     private static final Vec2 HAUT = new Vec2(0f, 1f);
 
     private final FakeWorld monde = FakeWorld.empty();
-    private final Player joueur = new Player(DEPART, PlayerStats.defaults());
+    private final Player joueur = new Player(DEPART, PlayerStats.defaults(), new Random(42L));
 
     private static PlayerIntent intention(Vec2 move, Vec2 aim, boolean attack, boolean dodge) {
         return new PlayerIntent(move, aim, attack, dodge, false, false);
