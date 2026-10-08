@@ -12,6 +12,7 @@ import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Vec2;
+import game.model.entity.Player;
 import game.model.world.Run;
 
 /**
@@ -40,8 +41,6 @@ public class GameScreen extends ScreenAdapter {
     private final Run run = new Run(GameConfig.defaults());
     private final InputSource input = new KeyboardMouseInput(viewport);
 
-    // Position du carré témoin, en attendant le vrai joueur (P1-A1).
-    private final Vec2 witness = new Vec2(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f);
     private PlayerIntent lastIntent = PlayerIntent.NONE;
 
     @Override
@@ -53,7 +52,8 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         // 1. Entrées : lues une fois par image, puis données à chaque pas de modèle.
-        PlayerIntent intent = input.poll(witness);
+        // La visée part de la position du joueur.
+        PlayerIntent intent = input.poll(run.player().position());
         lastIntent = intent;
 
         // 2. Modèle : 0, 1 ou plusieurs pas de durée fixe selon le temps écoulé.
@@ -76,30 +76,32 @@ public class GameScreen extends ScreenAdapter {
         // Fond sombre du donjon, sur toute la surface du monde logique.
         shapes.setColor(0.07f, 0.06f, 0.09f, 1f);
         shapes.rect(0f, 0f, WORLD_WIDTH, WORLD_HEIGHT);
-        // Carré témoin au centre, en attendant le joueur (P1-A1). Il devient blanc pendant l'attaque.
+        // Joueur : un disque bleu de la taille de sa zone de collision. Il devient blanc pendant l'attaque.
+        Vec2 player = run.player().position();
         if (lastIntent.attack()) {
             shapes.setColor(1f, 1f, 1f, 1f);
         } else {
             shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
         }
-        shapes.rect(witness.x() - 8f, witness.y() - 8f, 16f, 16f);
+        shapes.circle(player.x(), player.y(), Player.RADIUS, 24);
         shapes.end();
 
         drawIntentDebug();
     }
 
     /**
-     * Témoin temporaire des entrées : un trait jaune vers la souris (visée) et un trait
-     * vert dans la direction de déplacement. À retirer quand le joueur sera dessiné (P1-A1).
+     * Témoin temporaire des entrées, depuis le joueur : un trait jaune vers la souris (visée)
+     * et un trait vert dans la direction de déplacement. À retirer avec les états du joueur (P1-A2).
      */
     private void drawIntentDebug() {
+        Vec2 player = run.player().position();
         shapes.begin(ShapeRenderer.ShapeType.Line);
-        Vec2 aimEnd = witness.add(lastIntent.aim().scale(28f));
+        Vec2 aimEnd = player.add(lastIntent.aim().scale(28f));
         shapes.setColor(1f, 0.85f, 0.2f, 1f);
-        shapes.line(witness.x(), witness.y(), aimEnd.x(), aimEnd.y());
-        Vec2 moveEnd = witness.add(lastIntent.move().scale(20f));
+        shapes.line(player.x(), player.y(), aimEnd.x(), aimEnd.y());
+        Vec2 moveEnd = player.add(lastIntent.move().scale(20f));
         shapes.setColor(0.3f, 0.9f, 0.4f, 1f);
-        shapes.line(witness.x(), witness.y(), moveEnd.x(), moveEnd.y());
+        shapes.line(player.x(), player.y(), moveEnd.x(), moveEnd.y());
         shapes.end();
     }
 
