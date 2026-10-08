@@ -1,5 +1,6 @@
 package game.model.world;
 
+import game.model.combat.Collisions;
 import game.model.combat.Projectile;
 import game.model.commun.Circle;
 import game.model.commun.Faction;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Faux monde pour les tests : une arène et des murs choisis par le test, sans cible.
+ * Faux monde pour les tests : une arène, des murs et des cibles choisis par le test.
  * Les projectiles tirés sont gardés dans une liste que le test peut vérifier.
  */
 public final class FakeWorld implements World {
@@ -20,6 +21,7 @@ public final class FakeWorld implements World {
     private final List<Rect> walls;
     private final EventBus events = new EventBus();
     private final List<Projectile> projectiles = new ArrayList<>();
+    private final List<Damageable> targets = new ArrayList<>();
     private Vec2 playerPosition = Vec2.ZERO;
 
     /**
@@ -51,6 +53,15 @@ public final class FakeWorld implements World {
         this.playerPosition = position;
     }
 
+    /**
+     * Ajoute une cible que les attaques peuvent toucher.
+     *
+     * @param target la cible
+     */
+    public void addTarget(Damageable target) {
+        targets.add(target);
+    }
+
     /** @return les projectiles tirés depuis la création du monde */
     public List<Projectile> projectiles() {
         return projectiles;
@@ -73,7 +84,11 @@ public final class FakeWorld implements World {
 
     @Override
     public List<Damageable> targetsIn(Circle zone, Faction attacker) {
-        return List.of();
+        return targets.stream()
+                .filter(Damageable::isAlive)
+                .filter(target -> target.faction() != attacker)
+                .filter(target -> Collisions.overlaps(zone, target.hitbox()))
+                .toList();
     }
 
     @Override
