@@ -13,6 +13,7 @@ import game.core.input.KeyboardMouseInput;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Vec2;
 import game.model.entity.Player;
+import game.model.player.state.PlayerStateKind;
 import game.model.world.Run;
 
 /**
@@ -76,33 +77,32 @@ public class GameScreen extends ScreenAdapter {
         // Fond sombre du donjon, sur toute la surface du monde logique.
         shapes.setColor(0.07f, 0.06f, 0.09f, 1f);
         shapes.rect(0f, 0f, WORLD_WIDTH, WORLD_HEIGHT);
-        // Joueur : un disque bleu de la taille de sa zone de collision. Il devient blanc pendant l'attaque.
-        Vec2 player = run.player().position();
-        if (lastIntent.attack()) {
+        drawPlayer();
+        shapes.end();
+    }
+
+    /**
+     * Joueur : un disque de la taille de sa zone de collision, coloré selon son état,
+     * et un trait qui montre la direction du regard.
+     */
+    private void drawPlayer() {
+        Player player = run.player();
+        Vec2 center = player.position();
+        boolean dead = player.stateKind() == PlayerStateKind.DEAD;
+        if (dead) {
+            shapes.setColor(0.35f, 0.35f, 0.38f, 1f);
+        } else if (lastIntent.attack()) {
+            // Retour visuel provisoire du clic, remplacé par l'état d'attaque (P1-A3).
             shapes.setColor(1f, 1f, 1f, 1f);
         } else {
             shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
         }
-        shapes.circle(player.x(), player.y(), Player.RADIUS, 24);
-        shapes.end();
-
-        drawIntentDebug();
-    }
-
-    /**
-     * Témoin temporaire des entrées, depuis le joueur : un trait jaune vers la souris (visée)
-     * et un trait vert dans la direction de déplacement. À retirer avec les états du joueur (P1-A2).
-     */
-    private void drawIntentDebug() {
-        Vec2 player = run.player().position();
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        Vec2 aimEnd = player.add(lastIntent.aim().scale(28f));
-        shapes.setColor(1f, 0.85f, 0.2f, 1f);
-        shapes.line(player.x(), player.y(), aimEnd.x(), aimEnd.y());
-        Vec2 moveEnd = player.add(lastIntent.move().scale(20f));
-        shapes.setColor(0.3f, 0.9f, 0.4f, 1f);
-        shapes.line(player.x(), player.y(), moveEnd.x(), moveEnd.y());
-        shapes.end();
+        shapes.circle(center.x(), center.y(), Player.RADIUS, 24);
+        if (!dead) {
+            Vec2 tip = center.add(player.facing().scale(Player.RADIUS + 6f));
+            shapes.setColor(1f, 0.85f, 0.2f, 1f);
+            shapes.rectLine(center.x(), center.y(), tip.x(), tip.y(), 2f);
+        }
     }
 
     @Override
