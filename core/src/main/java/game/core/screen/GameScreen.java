@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.model.commun.GameConfig;
 import game.core.input.InputSource;
@@ -42,7 +43,6 @@ public class GameScreen extends ScreenAdapter {
     private final Run run = new Run(GameConfig.defaults());
     private final InputSource input = new KeyboardMouseInput(viewport);
 
-    private PlayerIntent lastIntent = PlayerIntent.NONE;
 
     @Override
     public void resize(int width, int height) {
@@ -55,7 +55,6 @@ public class GameScreen extends ScreenAdapter {
         // 1. Entrées : lues une fois par image, puis données à chaque pas de modèle.
         // La visée part de la position du joueur.
         PlayerIntent intent = input.poll(run.player().position());
-        lastIntent = intent;
 
         // 2. Modèle : 0, 1 ou plusieurs pas de durée fixe selon le temps écoulé.
         int steps = clock.advance(delta);
@@ -83,16 +82,22 @@ public class GameScreen extends ScreenAdapter {
 
     /**
      * Joueur : un disque de la taille de sa zone de collision, coloré selon son état,
-     * et un trait qui montre la direction du regard.
+     * et un trait qui montre la direction du regard. Pendant une attaque, la zone de coup
+     * est dessinée devant lui.
      */
     private void drawPlayer() {
         Player player = run.player();
         Vec2 center = player.position();
-        boolean dead = player.stateKind() == PlayerStateKind.DEAD;
+        PlayerStateKind kind = player.stateKind();
+        boolean dead = kind == PlayerStateKind.DEAD;
+        if (kind == PlayerStateKind.ATTACKING) {
+            Circle zone = player.attackZone();
+            shapes.setColor(0.85f, 0.85f, 0.95f, 1f);
+            shapes.circle(zone.center().x(), zone.center().y(), zone.radius(), 20);
+        }
         if (dead) {
             shapes.setColor(0.35f, 0.35f, 0.38f, 1f);
-        } else if (lastIntent.attack()) {
-            // Retour visuel provisoire du clic, remplacé par l'état d'attaque (P1-A3).
+        } else if (kind == PlayerStateKind.ATTACKING) {
             shapes.setColor(1f, 1f, 1f, 1f);
         } else {
             shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
