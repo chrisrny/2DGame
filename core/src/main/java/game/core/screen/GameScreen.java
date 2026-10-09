@@ -11,7 +11,9 @@ import game.model.commun.FixedStep;
 import game.model.commun.GameConfig;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
+import game.core.render.WorldRenderer;
 import game.model.commun.PlayerIntent;
+import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
@@ -42,6 +44,7 @@ public class GameScreen extends ScreenAdapter {
     private final FixedStep clock = new FixedStep();
     private final Run run = new Run(GameConfig.defaults());
     private final InputSource input = new KeyboardMouseInput(viewport);
+    private final WorldRenderer worldRenderer = new WorldRenderer();
 
 
     @Override
@@ -69,15 +72,26 @@ public class GameScreen extends ScreenAdapter {
     private void draw() {
         // Noir partout : ce qui reste visible hors du monde forme les bandes noires.
         ScreenUtils.clear(0f, 0f, 0f, 1f);
+        followPlayer();
         viewport.apply();
         shapes.setProjectionMatrix(camera.combined);
 
         shapes.begin(ShapeRenderer.ShapeType.Filled);
-        // Fond sombre du donjon, sur toute la surface du monde logique.
-        shapes.setColor(0.07f, 0.06f, 0.09f, 1f);
-        shapes.rect(0f, 0f, WORLD_WIDTH, WORLD_HEIGHT);
+        worldRenderer.draw(shapes, run.map());
         drawPlayer();
         shapes.end();
+    }
+
+    /**
+     * Centre la caméra sur le joueur, sans jamais montrer l'extérieur de la map.
+     */
+    private void followPlayer() {
+        Rect arena = run.map().arena();
+        Vec2 target = run.player().position();
+        float x = Math.clamp(target.x(), arena.x() + WORLD_WIDTH / 2f, arena.right() - WORLD_WIDTH / 2f);
+        float y = Math.clamp(target.y(), arena.y() + WORLD_HEIGHT / 2f, arena.top() - WORLD_HEIGHT / 2f);
+        camera.position.set(x, y, 0f);
+        camera.update();
     }
 
     /**
