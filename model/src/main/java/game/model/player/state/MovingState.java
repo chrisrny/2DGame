@@ -9,6 +9,9 @@ public final class MovingState implements PlayerState {
 
     @Override
     public PlayerState next(Player player, PlayerIntent intent) {
+        if (player.canStartDodge()) {
+            return player.startDodge(intent.move());
+        }
         if (player.canStartAttack()) {
             return new AttackingState();
         }

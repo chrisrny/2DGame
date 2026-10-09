@@ -10,6 +10,7 @@ import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.event.GameEvent;
 import game.model.player.state.DeadState;
+import game.model.player.state.DodgingState;
 import game.model.player.state.IdleState;
 import game.model.player.state.PlayerState;
 import game.model.player.state.PlayerStateKind;
@@ -49,6 +50,7 @@ public final class Player implements Damageable {
     private boolean attackPressed;
     private boolean dodgePressed;
     private float attackCooldownLeft;
+    private float dodgeCooldownLeft;
 
     /**
      * Crée un joueur avec tous ses points de vie.
@@ -79,6 +81,7 @@ public final class Player implements Damageable {
         Objects.requireNonNull(intent, "intent");
         Objects.requireNonNull(world, "world");
         attackCooldownLeft = Math.max(0f, attackCooldownLeft - dt);
+        dodgeCooldownLeft = Math.max(0f, dodgeCooldownLeft - dt);
         detectPresses(intent);
         if (isAlive()) {
             facing = intent.aim();
@@ -112,9 +115,45 @@ public final class Player implements Damageable {
      * @param dt        durée du pas, en secondes
      */
     public void walk(Vec2 direction, World world, float dt) {
-        Vec2 delta = direction.scale(stats.speed() * dt);
+        moveBy(direction.scale(stats.speed() * dt), world);
+    }
+
+    /**
+     * Déplace le joueur d'un vecteur donné : il glisse le long des murs et ne sort jamais
+     * de l'arène. C'est le seul endroit où la position change ; la marche et l'esquive
+     * passent toutes deux par ici.
+     *
+     * @param delta déplacement voulu pendant ce pas
+     * @param world la salle où se trouve le joueur
+     */
+    public void moveBy(Vec2 delta, World world) {
         Vec2 moved = Collisions.move(hitbox(), delta, world.walls());
         position = keepInside(moved, world.arena());
+    }
+
+    /**
+     * Indique si une esquive peut commencer à ce pas : le bouton vient d'être enfoncé
+     * et la recharge d'esquive est terminée.
+     *
+     * @return {@code true} si le joueur peut esquiver maintenant
+     */
+    public boolean canStartDodge() {
+        return dodgePressed && dodgeCooldownLeft <= 0f;
+    }
+
+    /**
+     * Lance une esquive et relance sa recharge. Utilisé par les états qui autorisent l'esquive.
+     *
+     * <p>La direction est figée au départ : celle du déplacement si le joueur bouge,
+     * sinon celle du regard.</p>
+     *
+     * @param move direction de déplacement demandée à ce pas
+     * @return l'état d'esquive dans lequel passer
+     */
+    public DodgingState startDodge(Vec2 move) {
+        dodgeCooldownLeft = stats.dodgeCooldown();
+        Vec2 direction = move.length() > 0f ? move.normalized() : facing;
+        return new DodgingState(direction);
     }
 
     /**
@@ -187,13 +226,14 @@ public final class Player implements Damageable {
      * Applique un coup au joueur.
      *
      * <p>Version minimale : le tir ami et les coups sur un joueur mort sont ignorés.
-     * Un coup mortel fait passer le joueur en état mort. L'invincibilité et le recul
-     * arrivent avec P1-A5.</p>
+     * Les coups sont aussi ignorés quand l'état courant rend invincible (esquive).
+     * Un coup mortel fait passer le joueur en état mort. L'invincibilité après un coup
+     * et le recul arrivent avec P1-A5.</p>
      */
     @Override
     public boolean receive(Hit hit) {
         Objects.requireNonNull(hit, "hit");
-        if (!isAlive() || hit.source() == faction()) {
+        if (!isAlive() || hit.source() == faction() || state.invulnerable()) {
             return false;
         }
         hp = Math.max(0, hp - hit.damage());
@@ -251,6 +291,11 @@ public final class Player implements Damageable {
     /** @return le temps restant avant de pouvoir attaquer de nouveau, en secondes */
     public float attackCooldownLeft() {
         return attackCooldownLeft;
+    }
+
+    /** @return le temps restant avant de pouvoir esquiver de nouveau, en secondes */
+    public float dodgeCooldownLeft() {
+        return dodgeCooldownLeft;
     }
 
     /** @return {@code true} si le bouton d'esquive vient d'être enfoncé à ce pas */

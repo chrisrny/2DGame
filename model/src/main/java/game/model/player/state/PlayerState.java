@@ -36,6 +36,16 @@ public interface PlayerState {
      */
     void act(Player player, PlayerIntent intent, World world, float dt);
 
+    /**
+     * Indique si le joueur ignore les coups dans cet état. C'est le joueur qui décide
+     * si un coup s'applique (contrat {@code Damageable}) : il demande à son état.
+     *
+     * @return {@code true} si les coups sont ignorés ; {@code false} par défaut
+     */
+    default boolean invulnerable() {
+        return false;
+    }
+
     /** @return la nature de cet état, que la vue utilise pour dessiner le joueur */
     PlayerStateKind kind();
 }
