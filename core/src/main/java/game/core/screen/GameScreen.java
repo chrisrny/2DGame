@@ -99,6 +99,8 @@ public class GameScreen extends ScreenAdapter {
             shapes.setColor(0.35f, 0.35f, 0.38f, 1f);
         } else if (kind == PlayerStateKind.ATTACKING) {
             shapes.setColor(1f, 1f, 1f, 1f);
+        } else if (kind == PlayerStateKind.DODGING) {
+            shapes.setColor(0.35f, 0.95f, 0.95f, 1f);
         } else {
             shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
         }
