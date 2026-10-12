@@ -21,9 +21,9 @@ class RunTest {
     }
 
     @Test
-    void leJoueurCommenceAuCentreDeLArene() {
+    void leJoueurCommenceAuCentreDeLaMap() {
         Run run = new Run(GameConfig.defaults(42L));
-        assertEquals(new Vec2(320f, 180f), run.player().position());
+        assertEquals(MapLayouts.main().center(), run.player().position());
     }
 
     @Test
@@ -34,6 +34,6 @@ class RunTest {
             run.update(droite, FixedStep.DT);
         }
         float vitesse = run.config().player().speed();
-        assertEquals(320f + vitesse, run.player().position().x(), 1e-2f);
+        assertEquals(MapLayouts.main().center().x() + vitesse, run.player().position().x(), 1e-2f);
     }
 }
