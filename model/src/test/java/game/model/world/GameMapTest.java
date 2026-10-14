@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import game.model.combat.Hit;
+import game.model.combat.Projectile;
 import game.model.commun.Circle;
 import game.model.commun.Faction;
 import game.model.commun.FixedStep;
 import game.model.commun.PlayerIntent;
 import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
+import game.model.entity.Archer;
 import game.model.entity.Player;
 import game.model.entity.Prowler;
 import game.model.event.EventBus;
@@ -79,6 +81,24 @@ class GameMapTest {
         pas(2);
         assertTrue(map.enemies().isEmpty());
         assertEquals(1, recus.stream().filter(e -> e instanceof GameEvent.EntityDied).count());
+    }
+
+    @Test
+    void laMapFaitAvancerLesProjectilesEtRetireCeuxQuiTouchent() {
+        Vec2 depart = joueur.position().sub(new Vec2(40f, 0f));
+        map.spawnProjectile(new Projectile(depart, new Vec2(200f, 0f), 3f, Faction.ENEMY, 8, 3f));
+        pas(30);
+        assertTrue(map.projectiles().isEmpty());
+        assertEquals(PlayerStats.defaults().maxHp() - 8, joueur.hp());
+    }
+
+    @Test
+    void unArcherSurLaMapTireSurLeJoueur() {
+        map.addEnemy(new Archer(joueur.position().add(new Vec2(150f, 0f))));
+        pas(95);
+        assertEquals(1, map.projectiles().size());
+        pas(60);
+        assertTrue(joueur.hp() < PlayerStats.defaults().maxHp());
     }
 
     @Test

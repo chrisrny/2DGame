@@ -25,9 +25,9 @@ import java.util.Objects;
  * La map de jeu : elle contient le joueur, les ennemis et les projectiles, et c'est par elle
  * qu'ils interagissent.
  *
- * <p>À chaque pas : le joueur bouge, puis les ennemis vivants, puis les ennemis au contact
- * frappent le joueur, puis les morts sont retirés en publiant {@code EntityDied}.
- * Les projectiles sont seulement gardés : leur déplacement arrive avec P1-B2.</p>
+ * <p>À chaque pas : le joueur bouge, puis les ennemis vivants, puis les projectiles (y compris
+ * ceux tirés pendant ce pas), puis les ennemis au contact frappent le joueur, puis les morts
+ * sont retirés en publiant {@code EntityDied}, et les projectiles disparus sont retirés.</p>
  */
 public final class GameMap implements World {
 
@@ -79,8 +79,18 @@ public final class GameMap implements World {
                 enemy.update(this, dt);
             }
         }
+        updateProjectiles(dt);
         applyContactDamage(dt);
         removeDeadEnemies();
+    }
+
+    // On parcourt une copie : une mise à jour peut ajouter un projectile (spawnProjectile)
+    // sans casser le parcours. Les projectiles disparus sont retirés à la fin du pas.
+    private void updateProjectiles(float dt) {
+        for (Projectile projectile : List.copyOf(projectiles)) {
+            projectile.update(this, dt);
+        }
+        projectiles.removeIf(projectile -> !projectile.isAlive());
     }
 
     // Un ennemi au contact ne frappe qu'une fois par CONTACT_COOLDOWN, sinon il viderait les PV
