@@ -2,14 +2,17 @@ package game.core.render;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import game.model.combat.Projectile;
+import game.model.commun.Faction;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
+import game.model.entity.Archer;
 import game.model.entity.Enemy;
 import game.model.world.GameMap;
 
 /**
- * Dessin provisoire de la map en formes simples : sol sombre, murs gris, ennemis en disques
- * rouges, projectiles en petits points blancs. Les sprites le remplaceront en phase 3.
+ * Dessin provisoire de la map en formes simples : sol sombre, murs gris, Rôdeurs en disques
+ * rouges, Archers en disques orange, projectiles en petits points (orange pour les ennemis,
+ * cyan pour le joueur). Les sprites le remplaceront en phase 3.
  */
 public final class WorldRenderer {
 
@@ -26,13 +29,21 @@ public final class WorldRenderer {
         for (Rect wall : map.walls()) {
             rect(shapes, wall);
         }
-        shapes.setColor(0.86f, 0.25f, 0.25f, 1f);
         for (Enemy enemy : map.enemies()) {
+            if (enemy instanceof Archer) {
+                shapes.setColor(1f, 0.55f, 0.15f, 1f);
+            } else {
+                shapes.setColor(0.86f, 0.25f, 0.25f, 1f);
+            }
             Vec2 p = enemy.position();
             shapes.circle(p.x(), p.y(), enemy.hitbox().radius(), 20);
         }
-        shapes.setColor(1f, 1f, 1f, 1f);
         for (Projectile projectile : map.projectiles()) {
+            if (projectile.faction() == Faction.ENEMY) {
+                shapes.setColor(1f, 0.7f, 0.3f, 1f);
+            } else {
+                shapes.setColor(0.35f, 0.95f, 0.95f, 1f);
+            }
             Vec2 p = projectile.position();
             shapes.circle(p.x(), p.y(), projectile.hitbox().radius(), 8);
         }
