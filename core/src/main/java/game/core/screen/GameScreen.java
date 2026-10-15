@@ -10,6 +10,7 @@ import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.model.commun.GameConfig;
 import game.core.hud.Hud;
+import game.core.hud.LevelUpOverlay;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
 import game.core.render.WorldRenderer;
@@ -50,6 +51,7 @@ public class GameScreen extends ScreenAdapter {
     private final InputSource input = new KeyboardMouseInput(viewport);
     private final WorldRenderer worldRenderer = new WorldRenderer();
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
+    private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
 
 
     @Override
@@ -57,10 +59,22 @@ public class GameScreen extends ScreenAdapter {
         // true : la caméra est recentrée sur le monde à chaque redimensionnement.
         viewport.update(width, height, true);
         hud.resize(width, height);
+        levelUp.resize(width, height);
     }
 
     @Override
     public void render(float delta) {
+        // Montée de niveau : la partie est figée tant que le joueur n'a pas choisi sa relique.
+        // On ne fait pas avancer l'horloge, pour ne pas rattraper ce temps d'un coup ensuite.
+        if (run.isChoosingRelic()) {
+            int choice = levelUp.readChoice(run.pendingChoice().size());
+            if (choice >= 0) {
+                run.chooseRelic(choice);
+            }
+            draw();
+            return;
+        }
+
         // 1. Entrées : lues une fois par image, puis données à chaque pas de modèle.
         // La visée part de la position du joueur.
         PlayerIntent intent = input.poll(run.player().position());
@@ -88,7 +102,10 @@ public class GameScreen extends ScreenAdapter {
         shapes.end();
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
-        hud.draw(run.player());
+        hud.draw(run.player(), run.experience());
+        if (run.isChoosingRelic()) {
+            levelUp.draw(run.pendingChoice());
+        }
     }
 
     /**
@@ -160,5 +177,6 @@ public class GameScreen extends ScreenAdapter {
     public void dispose() {
         shapes.dispose();
         hud.dispose();
+        levelUp.dispose();
     }
 }

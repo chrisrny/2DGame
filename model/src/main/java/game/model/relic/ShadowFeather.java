@@ -10,7 +10,7 @@ public final class ShadowFeather extends AbstractRelic {
 
     /** Crée la relique. */
     public ShadowFeather() {
-        super("Plume d'ombre", "−20 % de recharge d'esquive");
+        super("Plume d'ombre", "-20 % de recharge d'esquive");
     }
 
     @Override
