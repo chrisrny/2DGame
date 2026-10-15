@@ -9,6 +9,10 @@ import java.util.Objects;
  *
  * <p>Par défaut, une relique ne change aucune statistique ; celles qui en changent
  * redéfinissent {@link #apply(PlayerStats)}.</p>
+ *
+ * <p>Le nom et la description sont affichés avec la police par défaut de libGDX, qui ne
+ * contient que les caractères latins courants : on écrit « Coeur » et « Oeil » plutôt
+ * qu'avec la ligature, et un tiret simple plutôt que le signe moins.</p>
  */
 public abstract class AbstractRelic implements Relic {
 

@@ -10,7 +10,7 @@ public final class HunterEye extends AbstractRelic {
 
     /** Crée la relique. */
     public HunterEye() {
-        super("Œil du chasseur", "+10 % de chance de critique");
+        super("Oeil du chasseur", "+10 % de chance de critique");
     }
 
     @Override

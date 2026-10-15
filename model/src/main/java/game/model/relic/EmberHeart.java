@@ -14,7 +14,7 @@ public final class EmberHeart extends AbstractRelic {
 
     /** Crée la relique. */
     public EmberHeart() {
-        super("Cœur de braise", "+20 PV max");
+        super("Coeur de braise", "+20 PV max");
     }
 
     @Override
