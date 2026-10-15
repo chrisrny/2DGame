@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * Ce que le joueur et les ennemis peuvent savoir et faire dans la salle où ils se trouvent.
  *
- * <p>Implémentée par {@code Room} (P1-B5). Le joueur et les ennemis passent par cette interface
- * plutôt que par {@code Room} directement : les tests peuvent fournir un faux monde simple.</p>
+ * <p>Implémentée par {@link GameMap}. Le joueur et les ennemis passent par cette interface
+ * plutôt que par {@code GameMap} directement : les tests peuvent fournir un faux monde simple.</p>
  */
 public interface World {
 
