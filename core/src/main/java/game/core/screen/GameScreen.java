@@ -38,6 +38,9 @@ public class GameScreen extends ScreenAdapter {
     /** Hauteur du monde logique, en unités. */
     public static final float WORLD_HEIGHT = 360f;
 
+    /** Durée d'une phase de clignotement pendant l'invincibilité, en secondes. */
+    private static final float BLINK_PERIOD = 0.1f;
+
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
@@ -97,7 +100,8 @@ public class GameScreen extends ScreenAdapter {
     /**
      * Joueur : un disque de la taille de sa zone de collision, coloré selon son état,
      * et un trait qui montre la direction du regard. Pendant une attaque, la zone de coup
-     * est dessinée devant lui.
+     * est dessinée devant lui. Juste après un coup reçu, il est rouge, puis il clignote
+     * tant qu'il est invincible.
      */
     private void drawPlayer() {
         Player player = run.player();
@@ -111,6 +115,8 @@ public class GameScreen extends ScreenAdapter {
         }
         if (dead) {
             shapes.setColor(0.35f, 0.35f, 0.38f, 1f);
+        } else if (kind == PlayerStateKind.HURT) {
+            shapes.setColor(0.95f, 0.25f, 0.25f, 1f);
         } else if (kind == PlayerStateKind.ATTACKING) {
             shapes.setColor(1f, 1f, 1f, 1f);
         } else if (kind == PlayerStateKind.DODGING) {
@@ -118,12 +124,30 @@ public class GameScreen extends ScreenAdapter {
         } else {
             shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
         }
-        shapes.circle(center.x(), center.y(), Player.RADIUS, 24);
+        if (!blinkHidden(player)) {
+            shapes.circle(center.x(), center.y(), Player.RADIUS, 24);
+        }
         if (!dead) {
             Vec2 tip = center.add(player.facing().scale(Player.RADIUS + 6f));
             shapes.setColor(1f, 0.85f, 0.2f, 1f);
             shapes.rectLine(center.x(), center.y(), tip.x(), tip.y(), 2f);
         }
+    }
+
+    /**
+     * Clignotement pendant l'invincibilité après un coup : le joueur est caché une période
+     * sur deux. La période est calculée à partir du temps d'invincibilité restant, donnée
+     * par le modèle : la vue ne garde aucun minuteur à elle.
+     *
+     * @param player le joueur à dessiner
+     * @return {@code true} si le corps du joueur ne doit pas être dessiné à cette image
+     */
+    private static boolean blinkHidden(Player player) {
+        float left = player.invulnerableLeft();
+        if (left <= 0f || player.stateKind() == PlayerStateKind.HURT) {
+            return false;
+        }
+        return (int) (left / BLINK_PERIOD) % 2 == 1;
     }
 
     @Override
