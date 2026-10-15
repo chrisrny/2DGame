@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.model.commun.GameConfig;
+import game.core.hud.Hud;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
 import game.core.render.WorldRenderer;
@@ -48,12 +49,14 @@ public class GameScreen extends ScreenAdapter {
     private final Run run = new Run(GameConfig.defaults());
     private final InputSource input = new KeyboardMouseInput(viewport);
     private final WorldRenderer worldRenderer = new WorldRenderer();
+    private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
 
 
     @Override
     public void resize(int width, int height) {
         // true : la caméra est recentrée sur le monde à chaque redimensionnement.
         viewport.update(width, height, true);
+        hud.resize(width, height);
     }
 
     @Override
@@ -83,6 +86,9 @@ public class GameScreen extends ScreenAdapter {
         worldRenderer.draw(shapes, run.map());
         drawPlayer();
         shapes.end();
+
+        // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
+        hud.draw(run.player());
     }
 
     /**
@@ -153,5 +159,6 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         shapes.dispose();
+        hud.dispose();
     }
 }
