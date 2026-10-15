@@ -8,11 +8,13 @@ import game.model.commun.Vec2;
 import game.model.entity.Archer;
 import game.model.entity.Charger;
 import game.model.entity.Enemy;
+import game.model.entity.GiantProwler;
 import game.model.world.GameMap;
 
 /**
  * Dessin provisoire de la map en formes simples : sol sombre, murs gris, Rôdeurs en disques
- * rouges, Archers en disques orange, Chargeurs en disques jaunes, projectiles en petits points
+ * rouges, Archers en disques orange, Chargeurs en disques jaunes, boss provisoire en grand disque
+ * pourpre, projectiles en petits points
  * (orange pour les ennemis, cyan pour le joueur). Les sprites le remplaceront en phase 3.
  */
 public final class WorldRenderer {
@@ -36,6 +38,8 @@ public final class WorldRenderer {
         for (Enemy enemy : map.enemies()) {
             if (enemy instanceof Charger charger) {
                 setChargerColor(shapes, charger);
+            } else if (enemy instanceof GiantProwler) {
+                shapes.setColor(0.62f, 0.12f, 0.38f, 1f);
             } else if (enemy instanceof Archer) {
                 shapes.setColor(1f, 0.55f, 0.15f, 1f);
             } else {
