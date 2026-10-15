@@ -4,6 +4,7 @@ import game.model.commun.GameConfig;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Vec2;
 import game.model.entity.Archer;
+import game.model.entity.Charger;
 import game.model.entity.Player;
 import game.model.entity.Prowler;
 import game.model.event.EventBus;
@@ -47,10 +48,11 @@ public final class Run {
         this.player = new Player(layout.center(), config.player(), random);
         this.map = new GameMap(layout, player, events);
         this.experience = new Experience(events);
-        // En attendant les vagues (P1-B6) : deux Rôdeurs et un Archer posés à la main.
+        // En attendant les vagues (P1-B6) : deux Rôdeurs, un Archer et un Chargeur posés à la main.
         map.addEnemy(new Prowler(new Vec2(480f, 600f)));
         map.addEnemy(new Prowler(new Vec2(1440f, 560f)));
         map.addEnemy(new Archer(new Vec2(1300f, 300f)));
+        map.addEnemy(new Charger(new Vec2(1760f, 520f)));
     }
 
     /** Nombre de reliques proposées à chaque niveau gagné. */

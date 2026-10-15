@@ -12,6 +12,7 @@ import game.model.commun.PlayerIntent;
 import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.entity.Archer;
+import game.model.entity.Charger;
 import game.model.entity.Player;
 import game.model.entity.Prowler;
 import game.model.event.EventBus;
@@ -71,6 +72,16 @@ class GameMapTest {
         pas(40);
         assertEquals(pvMax - 2 * Prowler.CONTACT_DAMAGE, joueur.hp());
         assertTrue(recus.stream().anyMatch(e -> e instanceof GameEvent.EntityHit));
+    }
+
+    @Test
+    void unChargeurNeBlesseAuContactQuePendantSaCharge() {
+        map.addEnemy(new Charger(aCoteDuJoueur()));
+        int pvMax = PlayerStats.defaults().maxHp();
+        pas(30);
+        assertEquals(pvMax, joueur.hp(), "pendant l'annonce, le toucher est sans danger");
+        pas(20);
+        assertEquals(pvMax - Charger.CHARGE_DAMAGE, joueur.hp());
     }
 
     @Test

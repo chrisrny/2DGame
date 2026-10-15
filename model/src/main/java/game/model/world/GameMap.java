@@ -94,11 +94,13 @@ public final class GameMap implements World {
     }
 
     // Un ennemi au contact ne frappe qu'une fois par CONTACT_COOLDOWN, sinon il viderait les PV
-    // du joueur en quelques pas.
+    // du joueur en quelques pas. Un ennemi sans dégâts de contact en ce moment (le Chargeur hors
+    // de sa charge) ne frappe pas : un coup à 0 mettrait quand même le joueur en état touché.
     private void applyContactDamage(float dt) {
         for (Enemy enemy : enemies) {
             float cooldown = Math.max(0f, contactCooldowns.getOrDefault(enemy, 0f) - dt);
-            if (cooldown == 0f && enemy.isAlive() && Collisions.overlaps(enemy.hitbox(), player.hitbox())) {
+            if (cooldown == 0f && enemy.isAlive() && enemy.contactDamage() > 0
+                    && Collisions.overlaps(enemy.hitbox(), player.hitbox())) {
                 Vec2 push = player.position().sub(enemy.position()).normalized().scale(CONTACT_KNOCKBACK);
                 Hit hit = new Hit(enemy.contactDamage(), Faction.ENEMY, false, push);
                 if (player.receive(hit)) {
