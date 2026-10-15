@@ -4,7 +4,7 @@ package game.model.player.state;
  * Nature de l'état du joueur, vue de l'extérieur du modèle.
  *
  * <p>La vue dessine le joueur selon cette valeur, sans connaître les classes d'état.
- * Chaque nouvel état ajoute sa valeur (coup reçu en P1-A5).</p>
+ * Chaque nouvel état ajoute sa valeur.</p>
  */
 public enum PlayerStateKind {
     /** Immobile. */
@@ -15,6 +15,8 @@ public enum PlayerStateKind {
     ATTACKING,
     /** En train d'esquiver : se déplace vite et ne peut pas être touché. */
     DODGING,
+    /** Vient d'être touché : repoussé et sans contrôle pendant un court instant. */
+    HURT,
     /** Mort : n'agit plus. */
     DEAD
 }
