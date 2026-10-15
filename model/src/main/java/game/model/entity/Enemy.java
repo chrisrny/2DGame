@@ -80,6 +80,20 @@ public abstract class Enemy implements Damageable {
     }
 
     /**
+     * Se déplace d'un vecteur donné, en glissant le long des murs, sans tenir compte de sa vitesse.
+     * Sert aux déplacements spéciaux, comme la charge du Chargeur.
+     *
+     * @param delta le déplacement voulu pendant ce pas
+     * @param world le monde, pour ses murs
+     * @return le déplacement réellement effectué : plus court que {@code delta} si un mur a bloqué
+     */
+    public Vec2 moveBy(Vec2 delta, World world) {
+        Vec2 start = position;
+        setPosition(Collisions.move(hitbox(), delta, world.walls()));
+        return position.sub(start);
+    }
+
+    /**
      * Applique un coup : ignore le tir ami et les coups reçus une fois mort, puis retire les
      * points de vie. Le recul du coup est une vitesse, en unités par seconde, amortie
      * jusqu'à zéro en {@link #KNOCKBACK_DURATION}.
