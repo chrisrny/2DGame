@@ -18,6 +18,7 @@ import game.model.player.state.PlayerStateKind;
 import game.model.relic.Relic;
 import game.model.skill.Shockwave;
 import game.model.skill.Skill;
+import game.model.skill.ThrownBlade;
 import game.model.world.World;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public final class Player implements Damageable {
     private boolean skill1Pressed;
     private boolean skill2Pressed;
     private final Skill skill1 = new Shockwave();
-    private Skill skill2;
+    private final Skill skill2 = new ThrownBlade();
     private float attackCooldownLeft;
     private float dodgeCooldownLeft;
     private float invulnerableLeft;
@@ -132,9 +133,7 @@ public final class Player implements Damageable {
      */
     private void useSkills(World world, float dt) {
         skill1.update(dt);
-        if (skill2 != null) {
-            skill2.update(dt);
-        }
+        skill2.update(dt);
         PlayerStateKind kind = state.kind();
         if (kind != PlayerStateKind.IDLE && kind != PlayerStateKind.MOVING) {
             return;
@@ -142,7 +141,7 @@ public final class Player implements Damageable {
         if (skill1Pressed) {
             skill1.tryActivate(this, world);
         }
-        if (skill2Pressed && skill2 != null) {
+        if (skill2Pressed) {
             skill2.tryActivate(this, world);
         }
     }
@@ -444,9 +443,13 @@ public final class Player implements Damageable {
         return skill1;
     }
 
-    /** @return la compétence du deuxième emplacement, ou rien si l'emplacement est vide */
+    /**
+     * Le HUD traite les deux emplacements de la même façon : un emplacement peut être vide.
+     *
+     * @return la compétence du deuxième emplacement (la Lame lancée)
+     */
     public Optional<Skill> skill2() {
-        return Optional.ofNullable(skill2);
+        return Optional.of(skill2);
     }
 
     /** @return {@code true} si le bouton d'esquive vient d'être enfoncé à ce pas */
