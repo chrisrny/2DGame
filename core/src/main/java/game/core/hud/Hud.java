@@ -5,15 +5,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.entity.Player;
 import game.model.player.Experience;
+import game.model.skill.Skill;
+import java.util.Optional;
 
 /**
  * Interface en jeu, dessinée par-dessus le monde, en haut à gauche : barre de points de vie,
- * jauge de recharge de l'esquive, barre d'expérience et niveau.
+ * jauge de recharge de l'esquive, barre d'expérience et niveau, puis les deux emplacements de
+ * compétence avec leur recharge.
  *
  * <p>Le HUD a sa propre caméra, qui ne bouge jamais : la caméra du jeu suit le joueur sur la
  * map, celle du HUD reste fixe, donc la barre reste toujours au même endroit. Il utilise les
@@ -38,6 +42,12 @@ public final class Hud implements Disposable {
 
     /** Hauteur de la barre d'expérience, en unités. */
     private static final float XP_HEIGHT = 3f;
+
+    /** Côté d'une case de compétence, en unités. */
+    private static final float SKILL_SIZE = 14f;
+
+    /** Espace entre deux cases de compétence, en unités. */
+    private static final float SKILL_GAP = 4f;
 
     /** Espace vertical entre deux barres, en unités. */
     private static final float BAR_GAP = 4f;
@@ -103,6 +113,9 @@ public final class Hud implements Disposable {
             drawBar(dodgeY, DODGE_HEIGHT, dodgeRatio, 0.30f, 0.45f, 0.55f);
         }
         drawBar(xpY, XP_HEIGHT, xpRatio(experience), 0.95f, 0.78f, 0.25f);
+        float skillY = xpY - BAR_GAP - SKILL_SIZE;
+        drawSkill(MARGIN, skillY, Optional.of(player.skill1()));
+        drawSkill(MARGIN + SKILL_SIZE + SKILL_GAP, skillY, player.skill2());
         shapes.end();
 
         batch.setProjectionMatrix(camera.combined);
@@ -112,6 +125,10 @@ public final class Hud implements Disposable {
         font.draw(batch, player.hp() + " / " + player.maxHp(), textX, textY);
         float levelY = xpY + XP_HEIGHT / 2f + font.getCapHeight() / 2f;
         font.draw(batch, "Niv. " + experience.level(), textX, levelY);
+        float labelY = skillY + SKILL_SIZE / 2f + font.getCapHeight() / 2f;
+        font.draw(batch, "1", MARGIN, labelY, SKILL_SIZE, Align.center, false);
+        font.draw(batch, "2", MARGIN + SKILL_SIZE + SKILL_GAP, labelY, SKILL_SIZE,
+                Align.center, false);
         batch.end();
     }
 
@@ -153,6 +170,28 @@ public final class Hud implements Disposable {
             return 1f;
         }
         return Math.clamp(1f - player.dodgeCooldownLeft() / cooldown, 0f, 1f);
+    }
+
+    /**
+     * Case d'une compétence : elle se remplit de bas en haut pendant la recharge, et devient
+     * bleu clair quand la compétence est prête. Un emplacement vide reste gris foncé.
+     * Le {@link ShapeRenderer} doit déjà être ouvert en mode {@code Filled}.
+     */
+    private void drawSkill(float x, float y, Optional<Skill> skill) {
+        shapes.setColor(0.05f, 0.05f, 0.06f, 1f);
+        shapes.rect(x - FRAME, y - FRAME, SKILL_SIZE + 2f * FRAME, SKILL_SIZE + 2f * FRAME);
+        shapes.setColor(0.18f, 0.18f, 0.20f, 1f);
+        shapes.rect(x, y, SKILL_SIZE, SKILL_SIZE);
+        if (skill.isEmpty()) {
+            return;
+        }
+        float ready = 1f - Math.clamp(skill.get().cooldownRatio(), 0f, 1f);
+        if (ready >= 1f) {
+            shapes.setColor(0.45f, 0.75f, 1f, 1f);
+        } else {
+            shapes.setColor(0.25f, 0.35f, 0.50f, 1f);
+        }
+        shapes.rect(x, y, SKILL_SIZE, SKILL_SIZE * ready);
     }
 
     /**

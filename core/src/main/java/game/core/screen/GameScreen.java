@@ -20,6 +20,7 @@ import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
+import game.model.skill.Shockwave;
 import game.model.world.Run;
 
 /**
@@ -40,6 +41,9 @@ public class GameScreen extends ScreenAdapter {
 
     /** Hauteur du monde logique, en unités. */
     public static final float WORLD_HEIGHT = 360f;
+
+    /** Durée de l'anneau dessiné quand l'Onde de choc part, en secondes (purement visuel). */
+    private static final float SHOCKWAVE_VISUAL_DURATION = 0.2f;
 
     /** Durée d'une phase de clignotement pendant l'invincibilité, en secondes. */
     private static final float BLINK_PERIOD = 0.1f;
@@ -105,6 +109,7 @@ public class GameScreen extends ScreenAdapter {
         worldRenderer.draw(shapes, run.map());
         drawPlayer();
         shapes.end();
+        drawShockwave();
         damageNumbers.draw(camera.combined);
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
@@ -177,6 +182,25 @@ public class GameScreen extends ScreenAdapter {
             return false;
         }
         return (int) (left / BLINK_PERIOD) % 2 == 1;
+    }
+
+    /**
+     * Anneau de l'Onde de choc : il grandit de 0 au rayon de l'onde juste après son utilisation.
+     * La vue lit le temps écoulé depuis l'utilisation, gardé par la compétence : le modèle n'a
+     * pas besoin d'un événement de plus.
+     */
+    private void drawShockwave() {
+        float age = run.player().skill1().timeSinceActivation();
+        if (age >= SHOCKWAVE_VISUAL_DURATION) {
+            return;
+        }
+        Vec2 center = run.player().position();
+        float radius = Shockwave.RADIUS * (age / SHOCKWAVE_VISUAL_DURATION);
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(0.45f, 0.75f, 1f, 1f);
+        shapes.circle(center.x(), center.y(), Math.max(1f, radius), 40);
+        shapes.circle(center.x(), center.y(), Math.max(1f, radius - 2f), 40);
+        shapes.end();
     }
 
     @Override
