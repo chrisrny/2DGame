@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.model.commun.GameConfig;
+import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
 import game.core.input.InputSource;
@@ -52,6 +53,7 @@ public class GameScreen extends ScreenAdapter {
     private final WorldRenderer worldRenderer = new WorldRenderer();
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
     private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
+    private final DamageNumbers damageNumbers = new DamageNumbers(run.events());
 
 
     @Override
@@ -84,6 +86,9 @@ public class GameScreen extends ScreenAdapter {
         for (int i = 0; i < steps; i++) {
             run.update(intent, FixedStep.DT);
         }
+        // Les chiffres de dégâts avancent avec le temps réel : c'est purement visuel.
+        // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
+        damageNumbers.update(delta);
 
         // 3. Dessin.
         draw();
@@ -100,6 +105,7 @@ public class GameScreen extends ScreenAdapter {
         worldRenderer.draw(shapes, run.map());
         drawPlayer();
         shapes.end();
+        damageNumbers.draw(camera.combined);
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
         hud.draw(run.player(), run.experience());
@@ -178,5 +184,6 @@ public class GameScreen extends ScreenAdapter {
         shapes.dispose();
         hud.dispose();
         levelUp.dispose();
+        damageNumbers.dispose();
     }
 }
