@@ -9,10 +9,11 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.entity.Player;
+import game.model.player.Experience;
 
 /**
- * Interface en jeu, dessinée par-dessus le monde : barre de points de vie et jauge de
- * recharge de l'esquive, en haut à gauche.
+ * Interface en jeu, dessinée par-dessus le monde, en haut à gauche : barre de points de vie,
+ * jauge de recharge de l'esquive, barre d'expérience et niveau.
  *
  * <p>Le HUD a sa propre caméra, qui ne bouge jamais : la caméra du jeu suit le joueur sur la
  * map, celle du HUD reste fixe, donc la barre reste toujours au même endroit. Il utilise les
@@ -35,7 +36,10 @@ public final class Hud implements Disposable {
     /** Hauteur de la jauge d'esquive, en unités. */
     private static final float DODGE_HEIGHT = 4f;
 
-    /** Espace vertical entre la barre de vie et la jauge d'esquive, en unités. */
+    /** Hauteur de la barre d'expérience, en unités. */
+    private static final float XP_HEIGHT = 3f;
+
+    /** Espace vertical entre deux barres, en unités. */
     private static final float BAR_GAP = 4f;
 
     /** Espace entre la barre de vie et le texte des points de vie, en unités. */
@@ -80,12 +84,14 @@ public final class Hud implements Disposable {
     /**
      * Dessine le HUD. À appeler après le monde, pour qu'il soit au-dessus.
      *
-     * @param player le joueur dont on affiche l'état
+     * @param player     le joueur dont on affiche l'état
+     * @param experience l'expérience et le niveau du joueur
      */
-    public void draw(Player player) {
+    public void draw(Player player, Experience experience) {
         viewport.apply();
         float hpY = viewport.getWorldHeight() - MARGIN - HP_HEIGHT;
         float dodgeY = hpY - BAR_GAP - DODGE_HEIGHT;
+        float xpY = dodgeY - BAR_GAP - XP_HEIGHT;
         float dodgeRatio = dodgeReadyRatio(player);
 
         shapes.setProjectionMatrix(camera.combined);
@@ -96,6 +102,7 @@ public final class Hud implements Disposable {
         } else {
             drawBar(dodgeY, DODGE_HEIGHT, dodgeRatio, 0.30f, 0.45f, 0.55f);
         }
+        drawBar(xpY, XP_HEIGHT, xpRatio(experience), 0.95f, 0.78f, 0.25f);
         shapes.end();
 
         batch.setProjectionMatrix(camera.combined);
@@ -103,6 +110,8 @@ public final class Hud implements Disposable {
         float textX = MARGIN + BAR_WIDTH + TEXT_GAP;
         float textY = hpY + HP_HEIGHT / 2f + font.getCapHeight() / 2f;
         font.draw(batch, player.hp() + " / " + player.maxHp(), textX, textY);
+        float levelY = xpY + XP_HEIGHT / 2f + font.getCapHeight() / 2f;
+        font.draw(batch, "Niv. " + experience.level(), textX, levelY);
         batch.end();
     }
 
@@ -144,6 +153,20 @@ public final class Hud implements Disposable {
             return 1f;
         }
         return Math.clamp(1f - player.dodgeCooldownLeft() / cooldown, 0f, 1f);
+    }
+
+    /**
+     * Avancement vers le niveau suivant.
+     *
+     * @param experience l'expérience du joueur
+     * @return un nombre entre 0 (niveau tout juste atteint) et 1
+     */
+    static float xpRatio(Experience experience) {
+        int needed = experience.xpToNextLevel();
+        if (needed <= 0) {
+            return 0f;
+        }
+        return Math.clamp((float) experience.xp() / needed, 0f, 1f);
     }
 
     @Override
