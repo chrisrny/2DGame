@@ -16,11 +16,14 @@ import game.model.player.state.IdleState;
 import game.model.player.state.PlayerState;
 import game.model.player.state.PlayerStateKind;
 import game.model.relic.Relic;
+import game.model.skill.Shockwave;
+import game.model.skill.Skill;
 import game.model.world.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -67,6 +70,10 @@ public final class Player implements Damageable {
     private PlayerIntent previousIntent = PlayerIntent.NONE;
     private boolean attackPressed;
     private boolean dodgePressed;
+    private boolean skill1Pressed;
+    private boolean skill2Pressed;
+    private final Skill skill1 = new Shockwave();
+    private Skill skill2;
     private float attackCooldownLeft;
     private float dodgeCooldownLeft;
     private float invulnerableLeft;
@@ -93,7 +100,7 @@ public final class Player implements Damageable {
      *
      * <p>Dans l'ordre : annoncer la mort si elle vient d'arriver, décompter les recharges et
      * l'invincibilité, détecter les appuis, suivre la visée, laisser l'état courant décider de
-     * l'état suivant, puis faire agir cet état.</p>
+     * l'état suivant, faire agir cet état, puis utiliser les compétences.</p>
      *
      * @param intent ce que le joueur veut faire pendant ce pas
      * @param world  la salle où se trouve le joueur
@@ -112,6 +119,32 @@ public final class Player implements Damageable {
         }
         state = Objects.requireNonNull(state.next(this, intent), "état suivant");
         state.act(this, intent, world, dt);
+        useSkills(world, dt);
+    }
+
+    /**
+     * Fait avancer la recharge des compétences, puis utilise celles dont le bouton vient d'être
+     * enfoncé. Une compétence est instantanée et ne s'utilise qu'au repos ou en marchant : pas
+     * pendant une attaque, une esquive, un coup reçu, ni une fois mort.
+     *
+     * @param world le monde où se produit l'effet
+     * @param dt    durée du pas, en secondes
+     */
+    private void useSkills(World world, float dt) {
+        skill1.update(dt);
+        if (skill2 != null) {
+            skill2.update(dt);
+        }
+        PlayerStateKind kind = state.kind();
+        if (kind != PlayerStateKind.IDLE && kind != PlayerStateKind.MOVING) {
+            return;
+        }
+        if (skill1Pressed) {
+            skill1.tryActivate(this, world);
+        }
+        if (skill2Pressed && skill2 != null) {
+            skill2.tryActivate(this, world);
+        }
     }
 
     /**
@@ -139,6 +172,8 @@ public final class Player implements Damageable {
     private void detectPresses(PlayerIntent intent) {
         attackPressed = intent.attack() && !previousIntent.attack();
         dodgePressed = intent.dodge() && !previousIntent.dodge();
+        skill1Pressed = intent.skill1() && !previousIntent.skill1();
+        skill2Pressed = intent.skill2() && !previousIntent.skill2();
         previousIntent = intent;
     }
 
@@ -402,6 +437,16 @@ public final class Player implements Damageable {
     /** @return le temps d'invincibilité restant après un coup reçu, en secondes (0 si aucun) */
     public float invulnerableLeft() {
         return invulnerableLeft;
+    }
+
+    /** @return la compétence du premier emplacement (l'Onde de choc) */
+    public Skill skill1() {
+        return skill1;
+    }
+
+    /** @return la compétence du deuxième emplacement, ou rien si l'emplacement est vide */
+    public Optional<Skill> skill2() {
+        return Optional.ofNullable(skill2);
     }
 
     /** @return {@code true} si le bouton d'esquive vient d'être enfoncé à ce pas */
