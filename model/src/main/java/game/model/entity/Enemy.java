@@ -29,10 +29,11 @@ public abstract class Enemy implements Damageable {
     private final float radius;
     private final float speed;
     private final int contactDamage;
+    private final float multiplier;
     private final EnemyBehavior behavior;
 
     /**
-     * Crée un ennemi.
+     * Crée un ennemi aux valeurs de référence (multiplicateur 1).
      *
      * @param position      position de départ
      * @param maxHp         points de vie maximum
@@ -42,13 +43,36 @@ public abstract class Enemy implements Damageable {
      * @param behavior      comportement propre à cet ennemi (une instance par ennemi)
      */
     protected Enemy(Vec2 position, int maxHp, float radius, float speed, int contactDamage, EnemyBehavior behavior) {
+        this(position, maxHp, radius, speed, contactDamage, behavior, 1f);
+    }
+
+    /**
+     * Crée un ennemi renforcé (ou affaibli) par un multiplicateur, celui du stage et de la
+     * difficulté. Le multiplicateur s'applique aux points de vie et à tous les dégâts, pas à
+     * la vitesse ni à la taille.
+     *
+     * @param position      position de départ
+     * @param maxHp         points de vie maximum de référence
+     * @param radius        rayon de la zone de collision
+     * @param speed         vitesse de déplacement, en unités par seconde
+     * @param contactDamage dégâts de contact de référence
+     * @param behavior      comportement propre à cet ennemi (une instance par ennemi)
+     * @param multiplier    multiplicateur des points de vie et des dégâts, strictement positif
+     * @throws IllegalArgumentException si le multiplicateur n'est pas strictement positif
+     */
+    protected Enemy(Vec2 position, int maxHp, float radius, float speed, int contactDamage, EnemyBehavior behavior,
+            float multiplier) {
+        if (!(multiplier > 0f)) {
+            throw new IllegalArgumentException("Le multiplicateur doit être strictement positif");
+        }
         this.position = Objects.requireNonNull(position, "position");
         this.behavior = Objects.requireNonNull(behavior, "behavior");
-        this.maxHp = maxHp;
-        this.hp = maxHp;
+        this.multiplier = multiplier;
+        this.maxHp = Math.max(1, Math.round(maxHp * multiplier));
+        this.hp = this.maxHp;
         this.radius = radius;
         this.speed = speed;
-        this.contactDamage = contactDamage;
+        this.contactDamage = Math.round(contactDamage * multiplier);
     }
 
     /**
@@ -143,6 +167,22 @@ public abstract class Enemy implements Damageable {
     /** @return les dégâts infligés au joueur qui le touche */
     public int contactDamage() {
         return contactDamage;
+    }
+
+    /** @return le multiplicateur des points de vie et des dégâts (1 aux valeurs de référence) */
+    public float multiplier() {
+        return multiplier;
+    }
+
+    /**
+     * Applique le multiplicateur de l'ennemi à des dégâts de référence, par exemple ceux d'un
+     * projectile tiré par un Archer.
+     *
+     * @param baseDamage les dégâts de référence
+     * @return les dégâts réels, arrondis à l'entier le plus proche
+     */
+    public int scaleDamage(int baseDamage) {
+        return Math.round(baseDamage * multiplier);
     }
 
     @Override

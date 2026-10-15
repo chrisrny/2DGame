@@ -31,7 +31,7 @@ public final class ArcherBehavior implements EnemyBehavior {
     /** Vitesse des projectiles, en unités par seconde. */
     public static final float PROJECTILE_SPEED = 200f;
 
-    /** Dégâts d'un projectile. */
+    /** Dégâts de référence d'un projectile, avant le multiplicateur de l'Archer. */
     public static final int PROJECTILE_DAMAGE = 8;
 
     /** Rayon d'un projectile. */
@@ -63,6 +63,6 @@ public final class ArcherBehavior implements EnemyBehavior {
     private static void shoot(Enemy self, Vec2 target, World world) {
         Vec2 velocity = target.sub(self.position()).normalized().scale(PROJECTILE_SPEED);
         world.spawnProjectile(new Projectile(self.position(), velocity, PROJECTILE_RADIUS,
-                Faction.ENEMY, PROJECTILE_DAMAGE, PROJECTILE_LIFETIME));
+                Faction.ENEMY, self.scaleDamage(PROJECTILE_DAMAGE), PROJECTILE_LIFETIME));
     }
 }

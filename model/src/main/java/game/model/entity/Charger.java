@@ -28,18 +28,28 @@ public final class Charger extends Enemy {
     private final ChargerBehavior behavior;
 
     /**
-     * Crée un Chargeur.
+     * Crée un Chargeur aux valeurs de référence.
      *
      * @param position position d'apparition
      */
     public Charger(Vec2 position) {
-        this(position, new ChargerBehavior());
+        this(position, 1f);
+    }
+
+    /**
+     * Crée un Chargeur renforcé.
+     *
+     * @param position   position d'apparition
+     * @param multiplier multiplicateur des points de vie et des dégâts
+     */
+    public Charger(Vec2 position, float multiplier) {
+        this(position, multiplier, new ChargerBehavior());
     }
 
     // Constructeur privé : il permet de garder une référence au comportement passé à Enemy,
     // pour que la vue et les dégâts de contact puissent connaître la phase du Chargeur.
-    private Charger(Vec2 position, ChargerBehavior behavior) {
-        super(position, MAX_HP, RADIUS, SPEED, CHARGE_DAMAGE, behavior);
+    private Charger(Vec2 position, float multiplier, ChargerBehavior behavior) {
+        super(position, MAX_HP, RADIUS, SPEED, CHARGE_DAMAGE, behavior, multiplier);
         this.behavior = behavior;
     }
 
