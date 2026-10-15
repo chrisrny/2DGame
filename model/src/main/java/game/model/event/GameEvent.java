@@ -34,8 +34,13 @@ public sealed interface GameEvent {
     /** Le joueur est mort : la partie est perdue. */
     record PlayerDied() implements GameEvent { }
 
-    /** La dernière vague de la salle est vaincue : les portes s'ouvrent. */
-    record RoomCleared() implements GameEvent { }
+    /**
+     * Le joueur a tué assez d'ennemis pour finir un stage : la partie peut passer au suivant.
+     * Publié une seule fois par stage.
+     *
+     * @param stage numéro du stage terminé (1, 2 ou 3)
+     */
+    record StageCleared(int stage) implements GameEvent { }
 
     /**
      * Le joueur a choisi une relique.

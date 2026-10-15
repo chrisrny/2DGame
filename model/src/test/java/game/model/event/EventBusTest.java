@@ -17,7 +17,7 @@ class EventBusTest {
         List<GameEvent> received = new ArrayList<>();
         bus.subscribe(received::add);
 
-        bus.publish(new GameEvent.RoomCleared());
+        bus.publish(new GameEvent.StageCleared(1));
 
         assertTrue(received.isEmpty());
         assertEquals(1, bus.pendingCount());
@@ -29,11 +29,11 @@ class EventBusTest {
         List<GameEvent> received = new ArrayList<>();
         bus.subscribe(received::add);
 
-        bus.publish(new GameEvent.RoomCleared());
+        bus.publish(new GameEvent.StageCleared(1));
         bus.publish(new GameEvent.PlayerDied());
         bus.flush();
 
-        assertEquals(List.of(new GameEvent.RoomCleared(), new GameEvent.PlayerDied()), received);
+        assertEquals(List.of(new GameEvent.StageCleared(1), new GameEvent.PlayerDied()), received);
         assertEquals(0, bus.pendingCount());
     }
 
@@ -43,12 +43,12 @@ class EventBusTest {
         List<GameEvent> received = new ArrayList<>();
         bus.subscribe(event -> {
             received.add(event);
-            if (event instanceof GameEvent.RoomCleared) {
+            if (event instanceof GameEvent.StageCleared) {
                 bus.publish(new GameEvent.RelicChosen("Lame affûtée"));
             }
         });
 
-        bus.publish(new GameEvent.RoomCleared());
+        bus.publish(new GameEvent.StageCleared(1));
         bus.flush();
         assertEquals(1, received.size());
 
