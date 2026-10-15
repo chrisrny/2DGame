@@ -12,6 +12,7 @@ import game.model.commun.GameConfig;
 import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
+import game.core.hud.StageBanner;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
 import game.core.render.WorldRenderer;
@@ -57,6 +58,7 @@ public class GameScreen extends ScreenAdapter {
     private final WorldRenderer worldRenderer = new WorldRenderer();
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
     private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
+    private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final DamageNumbers damageNumbers = new DamageNumbers(run.events());
 
 
@@ -66,6 +68,7 @@ public class GameScreen extends ScreenAdapter {
         viewport.update(width, height, true);
         hud.resize(width, height);
         levelUp.resize(width, height);
+        stageBanner.resize(width, height);
     }
 
     @Override
@@ -114,6 +117,7 @@ public class GameScreen extends ScreenAdapter {
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
         hud.draw(run.player(), run.experience());
+        stageBanner.draw(run);
         if (run.isChoosingRelic()) {
             levelUp.draw(run.pendingChoice());
         }
@@ -209,5 +213,6 @@ public class GameScreen extends ScreenAdapter {
         hud.dispose();
         levelUp.dispose();
         damageNumbers.dispose();
+        stageBanner.dispose();
     }
 }

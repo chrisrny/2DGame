@@ -198,6 +198,18 @@ public final class GameMap implements World {
         }
     }
 
+    /**
+     * Tire au hasard un point d'apparition à au moins {@link #MIN_SPAWN_DISTANCE} du joueur,
+     * pour un ennemi qui n'arrive pas avec une vague, comme le boss.
+     *
+     * @return un point d'apparition éloigné du joueur
+     * @throws IllegalStateException si tous les points sont trop près du joueur
+     */
+    public Vec2 randomSpawnPoint() {
+        List<Vec2> points = spawnPointsAwayFromPlayer();
+        return points.get(random.nextInt(points.size()));
+    }
+
     private List<Vec2> spawnPointsAwayFromPlayer() {
         List<Vec2> points = new ArrayList<>();
         for (Vec2 point : layout.spawnPoints()) {
