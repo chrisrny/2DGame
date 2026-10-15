@@ -2,11 +2,7 @@ package game.model.world;
 
 import game.model.commun.GameConfig;
 import game.model.commun.PlayerIntent;
-import game.model.commun.Vec2;
-import game.model.entity.Archer;
-import game.model.entity.Charger;
 import game.model.entity.Player;
-import game.model.entity.Prowler;
 import game.model.event.EventBus;
 import game.model.event.GameEvent;
 import game.model.player.Experience;
@@ -21,7 +17,7 @@ import java.util.Random;
  *
  * <p>C'est le point d'entrée du modèle : la vue l'appelle à chaque pas de jeu avec
  * l'intention du joueur, et lit son état pour dessiner. Le joueur évolue sur la grande map
- * de la démo ; les stages et leurs vagues (P1-B6, P1-B7) viendront s'y brancher.</p>
+ * de la démo, où les vagues du stage 1 arrivent. L'enchaînement des stages viendra en P1-B7.</p>
  */
 public final class Run {
 
@@ -46,13 +42,10 @@ public final class Run {
         // le joueur, les ennemis et les vagues doivent tous tirer leur hasard d'ici.
         this.random = new Random(config.seed());
         this.player = new Player(layout.center(), config.player(), random);
-        this.map = new GameMap(layout, player, events);
+        this.map = new GameMap(layout, player, events, random);
         this.experience = new Experience(events);
-        // En attendant les vagues (P1-B6) : deux Rôdeurs, un Archer et un Chargeur posés à la main.
-        map.addEnemy(new Prowler(new Vec2(480f, 600f)));
-        map.addEnemy(new Prowler(new Vec2(1440f, 560f)));
-        map.addEnemy(new Archer(new Vec2(1300f, 300f)));
-        map.addEnemy(new Charger(new Vec2(1760f, 520f)));
+        // La difficulté choisie renforce ou affaiblit les ennemis de tous les stages.
+        map.startStage(Stages.demo().get(0).scaled(config.difficulty().enemyMultiplier()));
     }
 
     /** Nombre de reliques proposées à chaque niveau gagné. */

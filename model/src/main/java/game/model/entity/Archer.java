@@ -23,11 +23,21 @@ public final class Archer extends Enemy {
     public static final int CONTACT_DAMAGE = 4;
 
     /**
-     * Crée un Archer.
+     * Crée un Archer aux valeurs de référence.
      *
      * @param position position d'apparition
      */
     public Archer(Vec2 position) {
-        super(position, MAX_HP, RADIUS, SPEED, CONTACT_DAMAGE, new ArcherBehavior());
+        this(position, 1f);
+    }
+
+    /**
+     * Crée un Archer renforcé : le multiplicateur s'applique aussi aux dégâts de ses tirs.
+     *
+     * @param position   position d'apparition
+     * @param multiplier multiplicateur des points de vie et des dégâts
+     */
+    public Archer(Vec2 position, float multiplier) {
+        super(position, MAX_HP, RADIUS, SPEED, CONTACT_DAMAGE, new ArcherBehavior(), multiplier);
     }
 }

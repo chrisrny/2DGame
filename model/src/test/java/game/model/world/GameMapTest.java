@@ -28,7 +28,7 @@ class GameMapTest {
     private final EventBus events = new EventBus();
     private final List<GameEvent> recus = new ArrayList<>();
     private final Player joueur = new Player(MapLayouts.main().center(), PlayerStats.defaults(), new Random(42));
-    private final GameMap map = new GameMap(MapLayouts.main(), joueur, events);
+    private final GameMap map = new GameMap(MapLayouts.main(), joueur, events, new Random(42));
 
     GameMapTest() {
         events.subscribe(recus::add);

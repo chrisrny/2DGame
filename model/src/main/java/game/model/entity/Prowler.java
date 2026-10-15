@@ -21,11 +21,21 @@ public final class Prowler extends Enemy {
     public static final int CONTACT_DAMAGE = 10;
 
     /**
-     * Crée un Rôdeur.
+     * Crée un Rôdeur aux valeurs de référence.
      *
      * @param position position d'apparition
      */
     public Prowler(Vec2 position) {
-        super(position, MAX_HP, RADIUS, SPEED, CONTACT_DAMAGE, new ProwlerBehavior());
+        this(position, 1f);
+    }
+
+    /**
+     * Crée un Rôdeur renforcé.
+     *
+     * @param position   position d'apparition
+     * @param multiplier multiplicateur des points de vie et des dégâts
+     */
+    public Prowler(Vec2 position, float multiplier) {
+        super(position, MAX_HP, RADIUS, SPEED, CONTACT_DAMAGE, new ProwlerBehavior(), multiplier);
     }
 }
