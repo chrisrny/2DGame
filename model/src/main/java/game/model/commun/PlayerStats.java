@@ -50,4 +50,60 @@ public record PlayerStats(
     public static PlayerStats defaults() {
         return new PlayerStats(120f, 100, 10, 28f, 0.4f, 0.10f, 48f, 0.2f, 0.8f);
     }
+
+    /**
+     * Copie avec une autre vitesse. Les reliques s'en servent pour produire de nouvelles
+     * statistiques sans modifier celles-ci.
+     *
+     * @param value la nouvelle vitesse, en unités par seconde
+     * @return une copie avec cette vitesse
+     */
+    public PlayerStats withSpeed(float value) {
+        return new PlayerStats(value, maxHp, attackDamage, attackRange, attackCooldown, critChance,
+                dodgeDistance, dodgeDuration, dodgeCooldown);
+    }
+
+    /**
+     * Copie avec d'autres points de vie maximum.
+     *
+     * @param value les nouveaux points de vie maximum
+     * @return une copie avec ces points de vie maximum
+     */
+    public PlayerStats withMaxHp(int value) {
+        return new PlayerStats(speed, value, attackDamage, attackRange, attackCooldown, critChance,
+                dodgeDistance, dodgeDuration, dodgeCooldown);
+    }
+
+    /**
+     * Copie avec d'autres dégâts d'attaque.
+     *
+     * @param value les nouveaux dégâts
+     * @return une copie avec ces dégâts
+     */
+    public PlayerStats withAttackDamage(int value) {
+        return new PlayerStats(speed, maxHp, value, attackRange, attackCooldown, critChance,
+                dodgeDistance, dodgeDuration, dodgeCooldown);
+    }
+
+    /**
+     * Copie avec une autre chance de critique.
+     *
+     * @param value la nouvelle chance de critique, entre 0 et 1
+     * @return une copie avec cette chance de critique
+     */
+    public PlayerStats withCritChance(float value) {
+        return new PlayerStats(speed, maxHp, attackDamage, attackRange, attackCooldown, value,
+                dodgeDistance, dodgeDuration, dodgeCooldown);
+    }
+
+    /**
+     * Copie avec une autre recharge d'esquive.
+     *
+     * @param value la nouvelle recharge d'esquive, en secondes
+     * @return une copie avec cette recharge
+     */
+    public PlayerStats withDodgeCooldown(float value) {
+        return new PlayerStats(speed, maxHp, attackDamage, attackRange, attackCooldown, critChance,
+                dodgeDistance, dodgeDuration, value);
+    }
 }

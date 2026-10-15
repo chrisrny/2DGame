@@ -15,7 +15,10 @@ import game.model.player.state.HurtState;
 import game.model.player.state.IdleState;
 import game.model.player.state.PlayerState;
 import game.model.player.state.PlayerStateKind;
+import game.model.relic.Relic;
 import game.model.world.World;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -53,7 +56,9 @@ public final class Player implements Damageable {
     /** Durée de l'invincibilité après un coup reçu, en secondes. Elle démarre au coup. */
     public static final float INVULNERABILITY_DURATION = 0.8f;
 
-    private final PlayerStats stats;
+    private final PlayerStats baseStats;
+    private PlayerStats stats;
+    private final List<Relic> relics = new ArrayList<>();
     private final Random random;
     private Vec2 position;
     private int hp;
@@ -71,13 +76,14 @@ public final class Player implements Damageable {
      * Crée un joueur avec tous ses points de vie.
      *
      * @param position position de départ
-     * @param stats    statistiques du joueur
+     * @param stats    statistiques de base du joueur, avant toute relique
      * @param random   source de hasard de la partie (coups critiques), partagée et initialisée
      *                 avec la graine de la partie pour que tout soit reproductible
      */
     public Player(Vec2 position, PlayerStats stats, Random random) {
         this.position = Objects.requireNonNull(position, "position");
-        this.stats = Objects.requireNonNull(stats, "stats");
+        this.baseStats = Objects.requireNonNull(stats, "stats");
+        this.stats = baseStats;
         this.random = Objects.requireNonNull(random, "random");
         this.hp = stats.maxHp();
     }
@@ -217,7 +223,7 @@ public final class Player implements Damageable {
      *
      * <p>Chaque cible tire son propre critique. Le recul pousse la cible dans la direction
      * joueur → cible. Chaque coup accepté publie un {@link GameEvent.EntityHit}, que la vue
-     * utilisera pour afficher les dégâts.</p>
+     * utilisera pour afficher les dégâts, puis prévient chaque relique ({@link Relic#onHit}).</p>
      *
      * @param world la salle, qui sait quelles cibles sont dans la zone
      * @return le nombre de cibles réellement touchées
@@ -238,6 +244,9 @@ public final class Player implements Damageable {
             if (target.receive(hit)) {
                 touched++;
                 world.events().publish(new GameEvent.EntityHit(targetCenter, damage, critical, target.faction()));
+                for (Relic relic : relics) {
+                    relic.onHit(this);
+                }
             }
         }
         return touched;
@@ -290,6 +299,49 @@ public final class Player implements Damageable {
      */
     public boolean isInvulnerable() {
         return state.invulnerable() || invulnerableLeft > 0f;
+    }
+
+    /**
+     * Ajoute une relique et recalcule les statistiques réelles.
+     *
+     * <p>Si la relique augmente les points de vie maximum, le joueur gagne aussi ces points
+     * de vie tout de suite : prendre une relique de vie ne doit pas ressembler à une perte.</p>
+     *
+     * @param relic la relique gagnée
+     */
+    public void addRelic(Relic relic) {
+        Objects.requireNonNull(relic, "relic");
+        int previousMaxHp = stats.maxHp();
+        relics.add(relic);
+        stats = computeStats();
+        if (isAlive()) {
+            int gained = Math.max(0, stats.maxHp() - previousMaxHp);
+            hp = Math.min(stats.maxHp(), hp + gained);
+        }
+    }
+
+    /**
+     * Statistiques réelles : les statistiques de base, transformées par chaque relique dans
+     * l'ordre où elles ont été gagnées. Les statistiques de base ne sont jamais modifiées.
+     */
+    private PlayerStats computeStats() {
+        PlayerStats result = baseStats;
+        for (Relic relic : relics) {
+            result = Objects.requireNonNull(relic.apply(result), "stats de " + relic.name());
+        }
+        return result;
+    }
+
+    /**
+     * Rend des points de vie, sans dépasser le maximum. Un joueur mort n'est pas soigné.
+     *
+     * @param amount points de vie à rendre ; une valeur nulle ou négative ne fait rien
+     */
+    public void heal(int amount) {
+        if (!isAlive() || amount <= 0) {
+            return;
+        }
+        hp = Math.min(stats.maxHp(), hp + amount);
     }
 
     @Override
@@ -357,8 +409,18 @@ public final class Player implements Damageable {
         return dodgePressed;
     }
 
-    /** @return les statistiques du joueur */
+    /** @return les statistiques réelles du joueur, reliques comprises : ce que le jeu utilise */
     public PlayerStats stats() {
         return stats;
+    }
+
+    /** @return les statistiques de base du joueur, avant toute relique ; elles ne changent jamais */
+    public PlayerStats baseStats() {
+        return baseStats;
+    }
+
+    /** @return les reliques du joueur, dans l'ordre où il les a gagnées (lecture seule) */
+    public List<Relic> relics() {
+        return Collections.unmodifiableList(relics);
     }
 }
