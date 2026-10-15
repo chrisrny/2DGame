@@ -12,6 +12,7 @@ import game.model.commun.PlayerIntent;
 import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.skill.Shockwave;
+import game.model.skill.ThrownBlade;
 import game.model.world.FakeWorld;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,10 @@ class PlayerSkillTest {
 
     private static PlayerIntent intention(boolean attack, boolean dodge, boolean skill1) {
         return new PlayerIntent(Vec2.ZERO, DROITE, attack, dodge, skill1, false);
+    }
+
+    private static PlayerIntent lancer() {
+        return new PlayerIntent(Vec2.ZERO, DROITE, false, false, false, true);
     }
 
     private void pas(PlayerIntent intent, int nombre) {
@@ -130,7 +135,46 @@ class PlayerSkillTest {
     }
 
     @Test
-    void leDeuxiemeEmplacementEstVidePourLInstant() {
-        assertTrue(joueur.skill2().isEmpty());
+    void leDeuxiemeEmplacementContientLaLameLancee() {
+        assertTrue(joueur.skill2().orElseThrow() instanceof ThrownBlade);
+    }
+
+    @Test
+    void laToucheEDeclencheLaLameLancee() {
+        pas(lancer(), 1);
+        assertEquals(1, monde.projectiles().size());
+        assertFalse(joueur.skill2().orElseThrow().isReady());
+        assertTrue(joueur.skill1().isReady());
+    }
+
+    @Test
+    void uneToucheMaintenueNeLanceQuUneLame() {
+        pas(lancer(), 30);
+        assertEquals(1, monde.projectiles().size());
+    }
+
+    @Test
+    void pasDeLamePendantUneEsquive() {
+        pas(intention(false, true, false), 1);
+        pas(lancer(), 1);
+        assertTrue(monde.projectiles().isEmpty());
+    }
+
+    @Test
+    void pasDeLameQuandOnVientDEtreTouche() {
+        joueur.receive(new Hit(10, Faction.ENEMY, false, Vec2.ZERO));
+        pas(lancer(), 1);
+        assertTrue(monde.projectiles().isEmpty());
+    }
+
+    @Test
+    void uneNouvelleLamePartApresTroisSecondes() {
+        pas(lancer(), 1);
+        pas(PlayerIntent.NONE, 170);
+        pas(lancer(), 1);
+        assertEquals(1, monde.projectiles().size());
+        pas(PlayerIntent.NONE, 20);
+        pas(lancer(), 1);
+        assertEquals(2, monde.projectiles().size());
     }
 }
