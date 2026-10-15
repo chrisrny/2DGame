@@ -11,6 +11,7 @@ import game.model.commun.Vec2;
 import game.model.event.GameEvent;
 import game.model.player.state.DeadState;
 import game.model.player.state.DodgingState;
+import game.model.player.state.HurtState;
 import game.model.player.state.IdleState;
 import game.model.player.state.PlayerState;
 import game.model.player.state.PlayerStateKind;
@@ -23,8 +24,11 @@ import java.util.Random;
  * Le personnage contrôlé par le joueur.
  *
  * <p>Son comportement dépend de son état courant ({@link PlayerState}, pattern State) :
- * le joueur ne fait que détecter les appuis, suivre la visée et déléguer à cet état.
- * Quand ses points de vie tombent à zéro, il passe en état mort quel que soit son état.</p>
+ * le joueur ne fait que détecter les appuis, suivre la visée et déléguer à cet état.</p>
+ *
+ * <p>Un coup reçu le fait passer en état touché ({@link HurtState}) et le rend invincible
+ * pendant {@link #INVULNERABILITY_DURATION}. Quand ses points de vie tombent à zéro, il passe
+ * en état mort quel que soit son état, et {@link GameEvent.PlayerDied} est publié une fois.</p>
  */
 public final class Player implements Damageable {
 
@@ -40,6 +44,15 @@ public final class Player implements Damageable {
     /** Vitesse de recul donnée aux cibles touchées, en unités par seconde. */
     public static final float KNOCKBACK_SPEED = 300f;
 
+    /** Durée de l'état touché, en secondes : le joueur ne contrôle plus rien pendant ce temps. */
+    public static final float HURT_DURATION = 0.2f;
+
+    /** Durée du recul subi, en secondes : la vitesse du recul baisse jusqu'à zéro sur cette durée. */
+    public static final float HURT_KNOCKBACK_DURATION = 0.15f;
+
+    /** Durée de l'invincibilité après un coup reçu, en secondes. Elle démarre au coup. */
+    public static final float INVULNERABILITY_DURATION = 0.8f;
+
     private final PlayerStats stats;
     private final Random random;
     private Vec2 position;
@@ -51,6 +64,8 @@ public final class Player implements Damageable {
     private boolean dodgePressed;
     private float attackCooldownLeft;
     private float dodgeCooldownLeft;
+    private float invulnerableLeft;
+    private boolean deathPublished;
 
     /**
      * Crée un joueur avec tous ses points de vie.
@@ -70,8 +85,9 @@ public final class Player implements Damageable {
     /**
      * Fait avancer le joueur d'un pas de jeu.
      *
-     * <p>Dans l'ordre : décompter la recharge, détecter les appuis, suivre la visée, laisser
-     * l'état courant décider de l'état suivant, puis faire agir cet état.</p>
+     * <p>Dans l'ordre : annoncer la mort si elle vient d'arriver, décompter les recharges et
+     * l'invincibilité, détecter les appuis, suivre la visée, laisser l'état courant décider de
+     * l'état suivant, puis faire agir cet état.</p>
      *
      * @param intent ce que le joueur veut faire pendant ce pas
      * @param world  la salle où se trouve le joueur
@@ -80,14 +96,32 @@ public final class Player implements Damageable {
     public void update(PlayerIntent intent, World world, float dt) {
         Objects.requireNonNull(intent, "intent");
         Objects.requireNonNull(world, "world");
+        publishDeathOnce(world);
         attackCooldownLeft = Math.max(0f, attackCooldownLeft - dt);
         dodgeCooldownLeft = Math.max(0f, dodgeCooldownLeft - dt);
+        invulnerableLeft = Math.max(0f, invulnerableLeft - dt);
         detectPresses(intent);
         if (isAlive()) {
             facing = intent.aim();
         }
         state = Objects.requireNonNull(state.next(this, intent), "état suivant");
         state.act(this, intent, world, dt);
+    }
+
+    /**
+     * Publie {@link GameEvent.PlayerDied} au premier pas où le joueur est mort, et jamais ensuite.
+     *
+     * <p>La mort arrive dans {@link #receive(Hit)}, qui n'a pas accès au bus d'événements :
+     * elle est donc annoncée au pas suivant, ce qui laisse les événements distribués en fin
+     * de pas comme les autres.</p>
+     *
+     * @param world le monde, qui donne accès au bus d'événements
+     */
+    private void publishDeathOnce(World world) {
+        if (!isAlive() && !deathPublished) {
+            world.events().publish(new GameEvent.PlayerDied());
+            deathPublished = true;
+        }
     }
 
     /**
@@ -225,22 +259,37 @@ public final class Player implements Damageable {
     /**
      * Applique un coup au joueur.
      *
-     * <p>Version minimale : le tir ami et les coups sur un joueur mort sont ignorés.
-     * Les coups sont aussi ignorés quand l'état courant rend invincible (esquive).
-     * Un coup mortel fait passer le joueur en état mort. L'invincibilité après un coup
-     * et le recul arrivent avec P1-A5.</p>
+     * <p>Le coup est ignoré si le joueur est mort, si c'est un tir ami, si l'état courant rend
+     * invincible (esquive) ou si le joueur vient déjà d'être touché (invincibilité après un coup).
+     * Sinon, les points de vie baissent : un coup mortel fait passer le joueur en état mort,
+     * les autres le font passer en état touché, avec le recul du coup et
+     * {@link #INVULNERABILITY_DURATION} d'invincibilité. Un coup reçu interrompt donc
+     * une attaque en cours.</p>
      */
     @Override
     public boolean receive(Hit hit) {
         Objects.requireNonNull(hit, "hit");
-        if (!isAlive() || hit.source() == faction() || state.invulnerable()) {
+        if (!isAlive() || hit.source() == faction() || isInvulnerable()) {
             return false;
         }
         hp = Math.max(0, hp - hit.damage());
         if (hp == 0) {
             state = new DeadState();
+            return true;
         }
+        invulnerableLeft = INVULNERABILITY_DURATION;
+        state = new HurtState(hit.knockback());
         return true;
+    }
+
+    /**
+     * Indique si le joueur ignore les coups en ce moment : pendant une esquive, ou juste
+     * après avoir été touché.
+     *
+     * @return {@code true} si un coup serait ignoré maintenant
+     */
+    public boolean isInvulnerable() {
+        return state.invulnerable() || invulnerableLeft > 0f;
     }
 
     @Override
@@ -296,6 +345,11 @@ public final class Player implements Damageable {
     /** @return le temps restant avant de pouvoir esquiver de nouveau, en secondes */
     public float dodgeCooldownLeft() {
         return dodgeCooldownLeft;
+    }
+
+    /** @return le temps d'invincibilité restant après un coup reçu, en secondes (0 si aucun) */
+    public float invulnerableLeft() {
+        return invulnerableLeft;
     }
 
     /** @return {@code true} si le bouton d'esquive vient d'être enfoncé à ce pas */
