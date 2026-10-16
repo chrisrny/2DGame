@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -19,7 +18,7 @@ import game.core.hud.LevelUpOverlay;
 import game.core.hud.StageBanner;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
-import game.core.render.PlayerSprite;
+import game.core.render.SceneRenderer;
 import game.core.render.WorldRenderer;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Rect;
@@ -68,8 +67,6 @@ public class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
-    private final SpriteBatch batch = new SpriteBatch();
-    private final PlayerSprite playerSprite = new PlayerSprite();
     private final FixedStep clock = new FixedStep();
     private final Main main;
     private final Run run;
@@ -80,6 +77,7 @@ public class GameScreen extends ScreenAdapter {
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
     private final DamageNumbers damageNumbers;
+    private final SceneRenderer scene;
     private float overFor;
 
     /**
@@ -92,6 +90,7 @@ public class GameScreen extends ScreenAdapter {
         this.main = main;
         this.run = run;
         this.damageNumbers = new DamageNumbers(run.events());
+        this.scene = new SceneRenderer(run.events());
     }
 
     @Override
@@ -144,7 +143,7 @@ public class GameScreen extends ScreenAdapter {
         // Les chiffres de dégâts avancent avec le temps réel : c'est purement visuel.
         // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
         damageNumbers.update(delta);
-        playerSprite.update(run.player().stateKind(), delta);
+        scene.update(run, delta);
 
         // Fin de partie : on laisse un instant pour voir la mort du joueur ou du boss.
         if (run.isOver()) {
@@ -174,12 +173,12 @@ public class GameScreen extends ScreenAdapter {
         viewport.apply();
         shapes.setProjectionMatrix(camera.combined);
 
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
-        worldRenderer.draw(shapes, run.map());
-        shapes.end();
-        // Le feu au sol d'abord, le joueur par-dessus.
+        // Fausse 3D : le sol, le feu posé au sol, puis murs et personnages triés par profondeur.
+        scene.drawGround(camera, run, WORLD_WIDTH, WORLD_HEIGHT);
         drawFireZones();
-        drawPlayer();
+        Player player = run.player();
+        scene.drawObjects(camera, run, blinkHidden(player) ? BLINK_ALPHA : 1f);
+        worldRenderer.drawTelegraphs(shapes, run.map());
         drawShockwave();
         // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
         if (run.settings().showDamageNumbers()) {
@@ -226,19 +225,6 @@ public class GameScreen extends ScreenAdapter {
     }
 
     /**
-     * Joueur : son sprite animé, choisi selon son état (voir {@link PlayerSprite}). Tant qu'il
-     * est invincible après un coup, il clignote en devenant à moitié transparent une période
-     * sur deux.
-     */
-    private void drawPlayer() {
-        Player player = run.player();
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        playerSprite.draw(batch, player, blinkHidden(player) ? BLINK_ALPHA : 1f);
-        batch.end();
-    }
-
-    /**
      * Clignotement pendant l'invincibilité après un coup : le joueur est caché une période
      * sur deux. La période est calculée à partir du temps d'invincibilité restant, donnée
      * par le modèle : la vue ne garde aucun minuteur à elle.
@@ -276,8 +262,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         shapes.dispose();
-        batch.dispose();
-        playerSprite.dispose();
+        scene.dispose();
         hud.dispose();
         levelUp.dispose();
         damageNumbers.dispose();
