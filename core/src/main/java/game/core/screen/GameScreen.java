@@ -1,5 +1,7 @@
 package game.core.screen;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -8,7 +10,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.commun.Circle;
 import game.model.commun.FixedStep;
-import game.model.commun.GameConfig;
+import game.core.Main;
 import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
@@ -31,6 +33,9 @@ import game.model.world.Run;
  * le modèle à pas fixe, dessiner. L'écran ne décide jamais des règles : il transmet
  * l'intention du joueur au modèle et dessine ce que le modèle contient.</p>
  *
+ * <p>Échap ouvre la pause. Quand la partie est finie, l'écran laisse {@link #END_DELAY}
+ * secondes pour voir ce qui s'est passé, puis passe à l'écran de victoire ou de défaite.</p>
+ *
  * <p>Le jeu est dessiné dans un monde logique de 640x360. Le {@link FitViewport} l'agrandit
  * à la taille de la fenêtre en gardant le format 16:9, avec des bandes noires si la fenêtre
  * n'a pas les bonnes proportions.</p>
@@ -43,6 +48,9 @@ public class GameScreen extends ScreenAdapter {
     /** Hauteur du monde logique, en unités. */
     public static final float WORLD_HEIGHT = 360f;
 
+    /** Temps laissé après la fin de la partie avant l'écran de fin, en secondes. */
+    public static final float END_DELAY = 1.5f;
+
     /** Durée de l'anneau dessiné quand l'Onde de choc part, en secondes (purement visuel). */
     private static final float SHOCKWAVE_VISUAL_DURATION = 0.2f;
 
@@ -53,14 +61,27 @@ public class GameScreen extends ScreenAdapter {
     private final Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final FixedStep clock = new FixedStep();
-    private final Run run = new Run(GameConfig.defaults());
+    private final Main main;
+    private final Run run;
     private final InputSource input = new KeyboardMouseInput(viewport);
     private final WorldRenderer worldRenderer = new WorldRenderer();
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
     private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
-    private final DamageNumbers damageNumbers = new DamageNumbers(run.events());
+    private final DamageNumbers damageNumbers;
+    private float overFor;
 
+    /**
+     * Crée l'écran de partie.
+     *
+     * @param main le jeu, pour ouvrir la pause et l'écran de fin
+     * @param run  la partie à jouer
+     */
+    public GameScreen(Main main, Run run) {
+        this.main = main;
+        this.run = run;
+        this.damageNumbers = new DamageNumbers(run.events());
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -73,6 +94,12 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+        // Pause : cet écran est gardé tel quel derrière l'écran de pause, et n'avance plus.
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+            main.push(new PauseScreen(main, this));
+            return;
+        }
+
         // Montée de niveau : la partie est figée tant que le joueur n'a pas choisi sa relique.
         // On ne fait pas avancer l'horloge, pour ne pas rattraper ce temps d'un coup ensuite.
         if (run.isChoosingRelic()) {
@@ -97,7 +124,24 @@ public class GameScreen extends ScreenAdapter {
         // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
         damageNumbers.update(delta);
 
+        // Fin de partie : on laisse un instant pour voir la mort du joueur ou du boss.
+        if (run.isOver()) {
+            overFor += delta;
+            if (overFor >= END_DELAY) {
+                main.showEnd(run);
+                return;
+            }
+        }
+
         // 3. Dessin.
+        draw();
+    }
+
+    /**
+     * Dessine la partie sans la faire avancer : sert à l'écran de pause, qui l'affiche figée
+     * derrière son menu.
+     */
+    void drawFrozen() {
         draw();
     }
 
