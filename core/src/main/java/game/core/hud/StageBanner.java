@@ -2,7 +2,6 @@ package game.core.hud;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Align;
@@ -39,7 +38,7 @@ public final class StageBanner implements Disposable {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport;
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font = Fonts.create();
 
     /**
      * Crée l'affichage des stages.
@@ -50,7 +49,6 @@ public final class StageBanner implements Disposable {
     public StageBanner(float width, float height) {
         this.viewport = new FitViewport(width, height, camera);
         font.setUseIntegerPositions(false);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
 
     /**
