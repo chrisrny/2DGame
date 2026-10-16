@@ -157,7 +157,10 @@ public class GameScreen extends ScreenAdapter {
         drawPlayer();
         shapes.end();
         drawShockwave();
-        damageNumbers.draw(camera.combined);
+        // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
+        if (run.settings().showDamageNumbers()) {
+            damageNumbers.draw(camera.combined);
+        }
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
         hud.draw(run.player(), run.experience());

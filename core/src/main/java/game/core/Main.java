@@ -6,7 +6,9 @@ import game.core.screen.DefeatScreen;
 import game.core.screen.GameScreen;
 import game.core.screen.TitleScreen;
 import game.core.screen.VictoryScreen;
+import game.model.commun.Difficulty;
 import game.model.commun.GameConfig;
+import game.model.commun.Settings;
 import game.model.world.Run;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -25,10 +27,14 @@ import java.util.Objects;
  *   <li>{@link #replaceAll(Screen)} affiche un écran et libère tous les autres.</li>
  * </ul>
  * <p>Un écran quitté est donc toujours libéré ({@code dispose}) : il n'y a pas de fuite.</p>
+ *
+ * <p>{@code Main} garde aussi les réglages du joueur ({@link #settings()}), partagés par l'écran
+ * des options et la partie en cours, le temps que le jeu est ouvert.</p>
  */
 public class Main extends Game {
 
     private final Deque<Screen> suspended = new ArrayDeque<>();
+    private final Settings settings = new Settings(Difficulty.NORMAL);
 
     @Override
     public void create() {
@@ -42,7 +48,12 @@ public class Main extends Game {
 
     /** Lance une nouvelle partie, avec une nouvelle graine, et libère tous les autres écrans. */
     public void newGame() {
-        replaceAll(new GameScreen(this, new Run(GameConfig.defaults())));
+        replaceAll(new GameScreen(this, new Run(GameConfig.defaults(), settings)));
+    }
+
+    /** @return les réglages du joueur, modifiés par l'écran des options et lus par la partie */
+    public Settings settings() {
+        return settings;
     }
 
     /**
