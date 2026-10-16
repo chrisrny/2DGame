@@ -3,6 +3,7 @@ package game.model.world;
 import game.model.commun.Faction;
 import game.model.commun.GameConfig;
 import game.model.commun.PlayerIntent;
+import game.model.commun.Settings;
 import game.model.entity.Boss;
 import game.model.entity.Player;
 import game.model.event.EventBus;
@@ -26,10 +27,14 @@ import java.util.Random;
  * stage est fini ({@link GameEvent.StageCleared}), une pause de {@link #STAGE_INTRO} secondes
  * sans vague annonce le suivant. Au stage 3, le boss apparaît. La partie est perdue à la mort
  * du joueur et gagnée à la mort du boss.</p>
+ *
+ * <p>La difficulté vient des réglages ({@link Settings}) : elle est lue au début de chaque
+ * stage, donc un changement en pleine partie vaut à partir du stage suivant.</p>
  */
 public final class Run {
 
     private final GameConfig config;
+    private final Settings settings;
     private final EventBus events = new EventBus();
     private final Random random;
     private final Player player;
@@ -48,12 +53,24 @@ public final class Run {
     public static final float STAGE_INTRO = 2f;
 
     /**
-     * Crée une partie.
+     * Crée une partie dont la difficulté reste celle de {@code config}.
      *
      * @param config les réglages de la partie (graine du hasard, difficulté, statistiques)
      */
     public Run(GameConfig config) {
+        this(config, new Settings(config.difficulty()));
+    }
+
+    /**
+     * Crée une partie qui suit les réglages du joueur : la difficulté de {@code settings} remplace
+     * celle de {@code config}, et peut changer en cours de partie.
+     *
+     * @param config   la graine du hasard et les statistiques du joueur
+     * @param settings les réglages du joueur, partagés avec l'écran des options
+     */
+    public Run(GameConfig config, Settings settings) {
         this.config = Objects.requireNonNull(config, "config");
+        this.settings = Objects.requireNonNull(settings, "settings");
         MapLayout layout = MapLayouts.main();
         // Une seule source de hasard pour toute la partie, initialisée avec la graine :
         // le joueur, les ennemis et les vagues doivent tous tirer leur hasard d'ici.
@@ -61,9 +78,7 @@ public final class Run {
         this.player = new Player(layout.center(), config.player(), random);
         this.map = new GameMap(layout, player, events, random);
         this.experience = new Experience(events);
-        // La difficulté choisie renforce ou affaiblit les ennemis de tous les stages.
-        float difficulty = config.difficulty().enemyMultiplier();
-        this.stages = Stages.demo().stream().map(stage -> stage.scaled(difficulty)).toList();
+        this.stages = Stages.demo();
         events.subscribe(this::onEvent);
         // Le stage 1 commence tout de suite : sa première vague a déjà son propre délai.
         startStage();
@@ -92,7 +107,8 @@ public final class Run {
     }
 
     private void startStage() {
-        StageConfig stage = currentStage();
+        // La difficulté du moment renforce ou affaiblit tous les ennemis de ce stage, boss compris.
+        StageConfig stage = currentStage().scaled(settings.difficulty().enemyMultiplier());
         map.startStage(stage);
         if (isBossStage() && boss == null) {
             boss = new Boss(map.randomSpawnPoint(), stage.multiplier());
@@ -170,7 +186,7 @@ public final class Run {
         return currentStage().number();
     }
 
-    /** @return la description du stage en cours (ou annoncé) */
+    /** @return la description du stage en cours (ou annoncé), avant la difficulté */
     public StageConfig currentStage() {
         return stages.get(stageIndex);
     }
@@ -178,6 +194,11 @@ public final class Run {
     /** @return {@code true} au dernier stage, celui du boss */
     public boolean isBossStage() {
         return stageIndex == stages.size() - 1;
+    }
+
+    /** @return les réglages du joueur que suit cette partie */
+    public Settings settings() {
+        return settings;
     }
 
     /** @return le nombre d'ennemis tués depuis le début de la partie */
