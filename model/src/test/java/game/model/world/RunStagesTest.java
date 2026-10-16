@@ -12,7 +12,7 @@ import game.model.commun.GameConfig;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Vec2;
 import game.model.entity.Enemy;
-import game.model.entity.GiantProwler;
+import game.model.entity.Boss;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -107,7 +107,7 @@ class RunStagesTest {
         assertTrue(run.isBossStage());
         avancer(Run.STAGE_INTRO + 0.1f);
         Enemy boss = run.boss().orElseThrow();
-        assertInstanceOf(GiantProwler.class, boss);
+        assertInstanceOf(Boss.class, boss);
         assertTrue(run.map().enemies().contains(boss));
         assertFalse(run.isOver());
     }

@@ -3,8 +3,7 @@ package game.model.world;
 import game.model.commun.Faction;
 import game.model.commun.GameConfig;
 import game.model.commun.PlayerIntent;
-import game.model.entity.Enemy;
-import game.model.entity.GiantProwler;
+import game.model.entity.Boss;
 import game.model.entity.Player;
 import game.model.event.EventBus;
 import game.model.event.GameEvent;
@@ -40,7 +39,7 @@ public final class Run {
     private int stageIndex;
     private float stageIntroLeft = STAGE_INTRO;
     private boolean nextStagePending;
-    private Enemy boss;
+    private Boss boss;
     private int kills;
     private List<Relic> pendingChoice = List.of();
     private float elapsed;
@@ -96,8 +95,7 @@ public final class Run {
         StageConfig stage = currentStage();
         map.startStage(stage);
         if (isBossStage() && boss == null) {
-            // Boss provisoire en attendant le vrai (P2-B1).
-            boss = new GiantProwler(map.randomSpawnPoint(), stage.multiplier());
+            boss = new Boss(map.randomSpawnPoint(), stage.multiplier());
             map.addEnemy(boss);
         }
     }
@@ -202,7 +200,7 @@ public final class Run {
     }
 
     /** @return le boss, s'il est déjà apparu (même mort) */
-    public Optional<Enemy> boss() {
+    public Optional<Boss> boss() {
         return Optional.ofNullable(boss);
     }
 
