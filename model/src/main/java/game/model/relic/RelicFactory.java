@@ -25,11 +25,12 @@ public final class RelicFactory {
     /**
      * Crée un exemplaire neuf de chaque relique du jeu, toujours dans le même ordre.
      *
-     * @return les 6 reliques
+     * @return les 8 reliques
      */
     public static List<Relic> all() {
         return List.of(new SharpenedBlade(), new AshBoots(), new EmberHeart(),
-                new ShadowFeather(), new HunterEye(), new VampireFang());
+                new ShadowFeather(), new HunterEye(), new VampireFang(),
+                new EmberStep(), new Echo());
     }
 
     /**

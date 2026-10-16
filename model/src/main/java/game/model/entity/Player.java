@@ -101,7 +101,8 @@ public final class Player implements Damageable {
      *
      * <p>Dans l'ordre : annoncer la mort si elle vient d'arriver, décompter les recharges et
      * l'invincibilité, détecter les appuis, suivre la visée, laisser l'état courant décider de
-     * l'état suivant, faire agir cet état, puis utiliser les compétences.</p>
+     * l'état suivant, faire agir cet état, utiliser les compétences, puis faire avancer les
+     * effets qui durent des reliques.</p>
      *
      * @param intent ce que le joueur veut faire pendant ce pas
      * @param world  la salle où se trouve le joueur
@@ -121,6 +122,9 @@ public final class Player implements Damageable {
         state = Objects.requireNonNull(state.next(this, intent), "état suivant");
         state.act(this, intent, world, dt);
         useSkills(world, dt);
+        for (Relic relic : relics) {
+            relic.update(this, world, dt);
+        }
     }
 
     /**
@@ -227,6 +231,9 @@ public final class Player implements Damageable {
     public DodgingState startDodge(Vec2 move) {
         dodgeCooldownLeft = stats.dodgeCooldown();
         Vec2 direction = move.length() > 0f ? move.normalized() : facing;
+        for (Relic relic : relics) {
+            relic.onDodge(this);
+        }
         return new DodgingState(direction);
     }
 
@@ -252,8 +259,9 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Porte un coup : frappe toutes les cibles ennemies dans la zone d'attaque et relance
-     * la recharge. Utilisé par l'état d'attaque, une fois par attaque.
+     * Porte un coup : frappe toutes les cibles ennemies dans la zone d'attaque, relance
+     * la recharge, puis prévient chaque relique de l'attaque ({@link Relic#onAttack}).
+     * Utilisé par l'état d'attaque, une fois par attaque.
      *
      * <p>Chaque cible tire son propre critique. Le recul pousse la cible dans la direction
      * joueur → cible. Chaque coup accepté publie un {@link GameEvent.EntityHit}, que la vue
@@ -264,6 +272,27 @@ public final class Player implements Damageable {
      */
     public int strike(World world) {
         attackCooldownLeft = stats.attackCooldown();
+        int touched = hitTargets(world);
+        for (Relic relic : relics) {
+            relic.onAttack(this);
+        }
+        return touched;
+    }
+
+    /**
+     * Frappe une deuxième fois la zone d'attaque, pour la relique Écho : mêmes cibles, même
+     * tirage de critique et mêmes reliques de coup qu'une attaque, mais la recharge n'est pas
+     * relancée et ce coup ne compte pas comme une attaque.
+     *
+     * @param world la salle, qui sait quelles cibles sont dans la zone
+     * @return le nombre de cibles réellement touchées
+     */
+    public int echoStrike(World world) {
+        return hitTargets(world);
+    }
+
+    // Le cœur commun de strike et echoStrike : frapper chaque cible de la zone d'attaque.
+    private int hitTargets(World world) {
         List<Damageable> targets = world.targetsIn(attackZone(), faction());
         int touched = 0;
         for (Damageable target : targets) {
@@ -450,6 +479,19 @@ public final class Player implements Damageable {
      */
     public Optional<Skill> skill2() {
         return Optional.of(skill2);
+    }
+
+    /**
+     * Zones de feu posées par les reliques (Pas de braise), pour que la vue les dessine.
+     *
+     * @return les zones actives de toutes les reliques, éventuellement aucune
+     */
+    public List<Circle> fireZones() {
+        List<Circle> zones = new ArrayList<>();
+        for (Relic relic : relics) {
+            zones.addAll(relic.fireZones());
+        }
+        return zones;
     }
 
     /** @return {@code true} si le bouton d'esquive vient d'être enfoncé à ce pas */

@@ -1,7 +1,6 @@
 package game.model.relic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,8 +20,8 @@ class RelicFactoryTest {
     }
 
     @Test
-    void laFabriqueConnaitSixReliquesDifferentes() {
-        assertEquals(6, typesDifferents(RelicFactory.all()));
+    void laFabriqueConnaitHuitReliquesDifferentes() {
+        assertEquals(8, typesDifferents(RelicFactory.all()));
     }
 
     @Test
@@ -34,13 +33,13 @@ class RelicFactoryTest {
 
     @Test
     void leTirageNeProposeJamaisUneReliqueDejaPossedee() {
-        List<Relic> possedees = List.of(new SharpenedBlade(), new AshBoots(), new EmberHeart(), new HunterEye());
+        List<Relic> possedees = List.of(new SharpenedBlade(), new AshBoots(), new EmberHeart(),
+                new ShadowFeather(), new HunterEye(), new VampireFang());
         for (long graine = 0; graine < 20; graine++) {
             List<Relic> tirage = RelicFactory.draw(3, new Random(graine), possedees);
             assertEquals(2, tirage.size());
             for (Relic relique : tirage) {
-                assertFalse(relique instanceof SharpenedBlade || relique instanceof AshBoots
-                        || relique instanceof EmberHeart || relique instanceof HunterEye);
+                assertTrue(relique instanceof EmberStep || relique instanceof Echo);
             }
         }
     }
