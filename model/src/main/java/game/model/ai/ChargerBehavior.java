@@ -14,7 +14,8 @@ import game.model.world.World;
  *       libre jusqu'au joueur (il ne charge jamais dans un mur qu'il voit) ;</li>
  *   <li>{@link Phase#WIND_UP} : il reste immobile {@link #WIND_UP_DURATION} secondes. La vue
  *       le fait clignoter : sans annonce visible, la charge serait injuste ;</li>
- *   <li>{@link Phase#CHARGE} : il fonce à {@link #CHARGE_SPEED} dans la direction du joueur,
+ *   <li>{@link Phase#CHARGE} : il fonce à sa vitesse de charge ({@link #CHARGE_SPEED} pour le
+ *       Chargeur, plus pour le boss) dans la direction du joueur,
  *       figée au début de la charge, pendant {@link #CHARGE_MAX_DURATION} secondes au plus.
  *       Il s'arrête plus tôt s'il heurte un mur ;</li>
  *   <li>{@link Phase#STUNNED} : il reste étourdi {@link #STUN_DURATION} seconde, sans bouger
@@ -57,9 +58,25 @@ public final class ChargerBehavior implements EnemyBehavior {
     // En dessous de cette part du déplacement voulu, on considère que la charge a heurté un mur.
     private static final float BLOCKED_RATIO = 0.99f;
 
+    private final float chargeSpeed;
     private Phase phase = Phase.APPROACH;
     private float phaseTime;
     private Vec2 chargeDirection = Vec2.ZERO;
+
+    /** Crée le comportement du Chargeur, qui charge à {@link #CHARGE_SPEED}. */
+    public ChargerBehavior() {
+        this(CHARGE_SPEED);
+    }
+
+    /**
+     * Crée un comportement de charge plus rapide ou plus lent : le boss réutilise ainsi la
+     * logique du Chargeur avec sa propre vitesse.
+     *
+     * @param chargeSpeed vitesse de la charge, en unités par seconde
+     */
+    public ChargerBehavior(float chargeSpeed) {
+        this.chargeSpeed = chargeSpeed;
+    }
 
     @Override
     public void act(Enemy self, World world, float dt) {
@@ -93,7 +110,7 @@ public final class ChargerBehavior implements EnemyBehavior {
     }
 
     private void charge(Enemy self, World world, float dt) {
-        Vec2 wanted = chargeDirection.scale(CHARGE_SPEED * dt);
+        Vec2 wanted = chargeDirection.scale(chargeSpeed * dt);
         Vec2 moved = self.moveBy(wanted, world);
         boolean blocked = moved.length() < wanted.length() * BLOCKED_RATIO;
         if (blocked || elapsed(CHARGE_MAX_DURATION)) {
