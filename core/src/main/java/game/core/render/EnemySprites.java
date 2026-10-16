@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
 import game.model.commun.Vec2;
 import game.model.entity.Archer;
-import game.model.entity.Boss;
 import game.model.entity.Charger;
 import game.model.entity.Enemy;
 import java.util.Collections;
@@ -18,7 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Dessine les ennemis avec leurs feuilles de sprites animées.
+ * Dessine les ennemis ordinaires avec leurs feuilles de sprites animées. Le boss a sa propre
+ * classe, {@link BossSprite}.
  *
  * <p>Le modèle ne dit pas si un ennemi marche ou vient d'être touché : la vue le déduit en
  * comparant chaque image à la précédente (la position a bougé, les points de vie ont baissé).
@@ -53,12 +53,9 @@ public final class EnemySprites implements Disposable {
     private final Texture prowlerTexture = load("prowler");
     private final Texture archerTexture = load("archer");
     private final Texture chargerTexture = load("charger");
-    private final Texture bossTexture = load("boss");
     private final Sheet prowler;
     private final Sheet archer;
     private final Sheet charger;
-    private final Sheet boss;
-    private final Sheet bossSecondPhase;
     private final Animation<TextureRegion> chargerWindUp;
     private final Animation<TextureRegion> chargerCharge;
     private final Animation<TextureRegion> chargerStunned;
@@ -69,8 +66,6 @@ public final class EnemySprites implements Disposable {
         prowler = sheet(prowlerTexture, 32, 2f, 0, 1, 2);
         archer = sheet(archerTexture, 32, 1f, 0, 1, 2);
         charger = sheet(chargerTexture, 32, 1f, 0, 1, 2);
-        boss = sheet(bossTexture, 64, 1f, 0, 1, 2);
-        bossSecondPhase = sheet(bossTexture, 64, 1f, 3, 4, 2);
         TextureRegion[][] grid = TextureRegion.split(chargerTexture, 32, 32);
         chargerWindUp = loop(grid[3], 2, IDLE_FRAME);
         chargerCharge = loop(grid[4], 2, MOVE_FRAME);
@@ -165,9 +160,6 @@ public final class EnemySprites implements Disposable {
     }
 
     private Sheet sheetOf(Enemy enemy) {
-        if (enemy instanceof Boss b) {
-            return b.phaseNumber() >= 2 ? bossSecondPhase : boss;
-        }
         if (enemy instanceof Charger) {
             return charger;
         }
@@ -182,6 +174,5 @@ public final class EnemySprites implements Disposable {
         prowlerTexture.dispose();
         archerTexture.dispose();
         chargerTexture.dispose();
-        bossTexture.dispose();
     }
 }
