@@ -34,7 +34,8 @@ import game.model.world.Run;
  * le modèle à pas fixe, dessiner. L'écran ne décide jamais des règles : il transmet
  * l'intention du joueur au modèle et dessine ce que le modèle contient.</p>
  *
- * <p>Échap ouvre la pause. Quand la partie est finie, l'écran laisse {@link #END_DELAY}
+ * <p>Échap ouvre la pause, F9 et F10 gagnent ou perdent tout de suite (triche de démo pour la
+ * soutenance). Quand la partie est finie, l'écran laisse {@link #END_DELAY}
  * secondes pour voir ce qui s'est passé, puis passe à l'écran de victoire ou de défaite.</p>
  *
  * <p>Le jeu est dessiné dans un monde logique de 640x360. Le {@link FitViewport} l'agrandit
@@ -101,6 +102,15 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
             main.push(new PauseScreen(main, this));
             return;
+        }
+
+        // Triche de démo : F9 gagne, F10 perd tout de suite. C'est le modèle qui décide ; l'écran
+        // de fin arrive ensuite après END_DELAY, comme pour une vraie fin de partie.
+        if (Gdx.input.isKeyJustPressed(Keys.F9)) {
+            run.forceWin();
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.F10)) {
+            run.forceLose();
         }
 
         // Montée de niveau : la partie est figée tant que le joueur n'a pas choisi sa relique.
