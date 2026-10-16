@@ -49,6 +49,7 @@ public final class SceneRenderer implements Disposable {
     private final MapRenderer map;
     private final EnemySprites enemies = new EnemySprites();
     private final PlayerSprite player = new PlayerSprite();
+    private final SlashEffect slash = new SlashEffect();
     private final DeathPuffs puffs;
     private final List<Item> items = new ArrayList<>();
 
@@ -72,6 +73,7 @@ public final class SceneRenderer implements Disposable {
      */
     public void update(Run run, float delta) {
         player.update(run.player(), delta);
+        slash.update(run.player(), delta);
         enemies.update(run.map().enemies(), delta);
         puffs.update(delta);
     }
@@ -113,7 +115,13 @@ public final class SceneRenderer implements Disposable {
             float feet = enemy.position().y() - enemy.hitbox().radius();
             items.add(new Item(feet, () -> enemies.draw(batch, enemy, hero.position())));
         }
-        items.add(new Item(hero.position().y() - Player.RADIUS, () -> player.draw(batch, hero, playerAlpha)));
+        float heroFeet = hero.position().y() - Player.RADIUS;
+        items.add(new Item(heroFeet, () -> player.draw(batch, hero, playerAlpha)));
+        if (slash.visible()) {
+            // Coup vers le haut : juste derrière le héros ; sinon juste devant.
+            float slashDepth = slash.behindHero() ? heroFeet + 0.01f : heroFeet - 0.01f;
+            items.add(new Item(slashDepth, () -> slash.draw(batch, hero.position())));
+        }
         for (Projectile projectile : world.projectiles()) {
             items.add(new Item(projectile.position().y() - 4f, () -> drawProjectile(projectile)));
         }
@@ -192,6 +200,7 @@ public final class SceneRenderer implements Disposable {
         map.dispose();
         enemies.dispose();
         player.dispose();
+        slash.dispose();
         puffs.dispose();
     }
 }
