@@ -2,6 +2,7 @@ package game.model.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import game.model.combat.Hit;
 import game.model.commun.Circle;
@@ -12,10 +13,13 @@ import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.relic.AshBoots;
 import game.model.relic.EmberHeart;
+import game.model.relic.EmberStep;
 import game.model.relic.HunterEye;
+import game.model.relic.Relic;
 import game.model.relic.SharpenedBlade;
 import game.model.relic.VampireFang;
 import game.model.world.FakeWorld;
+import game.model.world.World;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -165,5 +169,92 @@ class PlayerRelicTest {
         joueur.addRelic(new VampireFang());
         assertEquals(1, joueur.relics().size());
         assertThrows(UnsupportedOperationException.class, () -> joueur.relics().add(new AshBoots()));
+    }
+    /** Relique espionne : compte les moments où le joueur la prévient. */
+    private static final class Espionne implements Relic {
+        private int attaques;
+        private int esquives;
+        private int pas;
+
+        @Override
+        public String name() {
+            return "Espionne";
+        }
+
+        @Override
+        public String description() {
+            return "";
+        }
+
+        @Override
+        public PlayerStats apply(PlayerStats stats) {
+            return stats;
+        }
+
+        @Override
+        public void onAttack(Player player) {
+            attaques++;
+        }
+
+        @Override
+        public void onDodge(Player player) {
+            esquives++;
+        }
+
+        @Override
+        public void update(Player player, World world, float dt) {
+            pas++;
+        }
+    }
+
+    @Test
+    void leJoueurPrevientSesReliquesDeChaqueMoment() {
+        Player joueur = joueur(SANS_CRITIQUE);
+        Espionne espionne = new Espionne();
+        joueur.addRelic(espionne);
+
+        attaquer(joueur);
+        pas(joueur, PlayerIntent.NONE, 30);
+        pas(joueur, new PlayerIntent(DROITE, DROITE, false, true, false, false), 1);
+
+        assertEquals(1, espionne.attaques);
+        assertEquals(1, espionne.esquives);
+        assertEquals(32, espionne.pas);
+    }
+
+    @Test
+    void uneAttaqueRateeCompteQuandMemeCommeUneAttaque() {
+        Player joueur = joueur(SANS_CRITIQUE);
+        Espionne espionne = new Espionne();
+        joueur.addRelic(espionne);
+
+        pas(joueur, new PlayerIntent(Vec2.ZERO, new Vec2(-1f, 0f), true, false, false, false), 1);
+
+        assertEquals(1, espionne.attaques);
+    }
+
+    @Test
+    void pasDeBraiseLaisseUneTraineeLeLongDeLEsquive() {
+        Player joueur = joueur(SANS_CRITIQUE);
+        joueur.addRelic(new EmberStep());
+
+        pas(joueur, new PlayerIntent(DROITE, DROITE, false, true, false, false), 1);
+        pas(joueur, PlayerIntent.NONE, 11);
+
+        List<Circle> zones = joueur.fireZones();
+        assertEquals(EmberStep.ZONE_COUNT, zones.size());
+        float precedent = DEPART.x();
+        for (Circle zone : zones) {
+            assertTrue(zone.center().x() > precedent);
+            precedent = zone.center().x();
+        }
+        assertTrue(precedent <= DEPART.x() + SANS_CRITIQUE.dodgeDistance());
+    }
+
+    @Test
+    void sansReliqueDeFeuLeJoueurNaAucuneZone() {
+        Player joueur = joueur(SANS_CRITIQUE);
+        pas(joueur, new PlayerIntent(DROITE, DROITE, false, true, false, false), 12);
+        assertTrue(joueur.fireZones().isEmpty());
     }
 }

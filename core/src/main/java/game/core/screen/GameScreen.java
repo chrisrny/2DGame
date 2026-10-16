@@ -26,6 +26,7 @@ import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
 import game.model.skill.Shockwave;
 import game.model.world.Run;
+import java.util.List;
 
 /**
  * Écran de partie.
@@ -169,6 +170,7 @@ public class GameScreen extends ScreenAdapter {
         worldRenderer.draw(shapes, run.map());
         drawPlayer();
         shapes.end();
+        drawFireZones();
         drawShockwave();
         // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
         if (run.settings().showDamageNumbers()) {
@@ -194,6 +196,24 @@ public class GameScreen extends ScreenAdapter {
         float y = Math.clamp(target.y(), arena.y() + WORLD_HEIGHT / 2f, arena.top() - WORLD_HEIGHT / 2f);
         camera.position.set(x, y, 0f);
         camera.update();
+    }
+
+    /**
+     * Zones de feu des reliques (Pas de braise) : des anneaux rouge orangé. On dessine des
+     * contours et non des disques pleins, pour ne pas cacher les ennemis qui brûlent dedans.
+     */
+    private void drawFireZones() {
+        List<Circle> zones = run.player().fireZones();
+        if (zones.isEmpty()) {
+            return;
+        }
+        shapes.begin(ShapeRenderer.ShapeType.Line);
+        shapes.setColor(1f, 0.30f, 0.10f, 1f);
+        for (Circle zone : zones) {
+            shapes.circle(zone.center().x(), zone.center().y(), zone.radius(), 20);
+            shapes.circle(zone.center().x(), zone.center().y(), zone.radius() - 2f, 20);
+        }
+        shapes.end();
     }
 
     /**
