@@ -104,6 +104,17 @@ public abstract class Enemy implements Damageable {
     }
 
     /**
+     * Poursuit le joueur : va droit sur lui si rien ne gêne, sinon contourne les murs en suivant
+     * le chemin donné par le monde ({@link World#pathTowardPlayer}).
+     *
+     * @param world le monde où il évolue
+     * @param dt    durée du pas, en secondes
+     */
+    public void chase(World world, float dt) {
+        moveToward(world.pathTowardPlayer(position, radius), world, dt);
+    }
+
+    /**
      * Se déplace d'un vecteur donné, en glissant le long des murs, sans tenir compte de sa vitesse.
      * Sert aux déplacements spéciaux, comme la charge du Chargeur.
      *
@@ -142,6 +153,17 @@ public abstract class Enemy implements Damageable {
         Vec2 delta = knockbackVelocity.scale(knockbackTimer / KNOCKBACK_DURATION * dt);
         setPosition(Collisions.move(hitbox(), delta, world.walls()));
         knockbackTimer -= dt;
+    }
+
+    /**
+     * Résistance de l'ennemi quand deux ennemis qui se chevauchent sont écartés : celui qui
+     * résiste le plus recule le moins. Vaut 1 par défaut ; un Chargeur en pleine charge résiste
+     * beaucoup plus, il bouscule les autres et reste presque sur sa ligne.
+     *
+     * @return un facteur strictement positif, 1 pour un ennemi ordinaire
+     */
+    public float pushResistance() {
+        return 1f;
     }
 
     /** @return la position actuelle */

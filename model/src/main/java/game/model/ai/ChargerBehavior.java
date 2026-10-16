@@ -9,8 +9,9 @@ import game.model.world.World;
  *
  * <p>Il passe en boucle par quatre phases, chacune avec son minuteur :</p>
  * <ol>
- *   <li>{@link Phase#APPROACH} : il marche vers le joueur à la vitesse de l'ennemi (60 u/s),
- *       jusqu'à être à moins de {@link #TRIGGER_DISTANCE} ;</li>
+ *   <li>{@link Phase#APPROACH} : il marche vers le joueur à la vitesse de l'ennemi (60 u/s), en
+ *       contournant les murs, jusqu'à être à moins de {@link #TRIGGER_DISTANCE} avec la voie
+ *       libre jusqu'au joueur (il ne charge jamais dans un mur qu'il voit) ;</li>
  *   <li>{@link Phase#WIND_UP} : il reste immobile {@link #WIND_UP_DURATION} secondes. La vue
  *       le fait clignoter : sans annonce visible, la charge serait injuste ;</li>
  *   <li>{@link Phase#CHARGE} : il fonce à {@link #CHARGE_SPEED} dans la direction du joueur,
@@ -83,10 +84,11 @@ public final class ChargerBehavior implements EnemyBehavior {
 
     private void approach(Enemy self, World world, float dt) {
         Vec2 player = world.playerPosition();
-        if (self.position().distanceTo(player) <= TRIGGER_DISTANCE) {
+        boolean inRange = self.position().distanceTo(player) <= TRIGGER_DISTANCE;
+        if (inRange && world.hasClearPath(self.position(), player, self.hitbox().radius())) {
             enter(Phase.WIND_UP);
         } else {
-            self.moveToward(player, world, dt);
+            self.chase(world, dt);
         }
     }
 
