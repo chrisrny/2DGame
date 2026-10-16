@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.core.Main;
+import game.core.hud.BossBar;
 import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
@@ -68,6 +69,7 @@ public class GameScreen extends ScreenAdapter {
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
     private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
+    private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
     private final DamageNumbers damageNumbers;
     private float overFor;
 
@@ -90,6 +92,7 @@ public class GameScreen extends ScreenAdapter {
         hud.resize(width, height);
         levelUp.resize(width, height);
         stageBanner.resize(width, height);
+        bossBar.resize(width, height);
     }
 
     @Override
@@ -165,6 +168,7 @@ public class GameScreen extends ScreenAdapter {
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
         hud.draw(run.player(), run.experience());
         stageBanner.draw(run);
+        bossBar.draw(run);
         if (run.isChoosingRelic()) {
             levelUp.draw(run.pendingChoice());
         }
@@ -261,5 +265,6 @@ public class GameScreen extends ScreenAdapter {
         levelUp.dispose();
         damageNumbers.dispose();
         stageBanner.dispose();
+        bossBar.dispose();
     }
 }
