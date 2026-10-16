@@ -87,4 +87,19 @@ public final class Charger extends Enemy {
     public boolean isStunned() {
         return behavior.isStunned();
     }
+
+    /** Résistance à la poussée pendant la charge : il bouscule les autres et reste sur sa ligne. */
+    public static final float CHARGE_PUSH_RESISTANCE = 25f;
+
+    /**
+     * En pleine charge, le Chargeur bouscule les autres ennemis et n'est presque pas dévié. Il
+     * n'est pas totalement indéplaçable : un ennemi coincé entre deux Chargeurs doit pouvoir
+     * s'en sortir, sinon ils se chevaucheraient.
+     *
+     * @return {@link #CHARGE_PUSH_RESISTANCE} pendant la charge, 1 sinon
+     */
+    @Override
+    public float pushResistance() {
+        return behavior.isCharging() ? CHARGE_PUSH_RESISTANCE : 1f;
+    }
 }

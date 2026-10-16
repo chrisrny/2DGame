@@ -13,6 +13,9 @@ import game.model.world.World;
  * s'il est trop près, avance s'il est trop loin, et reste sur place entre les deux.
  * Quand le joueur est à portée, il tire un projectile vers lui toutes les
  * {@link #FIRE_INTERVAL} secondes.</p>
+ *
+ * <p>Il ne tire jamais à travers un mur : sans ligne de vue sur le joueur, il le poursuit en
+ * contournant les obstacles jusqu'à le voir.</p>
  */
 public final class ArcherBehavior implements EnemyBehavior {
 
@@ -47,14 +50,15 @@ public final class ArcherBehavior implements EnemyBehavior {
     public void act(Enemy self, World world, float dt) {
         Vec2 player = world.playerPosition();
         float distance = self.position().distanceTo(player);
-        if (distance < MIN_DISTANCE) {
+        boolean seesPlayer = world.hasLineOfSight(self.position(), player);
+        if (!seesPlayer || distance > MAX_DISTANCE) {
+            self.chase(world, dt);
+        } else if (distance < MIN_DISTANCE) {
             Vec2 away = self.position().sub(player).normalized();
             self.moveToward(self.position().add(away.scale(MIN_DISTANCE)), world, dt);
-        } else if (distance > MAX_DISTANCE) {
-            self.moveToward(player, world, dt);
         }
         fireCooldown = Math.max(0f, fireCooldown - dt);
-        if (fireCooldown == 0f && distance <= FIRE_RANGE) {
+        if (fireCooldown == 0f && seesPlayer && distance <= FIRE_RANGE) {
             shoot(self, player, world);
             fireCooldown = FIRE_INTERVAL;
         }
