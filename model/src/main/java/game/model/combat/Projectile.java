@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Un projectile en vol : flèche d'Archer, Lame lancée du joueur, projectile du boss.
+ * Un projectile en vol : flèche d'Archer, lame de l'Éventail du joueur, projectile du boss.
  *
  * <p>À chaque pas, il avance en ligne droite et disparaît dans trois cas : sa durée de vie
  * est écoulée, il entre dans un mur, ou il touche une cible de l'autre faction (qui reçoit

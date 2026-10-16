@@ -12,7 +12,7 @@ import game.model.commun.PlayerIntent;
 import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.skill.Shockwave;
-import game.model.skill.ThrownBlade;
+import game.model.skill.BladeFan;
 import game.model.world.FakeWorld;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,22 +135,22 @@ class PlayerSkillTest {
     }
 
     @Test
-    void leDeuxiemeEmplacementContientLaLameLancee() {
-        assertTrue(joueur.skill2().orElseThrow() instanceof ThrownBlade);
+    void leDeuxiemeEmplacementContientLEventailDeLames() {
+        assertTrue(joueur.skill2().orElseThrow() instanceof BladeFan);
     }
 
     @Test
-    void laToucheEDeclencheLaLameLancee() {
+    void laToucheEDeclencheLEventail() {
         pas(lancer(), 1);
-        assertEquals(1, monde.projectiles().size());
+        assertEquals(BladeFan.BLADE_COUNT, monde.projectiles().size());
         assertFalse(joueur.skill2().orElseThrow().isReady());
         assertTrue(joueur.skill1().isReady());
     }
 
     @Test
-    void uneToucheMaintenueNeLanceQuUneLame() {
+    void uneToucheMaintenueNeLanceQuUnEventail() {
         pas(lancer(), 30);
-        assertEquals(1, monde.projectiles().size());
+        assertEquals(BladeFan.BLADE_COUNT, monde.projectiles().size());
     }
 
     @Test
@@ -168,13 +168,13 @@ class PlayerSkillTest {
     }
 
     @Test
-    void uneNouvelleLamePartApresTroisSecondes() {
+    void unNouvelEventailPartApresTroisSecondes() {
         pas(lancer(), 1);
         pas(PlayerIntent.NONE, 170);
         pas(lancer(), 1);
-        assertEquals(1, monde.projectiles().size());
+        assertEquals(BladeFan.BLADE_COUNT, monde.projectiles().size());
         pas(PlayerIntent.NONE, 20);
         pas(lancer(), 1);
-        assertEquals(2, monde.projectiles().size());
+        assertEquals(2 * BladeFan.BLADE_COUNT, monde.projectiles().size());
     }
 }
