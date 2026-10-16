@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -18,6 +19,7 @@ import game.core.hud.LevelUpOverlay;
 import game.core.hud.StageBanner;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
+import game.core.render.PlayerSprite;
 import game.core.render.WorldRenderer;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Rect;
@@ -60,9 +62,14 @@ public class GameScreen extends ScreenAdapter {
     /** Durée d'une phase de clignotement pendant l'invincibilité, en secondes. */
     private static final float BLINK_PERIOD = 0.1f;
 
+    /** Opacité du joueur pendant la phase « cachée » du clignotement. */
+    private static final float BLINK_ALPHA = 0.3f;
+
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
+    private final SpriteBatch batch = new SpriteBatch();
+    private final PlayerSprite playerSprite = new PlayerSprite();
     private final FixedStep clock = new FixedStep();
     private final Main main;
     private final Run run;
@@ -137,6 +144,7 @@ public class GameScreen extends ScreenAdapter {
         // Les chiffres de dégâts avancent avec le temps réel : c'est purement visuel.
         // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
         damageNumbers.update(delta);
+        playerSprite.update(run.player().stateKind(), delta);
 
         // Fin de partie : on laisse un instant pour voir la mort du joueur ou du boss.
         if (run.isOver()) {
@@ -168,9 +176,10 @@ public class GameScreen extends ScreenAdapter {
 
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         worldRenderer.draw(shapes, run.map());
-        drawPlayer();
         shapes.end();
+        // Le feu au sol d'abord, le joueur par-dessus.
         drawFireZones();
+        drawPlayer();
         drawShockwave();
         // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
         if (run.settings().showDamageNumbers()) {
@@ -217,40 +226,16 @@ public class GameScreen extends ScreenAdapter {
     }
 
     /**
-     * Joueur : un disque de la taille de sa zone de collision, coloré selon son état,
-     * et un trait qui montre la direction du regard. Pendant une attaque, la zone de coup
-     * est dessinée devant lui. Juste après un coup reçu, il est rouge, puis il clignote
-     * tant qu'il est invincible.
+     * Joueur : son sprite animé, choisi selon son état (voir {@link PlayerSprite}). Tant qu'il
+     * est invincible après un coup, il clignote en devenant à moitié transparent une période
+     * sur deux.
      */
     private void drawPlayer() {
         Player player = run.player();
-        Vec2 center = player.position();
-        PlayerStateKind kind = player.stateKind();
-        boolean dead = kind == PlayerStateKind.DEAD;
-        if (kind == PlayerStateKind.ATTACKING) {
-            Circle zone = player.attackZone();
-            shapes.setColor(0.85f, 0.85f, 0.95f, 1f);
-            shapes.circle(zone.center().x(), zone.center().y(), zone.radius(), 20);
-        }
-        if (dead) {
-            shapes.setColor(0.35f, 0.35f, 0.38f, 1f);
-        } else if (kind == PlayerStateKind.HURT) {
-            shapes.setColor(0.95f, 0.25f, 0.25f, 1f);
-        } else if (kind == PlayerStateKind.ATTACKING) {
-            shapes.setColor(1f, 1f, 1f, 1f);
-        } else if (kind == PlayerStateKind.DODGING) {
-            shapes.setColor(0.35f, 0.95f, 0.95f, 1f);
-        } else {
-            shapes.setColor(0.30f, 0.55f, 0.95f, 1f);
-        }
-        if (!blinkHidden(player)) {
-            shapes.circle(center.x(), center.y(), Player.RADIUS, 24);
-        }
-        if (!dead) {
-            Vec2 tip = center.add(player.facing().scale(Player.RADIUS + 6f));
-            shapes.setColor(1f, 0.85f, 0.2f, 1f);
-            shapes.rectLine(center.x(), center.y(), tip.x(), tip.y(), 2f);
-        }
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        playerSprite.draw(batch, player, blinkHidden(player) ? BLINK_ALPHA : 1f);
+        batch.end();
     }
 
     /**
@@ -259,7 +244,7 @@ public class GameScreen extends ScreenAdapter {
      * par le modèle : la vue ne garde aucun minuteur à elle.
      *
      * @param player le joueur à dessiner
-     * @return {@code true} si le corps du joueur ne doit pas être dessiné à cette image
+     * @return {@code true} si le joueur doit être dessiné estompé à cette image
      */
     private static boolean blinkHidden(Player player) {
         float left = player.invulnerableLeft();
@@ -291,6 +276,8 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         shapes.dispose();
+        batch.dispose();
+        playerSprite.dispose();
         hud.dispose();
         levelUp.dispose();
         damageNumbers.dispose();
