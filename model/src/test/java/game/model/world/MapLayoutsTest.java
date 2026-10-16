@@ -7,8 +7,10 @@ import game.model.combat.Collisions;
 import game.model.commun.Circle;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
+import game.model.entity.Boss;
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -74,6 +76,26 @@ class MapLayoutsTest {
         Set<Case> accessibles = accessiblesDepuis(MAP.center());
         for (Vec2 point : MAP.spawnPoints()) {
             assertTrue(accessibles.contains(caseDe(point)), point.toString());
+        }
+    }
+
+    private static boolean seChevauchent(Rect a, Rect b) {
+        return a.x() < b.right() && b.x() < a.right() && a.y() < b.top() && b.y() < a.top();
+    }
+
+    @Test
+    void lAreneDuBossNaQueLesQuatrePiliersDuDepart() {
+        long obstacles = MAP.walls().stream().filter(mur -> seChevauchent(MAP.bossArena(), mur)).count();
+        assertEquals(4, obstacles);
+        assertTrue(MAP.bossArena().contains(MAP.center()), "le joueur part du centre de l'arène");
+    }
+
+    @Test
+    void lAreneDuBossADesPointsDApparitionAssezLargesPourLui() {
+        List<Vec2> points = MAP.spawnPoints().stream().filter(MAP.bossArena()::contains).toList();
+        assertTrue(points.size() >= 2, "le boss peut apparaître loin du joueur, où qu'il soit");
+        for (Vec2 point : points) {
+            assertTrue(libre(new Circle(point, Boss.RADIUS)), point.toString());
         }
     }
 }

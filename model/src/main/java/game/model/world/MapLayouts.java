@@ -11,11 +11,18 @@ import java.util.List;
  * <p>La map de la démo fait 1920x1080, soit 3x3 écrans. De la roche taille ses coins et ses
  * bords pour que le contour jouable soit irrégulier. Chaque zone a ses obstacles, le centre
  * reste dégagé pour le joueur et les points d'apparition sont répartis sur le pourtour.</p>
+ *
+ * <p>Le centre sert aussi d'arène au boss ({@link #BOSS_ARENA}) : entre les passages et les
+ * couloirs, il n'a que les quatre petits piliers du départ, assez pour se mettre à l'abri d'une
+ * charge sans gêner l'esquive.</p>
  */
 public final class MapLayouts {
 
     /** Épaisseur du mur qui entoure la map. */
     public static final float WALL = 16f;
+
+    /** Arène du boss dans la map de la démo : la zone centrale, la plus dégagée. */
+    public static final Rect BOSS_ARENA = new Rect(460f, 230f, 1000f, 560f);
 
     private MapLayouts() {
     }
@@ -55,7 +62,7 @@ public final class MapLayouts {
                 v(90, 880), v(300, 980), v(780, 1000), v(1140, 1000), v(1560, 1010), v(1840, 880),
                 v(100, 560), v(480, 600), v(1440, 560), v(1760, 520),
                 v(140, 240), v(560, 260), v(780, 110), v(1160, 110), v(1460, 60), v(1700, 250));
-        return new MapLayout(arena, walls, spawnPoints);
+        return new MapLayout(arena, walls, spawnPoints, BOSS_ARENA);
     }
 
     private static List<Rect> border(Rect arena) {

@@ -116,4 +116,15 @@ class GameMapTest {
     void lesMursSontCeuxDuPlan() {
         assertEquals(MapLayouts.main().walls(), map.walls());
     }
+
+    @Test
+    void leBossApparaitDansSonAreneLePlusLoinPossibleDuJoueur() {
+        Player aGauche = new Player(new Vec2(500f, 600f), PlayerStats.defaults(), new Random(42));
+        GameMap salle = new GameMap(MapLayouts.main(), aGauche, events, new Random(42));
+
+        Vec2 apparition = salle.bossSpawnPoint();
+
+        assertTrue(MapLayouts.BOSS_ARENA.contains(apparition));
+        assertTrue(apparition.x() > MapLayouts.main().center().x(), "du côté opposé au joueur");
+    }
 }

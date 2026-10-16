@@ -15,6 +15,7 @@ import game.model.event.EventBus;
 import game.model.event.GameEvent;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -295,6 +296,20 @@ public final class GameMap implements World {
     public Vec2 randomSpawnPoint() {
         List<Vec2> points = spawnPointsAwayFromPlayer();
         return points.get(random.nextInt(points.size()));
+    }
+
+    /**
+     * Le point d'apparition du boss : celui de l'arène du boss le plus loin du joueur, pour lui
+     * laisser le temps de le voir arriver. Sans point dans l'arène, un point au hasard loin du
+     * joueur ({@link #randomSpawnPoint()}).
+     *
+     * @return le point où faire apparaître le boss
+     */
+    public Vec2 bossSpawnPoint() {
+        return layout.spawnPoints().stream()
+                .filter(layout.bossArena()::contains)
+                .max(Comparator.comparingDouble(point -> point.distanceTo(player.position())))
+                .orElseGet(this::randomSpawnPoint);
     }
 
     private List<Vec2> spawnPointsAwayFromPlayer() {

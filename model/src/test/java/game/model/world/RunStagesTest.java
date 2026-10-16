@@ -109,6 +109,8 @@ class RunStagesTest {
         Enemy boss = run.boss().orElseThrow();
         assertInstanceOf(Boss.class, boss);
         assertTrue(run.map().enemies().contains(boss));
+        assertTrue(run.map().layout().bossArena().contains(boss.position()), "dans l'arène du boss");
+        assertTrue(boss.position().distanceTo(run.player().position()) >= GameMap.MIN_SPAWN_DISTANCE);
         assertFalse(run.isOver());
     }
 

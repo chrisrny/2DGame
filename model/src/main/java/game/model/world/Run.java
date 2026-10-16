@@ -25,7 +25,8 @@ import java.util.Random;
  * <p>Une partie enchaîne les trois stages de {@link Stages#demo()} sur la même map, sans
  * téléportation : le joueur garde sa position, ses points de vie et son expérience. Quand un
  * stage est fini ({@link GameEvent.StageCleared}), une pause de {@link #STAGE_INTRO} secondes
- * sans vague annonce le suivant. Au stage 3, le boss apparaît. La partie est perdue à la mort
+ * sans vague annonce le suivant. Au stage 3, le boss apparaît dans son arène
+ * ({@link MapLayout#bossArena()}). La partie est perdue à la mort
  * du joueur et gagnée à la mort du boss.</p>
  *
  * <p>La difficulté vient des réglages ({@link Settings}) : elle est lue au début de chaque
@@ -111,7 +112,7 @@ public final class Run {
         StageConfig stage = currentStage().scaled(settings.difficulty().enemyMultiplier());
         map.startStage(stage);
         if (isBossStage() && boss == null) {
-            boss = new Boss(map.randomSpawnPoint(), stage.multiplier());
+            boss = new Boss(map.bossSpawnPoint(), stage.multiplier());
             map.addEnemy(boss);
         }
     }
