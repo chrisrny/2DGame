@@ -71,7 +71,7 @@ public final class SceneRenderer implements Disposable {
      * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Run run, float delta) {
-        player.update(run.player().stateKind(), delta);
+        player.update(run.player(), delta);
         enemies.update(run.map().enemies(), delta);
         puffs.update(delta);
     }
