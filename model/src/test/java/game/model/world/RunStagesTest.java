@@ -132,4 +132,45 @@ class RunStagesTest {
         assertTrue(run.isOver());
         assertEquals(3, run.stage());
     }
+
+    @Test
+    void laTricheF9GagneLaPartieTouteDeSuite() {
+        run.forceWin();
+
+        assertTrue(run.isOver());
+        assertTrue(run.isWon());
+        assertEquals(1, run.stage(), "sans jouer jusqu'au boss");
+    }
+
+    @Test
+    void laTricheF10PerdLaPartieTouteDeSuite() {
+        run.forceLose();
+
+        assertTrue(run.isOver());
+        assertFalse(run.isWon());
+    }
+
+    @Test
+    void laTricheNeChangePasUnePartieDejaFinie() {
+        run.player().receive(coupMortel(Faction.ENEMY));
+        pas();
+
+        run.forceWin();
+
+        assertFalse(run.isWon(), "une défaite reste une défaite");
+    }
+
+    @Test
+    void laTricheFermeUnChoixDeReliqueEnCours() {
+        for (int i = 0; i < 3600 && !run.isChoosingRelic(); i++) {
+            run.update(PlayerIntent.NONE, FixedStep.DT);
+            tuerLesEnnemis();
+        }
+        assertTrue(run.isChoosingRelic());
+
+        run.forceLose();
+
+        assertFalse(run.isChoosingRelic(), "sinon la partie resterait figée sur le choix");
+        assertTrue(run.isOver());
+    }
 }

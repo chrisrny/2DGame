@@ -49,6 +49,8 @@ public final class Run {
     private int kills;
     private List<Relic> pendingChoice = List.of();
     private float elapsed;
+    private boolean forcedWin;
+    private boolean forcedLoss;
 
     /** Durée de l'annonce d'un stage, en secondes : la vue affiche « Stage N » pendant ce temps. */
     public static final float STAGE_INTRO = 2f;
@@ -226,14 +228,45 @@ public final class Run {
         return Optional.ofNullable(boss);
     }
 
-    /** @return {@code true} si la partie est finie : joueur mort ou boss vaincu */
+    /** @return {@code true} si la partie est finie : joueur mort, boss vaincu ou triche de démo */
     public boolean isOver() {
-        return !player.isAlive() || isWon();
+        return forcedLoss || !player.isAlive() || isWon();
     }
 
-    /** @return {@code true} si le boss est mort et le joueur encore en vie */
+    /**
+     * @return {@code true} si la partie est gagnée : boss mort et joueur encore en vie, ou
+     *         victoire forcée par la triche de démo
+     */
     public boolean isWon() {
-        return boss != null && !boss.isAlive() && player.isAlive();
+        return !forcedLoss && (forcedWin || (boss != null && !boss.isAlive() && player.isAlive()));
+    }
+
+    /**
+     * Triche de démo (F9) : gagne la partie tout de suite, pour montrer l'écran de victoire en
+     * soutenance sans jouer jusqu'au boss. Sans effet sur une partie déjà finie.
+     */
+    public void forceWin() {
+        if (!isOver()) {
+            forcedWin = true;
+            closeRelicChoice();
+        }
+    }
+
+    /**
+     * Triche de démo (F10) : perd la partie tout de suite, pour montrer l'écran de défaite.
+     * Sans effet sur une partie déjà finie.
+     */
+    public void forceLose() {
+        if (!isOver()) {
+            forcedLoss = true;
+            closeRelicChoice();
+        }
+    }
+
+    // Une triche pendant un choix de relique ferme ce choix : sinon, la partie resterait figée
+    // dessus et l'écran de fin n'arriverait jamais.
+    private void closeRelicChoice() {
+        pendingChoice = List.of();
     }
 
     /** @return l'expérience et le niveau du joueur */

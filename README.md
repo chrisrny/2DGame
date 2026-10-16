@@ -24,6 +24,29 @@ Une run : trois salles d'ennemis, une relique à choisir après chaque salle, pu
 - Javadoc : `<module>/build/docs/javadoc/index.html`
 - Jar : `lwjgl3/build/libs/`
 
+## Démo
+
+| Touche | Action |
+|---|---|
+| Z Q S D ou flèches | Se déplacer |
+| Souris | Viser |
+| Clic gauche | Attaque de base |
+| Clic droit | Onde de choc |
+| E | Lame lancée |
+| Espace | Esquive |
+| Échap | Pause : reprendre, options ou quitter |
+| **F9** | Triche de démo : victoire immédiate |
+| **F10** | Triche de démo : défaite immédiate |
+
+Pour la soutenance :
+
+- **Réglage à effet immédiat** : en partie, Échap → Options → « Chiffres de dégâts : non » →
+  Échap → Reprendre. Les chiffres de dégâts ne s'affichent plus, sans relancer.
+- **Fins de partie** : F9 ou F10 en pleine partie. L'écran de victoire ou de défaite arrive
+  1,5 s plus tard ; Entrée relance une partie, Échap revient au titre.
+- **Difficulté** : Options → Difficulté (facile ×0,75, normale ×1, difficile ×1,25 sur les PV
+  et les dégâts des ennemis), appliquée à partir du stage suivant.
+
 ## Architecture
 
 Le projet est découpé en trois modules Gradle :
