@@ -107,4 +107,17 @@ public record Vec2(float x, float y) {
         }
         return new Vec2(x / length, y / length);
     }
+
+    /**
+     * Le même vecteur tourné d'un angle, dans le sens inverse des aiguilles d'une montre
+     * (y vers le haut). Sa longueur ne change pas.
+     *
+     * @param radians l'angle de rotation, en radians
+     * @return le vecteur tourné
+     */
+    public Vec2 rotated(float radians) {
+        float cos = (float) Math.cos(radians);
+        float sin = (float) Math.sin(radians);
+        return new Vec2(x * cos - y * sin, x * sin + y * cos);
+    }
 }

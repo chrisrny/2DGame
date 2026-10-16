@@ -32,7 +32,7 @@ Une run : trois salles d'ennemis, une relique à choisir après chaque salle, pu
 | Souris | Viser |
 | Clic gauche | Attaque de base |
 | Clic droit | Onde de choc |
-| E | Lame lancée |
+| E | Éventail de lames |
 | Espace | Esquive |
 | Échap | Pause : reprendre, options ou quitter |
 | **F9** | Triche de démo : victoire immédiate |
