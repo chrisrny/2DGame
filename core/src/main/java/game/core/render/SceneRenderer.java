@@ -50,6 +50,8 @@ public final class SceneRenderer implements Disposable {
     private final EnemySprites enemies = new EnemySprites();
     private final PlayerSprite player = new PlayerSprite();
     private final SlashEffect slash = new SlashEffect();
+    private final BossSprite boss = new BossSprite();
+    private final BossEffects bossEffects;
     private final DeathPuffs puffs;
     private final List<Item> items = new ArrayList<>();
 
@@ -63,6 +65,7 @@ public final class SceneRenderer implements Disposable {
         fx.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         map = new MapRenderer(fx);
         puffs = new DeathPuffs(events);
+        bossEffects = new BossEffects(fx);
     }
 
     /**
@@ -75,6 +78,16 @@ public final class SceneRenderer implements Disposable {
         player.update(run.player(), delta);
         slash.update(run.player(), delta);
         enemies.update(run.map().enemies(), delta);
+        boss.update(run.map().enemies(), run.player().position(), delta);
+        BossPoseTracker pose = boss.tracker();
+        pose.impactNow().ifPresent(bossEffects::slamImpact);
+        if (pose.phaseChangedNow()) {
+            bossEffects.phaseChange(pose.position());
+        }
+        if (boss.diedNow()) {
+            bossEffects.death(pose.position());
+        }
+        bossEffects.update(delta);
         puffs.update(delta);
     }
 
@@ -90,6 +103,7 @@ public final class SceneRenderer implements Disposable {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         map.drawGround(batch, run.map().arena(), run.map().walls(), camera, viewW, viewH);
+        bossEffects.drawGround(batch);
         batch.end();
     }
 
@@ -113,7 +127,11 @@ public final class SceneRenderer implements Disposable {
         }
         for (Enemy enemy : world.enemies()) {
             float feet = enemy.position().y() - enemy.hitbox().radius();
-            items.add(new Item(feet, () -> enemies.draw(batch, enemy, hero.position())));
+            if (enemy instanceof Boss b) {
+                items.add(new Item(feet, () -> boss.draw(batch, b)));
+            } else {
+                items.add(new Item(feet, () -> enemies.draw(batch, enemy, hero.position())));
+            }
         }
         float heroFeet = hero.position().y() - Player.RADIUS;
         items.add(new Item(heroFeet, () -> player.draw(batch, hero, playerAlpha)));
@@ -125,6 +143,8 @@ public final class SceneRenderer implements Disposable {
         for (Projectile projectile : world.projectiles()) {
             items.add(new Item(projectile.position().y() - 4f, () -> drawProjectile(projectile)));
         }
+        boss.dying().ifPresent(position ->
+                items.add(new Item(position.y() - Boss.RADIUS, () -> boss.drawDeath(batch))));
         for (DeathPuffs.Puff puff : puffs.puffs()) {
             items.add(new Item(puff.position().y() - 8f, () -> puffs.draw(batch, puff)));
         }
@@ -184,8 +204,19 @@ public final class SceneRenderer implements Disposable {
                 glow(b.position().add(new Vec2(0f, 22f)), 70f, 1f, 0.35f, 0.1f, strength);
             }
         }
+        bossEffects.drawGlows(batch);
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.setColor(1f, 1f, 1f, 1f);
+    }
+
+    /**
+     * Décalage de caméra du tremblement d'écran en cours (coup de massue du boss, passage de
+     * phase, mort du boss).
+     *
+     * @return le décalage à ajouter à la position de la caméra, en unités
+     */
+    public Vec2 cameraShake() {
+        return bossEffects.shakeOffset();
     }
 
     private void glow(Vec2 center, float size, float r, float g, float b, float a) {
@@ -200,6 +231,8 @@ public final class SceneRenderer implements Disposable {
         map.dispose();
         enemies.dispose();
         player.dispose();
+        boss.dispose();
+        bossEffects.dispose();
         slash.dispose();
         puffs.dispose();
     }

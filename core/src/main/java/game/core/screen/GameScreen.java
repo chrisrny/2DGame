@@ -202,7 +202,9 @@ public class GameScreen extends ScreenAdapter {
         Vec2 target = run.player().position();
         float x = Math.clamp(target.x(), arena.x() + WORLD_WIDTH / 2f, arena.right() - WORLD_WIDTH / 2f);
         float y = Math.clamp(target.y(), arena.y() + WORLD_HEIGHT / 2f, arena.top() - WORLD_HEIGHT / 2f);
-        camera.position.set(x, y, 0f);
+        // Tremblement d'écran des gros coups du boss : purement visuel, ajouté après le cadrage.
+        Vec2 shake = scene.cameraShake();
+        camera.position.set(x + shake.x(), y + shake.y(), 0f);
         camera.update();
     }
 
