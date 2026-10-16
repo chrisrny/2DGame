@@ -51,4 +51,15 @@ class Vec2Test {
     void dotDeDeuxDirectionsPerpendiculairesVautZero() {
         assertEquals(0f, new Vec2(1f, 0f).dot(new Vec2(0f, 1f)), EPSILON);
     }
+    @Test
+    void rotatedTourneDansLeSensInverseDesAiguilles() {
+        Vec2 tourne = new Vec2(1f, 0f).rotated((float) (Math.PI / 2));
+        assertEquals(0f, tourne.x(), EPSILON);
+        assertEquals(1f, tourne.y(), EPSILON);
+    }
+
+    @Test
+    void rotatedGardeLaLongueur() {
+        assertEquals(5f, new Vec2(3f, 4f).rotated(1.2f).length(), EPSILON);
+    }
 }
