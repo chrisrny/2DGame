@@ -45,6 +45,12 @@ public final class EnemySprites implements Disposable {
     private static final float WIND_UP_BLINK = 0.08f;
     /** Déplacement minimal entre deux images pour considérer qu'un ennemi marche, en unités. */
     private static final float MOVE_EPSILON = 0.05f;
+    /**
+     * Temps pendant lequel un ennemi reste « en marche » après son dernier mouvement, en secondes.
+     * À plus de 60 images par seconde, certaines images arrivent sans pas du modèle : sans ce
+     * délai, l'animation alternerait course et repos une image sur deux.
+     */
+    private static final float WALK_GRACE = 0.12f;
     /** Écart horizontal minimal avec le joueur pour se retourner, en unités. */
     private static final float FACE_DEAD_ZONE = 4f;
     /** Écart entre les bords de l'oni et du joueur en dessous duquel l'oni griffe, en unités. */
@@ -68,7 +74,7 @@ public final class EnemySprites implements Disposable {
         private int lastHp;
         private float flashLeft;
         private float time;
-        private boolean moving;
+        private float walkLeft;
         private boolean facingLeft;
         private float actionLeft;
     }
@@ -155,7 +161,8 @@ public final class EnemySprites implements Disposable {
             View view = views.computeIfAbsent(enemy, e -> newView(e));
             Vec2 p = enemy.position();
             float dx = p.x() - view.lastPosition.x();
-            view.moving = p.distanceTo(view.lastPosition) > MOVE_EPSILON;
+            boolean moved = p.distanceTo(view.lastPosition) > MOVE_EPSILON;
+            view.walkLeft = moved ? WALK_GRACE : Math.max(0f, view.walkLeft - delta);
             if (enemy.hp() < view.lastHp) {
                 view.flashLeft = HURT_FLASH;
             } else {
@@ -213,10 +220,11 @@ public final class EnemySprites implements Disposable {
     /**
      * Dessine un ennemi. Le {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch le pinceau d'images
-     * @param enemy l'ennemi
+     * @param batch    le pinceau d'images
+     * @param enemy    l'ennemi
+     * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
      */
-    public void draw(SpriteBatch batch, Enemy enemy) {
+    public void draw(SpriteBatch batch, Enemy enemy, Vec2 position) {
         View view = views.get(enemy);
         float time = view == null ? 0f : view.time;
         Sheet sheet = sheetOf(enemy);
@@ -236,22 +244,22 @@ public final class EnemySprites implements Disposable {
         } else if (flashing) {
             frame = sheet.hurt();
         } else {
-            boolean moving = view != null && view.moving;
+            boolean moving = view != null && view.walkLeft > 0f;
             frame = (moving ? sheet.move() : sheet.idle()).getKeyFrame(time);
         }
         boolean left = view != null && view.facingLeft;
-        drawFrame(batch, frame, enemy, sheet, left);
+        drawFrame(batch, frame, enemy, position, sheet, left);
         if (flashing || blink) {
             batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
             batch.setColor(1f, 1f, 1f, flashing ? FLASH_ALPHA : FLASH_ALPHA * 0.6f);
-            drawFrame(batch, frame, enemy, sheet, left);
+            drawFrame(batch, frame, enemy, position, sheet, left);
             batch.setColor(1f, 1f, 1f, 1f);
             batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 
-    private static void drawFrame(SpriteBatch batch, TextureRegion frame, Enemy enemy, Sheet sheet, boolean left) {
-        Vec2 p = enemy.position();
+    private static void drawFrame(SpriteBatch batch, TextureRegion frame, Enemy enemy, Vec2 p, Sheet sheet,
+            boolean left) {
         float size = sheet.cell();
         float x = p.x() - size / 2f;
         float y = p.y() - enemy.hitbox().radius() - sheet.emptyBelow() + sheet.lift();

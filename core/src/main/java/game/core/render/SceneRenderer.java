@@ -53,6 +53,7 @@ public final class SceneRenderer implements Disposable {
     private final SlashEffect slash = new SlashEffect();
     private final BossSprite boss = new BossSprite();
     private final BossEffects bossEffects;
+    private final MotionSmoothing smoothing = new MotionSmoothing();
     private final DeathPuffs puffs;
     private final List<Item> items = new ArrayList<>();
 
@@ -67,6 +68,35 @@ public final class SceneRenderer implements Disposable {
         map = new MapRenderer(fx);
         puffs = new DeathPuffs(events);
         bossEffects = new BossEffects(fx);
+    }
+
+    /**
+     * Note les positions avant un pas du modèle, pour lisser les déplacements à l'écran. À appeler
+     * juste avant chaque pas.
+     *
+     * @param run la partie
+     */
+    public void beforeStep(Run run) {
+        smoothing.beforeStep(run);
+    }
+
+    /**
+     * Règle l'avancement vers le prochain pas du modèle, une fois par image après les pas.
+     *
+     * @param progress temps en attente dans l'horloge divisé par la durée d'un pas, de 0 à 1
+     */
+    public void setStepProgress(float progress) {
+        smoothing.setProgress(progress);
+    }
+
+    /**
+     * Position lissée du joueur, celle où il est dessiné : la caméra la suit.
+     *
+     * @param run la partie
+     * @return la position à l'écran du joueur
+     */
+    public Vec2 playerOnScreen(Run run) {
+        return smoothing.of(run.player(), run.player().position());
     }
 
     /**
@@ -120,29 +150,32 @@ public final class SceneRenderer implements Disposable {
         Player hero = run.player();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        drawShadows(world, hero);
+        Vec2 heroPos = smoothing.of(hero, hero.position());
+        drawShadows(world, heroPos);
 
         items.clear();
         for (Rect wall : world.walls()) {
             items.add(new Item(wall.y(), () -> map.drawWall(batch, wall)));
         }
         for (Enemy enemy : world.enemies()) {
-            float feet = enemy.position().y() - enemy.hitbox().radius();
+            Vec2 pos = smoothing.of(enemy, enemy.position());
+            float feet = pos.y() - enemy.hitbox().radius();
             if (enemy instanceof Boss b) {
-                items.add(new Item(feet, () -> boss.draw(batch, b)));
+                items.add(new Item(feet, () -> boss.draw(batch, b, pos)));
             } else {
-                items.add(new Item(feet, () -> enemies.draw(batch, enemy)));
+                items.add(new Item(feet, () -> enemies.draw(batch, enemy, pos)));
             }
         }
-        float heroFeet = hero.position().y() - Player.RADIUS;
-        items.add(new Item(heroFeet, () -> player.draw(batch, hero, playerAlpha)));
+        float heroFeet = heroPos.y() - Player.RADIUS;
+        items.add(new Item(heroFeet, () -> player.draw(batch, hero, heroPos, playerAlpha)));
         if (slash.visible()) {
             // Coup vers le haut : juste derrière le héros ; sinon juste devant.
             float slashDepth = slash.behindHero() ? heroFeet + 0.01f : heroFeet - 0.01f;
-            items.add(new Item(slashDepth, () -> slash.draw(batch, hero.position())));
+            items.add(new Item(slashDepth, () -> slash.draw(batch, heroPos)));
         }
         for (Projectile projectile : world.projectiles()) {
-            items.add(new Item(projectile.position().y() - 4f, () -> drawProjectile(projectile)));
+            Vec2 pos = smoothing.of(projectile, projectile.position());
+            items.add(new Item(pos.y() - 4f, () -> drawProjectile(projectile, pos)));
         }
         boss.dying().ifPresent(position ->
                 items.add(new Item(position.y() - Boss.RADIUS, () -> boss.drawDeath(batch))));
@@ -159,16 +192,16 @@ public final class SceneRenderer implements Disposable {
         batch.end();
     }
 
-    private void drawShadows(GameMap world, Player hero) {
-        shadow(hero.position(), Player.RADIUS, Player.RADIUS);
+    private void drawShadows(GameMap world, Vec2 heroPos) {
+        shadow(heroPos, Player.RADIUS, Player.RADIUS);
         for (Enemy enemy : world.enemies()) {
             float r = enemy.hitbox().radius();
             // La lanterne flotte : son ombre est plus bas qu'elle.
             float drop = enemy instanceof Archer ? EnemySprites.LANTERN_SHADOW_DROP : 0f;
-            shadow(enemy.position(), r, r + drop);
+            shadow(smoothing.of(enemy, enemy.position()), r, r + drop);
         }
         for (Projectile projectile : world.projectiles()) {
-            shadow(projectile.position().add(new Vec2(0f, -6f)), 3f, 0f);
+            shadow(smoothing.of(projectile, projectile.position()).add(new Vec2(0f, -6f)), 3f, 0f);
         }
     }
 
@@ -179,8 +212,7 @@ public final class SceneRenderer implements Disposable {
         batch.draw(fx, center.x() - w / 2f, center.y() - feetOffset - h / 2f, w, h, FX_SHADOW, 4, FX, 8, false, false);
     }
 
-    private void drawProjectile(Projectile projectile) {
-        Vec2 p = projectile.position();
+    private void drawProjectile(Projectile projectile, Vec2 p) {
         Vec2 v = projectile.velocity();
         float angle = (float) Math.toDegrees(Math.atan2(v.y(), v.x()));
         int src = projectile.faction() == Faction.PLAYER ? FX_BLADE : FX_ARROW;
@@ -193,9 +225,9 @@ public final class SceneRenderer implements Disposable {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         for (Projectile projectile : world.projectiles()) {
             if (projectile.faction() == Faction.PLAYER) {
-                glow(projectile.position(), 18f, 0.25f, 0.95f, 0.95f, 0.55f);
+                glow(smoothing.of(projectile, projectile.position()), 18f, 0.25f, 0.95f, 0.95f, 0.55f);
             } else {
-                glow(projectile.position(), 12f, 0.5f, 1f, 0.7f, 0.3f);
+                glow(smoothing.of(projectile, projectile.position()), 12f, 0.5f, 1f, 0.7f, 0.3f);
             }
         }
         for (Circle zone : hero.fireZones()) {
@@ -204,7 +236,7 @@ public final class SceneRenderer implements Disposable {
         for (Enemy enemy : world.enemies()) {
             if (enemy instanceof Boss b) {
                 float strength = b.phaseNumber() >= 2 ? 0.55f : 0.3f;
-                glow(b.position().add(new Vec2(0f, 22f)), 70f, 1f, 0.35f, 0.1f, strength);
+                glow(smoothing.of(b, b.position()).add(new Vec2(0f, 22f)), 70f, 1f, 0.35f, 0.1f, strength);
             }
         }
         bossEffects.drawGlows(batch);
