@@ -90,7 +90,7 @@ public class GameScreen extends ScreenAdapter {
         this.main = main;
         this.run = run;
         this.damageNumbers = new DamageNumbers(run.events());
-        this.scene = new SceneRenderer(run.events());
+        this.scene = new SceneRenderer(run.events(), WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     @Override
@@ -182,6 +182,8 @@ public class GameScreen extends ScreenAdapter {
         drawFireZones();
         Player player = run.player();
         scene.drawObjects(camera, run, blinkHidden(player) ? BLINK_ALPHA : 1f);
+        // La nuit et ses lumières, puis ce qui reste vif : annonces, onde de choc, chiffres, HUD.
+        scene.drawLight(camera, viewport, run);
         worldRenderer.drawTelegraphs(shapes, run.map());
         drawShockwave();
         // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
