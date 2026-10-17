@@ -11,6 +11,7 @@ import game.model.commun.Circle;
 import game.model.commun.Faction;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
+import game.model.entity.Archer;
 import game.model.entity.Boss;
 import game.model.entity.Enemy;
 import game.model.entity.Player;
@@ -77,7 +78,7 @@ public final class SceneRenderer implements Disposable {
     public void update(Run run, float delta) {
         player.update(run.player(), delta);
         slash.update(run.player(), delta);
-        enemies.update(run.map().enemies(), delta);
+        enemies.update(run.map().enemies(), run.map().projectiles(), run.player().position(), delta);
         boss.update(run.map().enemies(), run.player().position(), delta);
         BossPoseTracker pose = boss.tracker();
         pose.impactNow().ifPresent(bossEffects::slamImpact);
@@ -130,7 +131,7 @@ public final class SceneRenderer implements Disposable {
             if (enemy instanceof Boss b) {
                 items.add(new Item(feet, () -> boss.draw(batch, b)));
             } else {
-                items.add(new Item(feet, () -> enemies.draw(batch, enemy, hero.position())));
+                items.add(new Item(feet, () -> enemies.draw(batch, enemy)));
             }
         }
         float heroFeet = hero.position().y() - Player.RADIUS;
@@ -162,7 +163,9 @@ public final class SceneRenderer implements Disposable {
         shadow(hero.position(), Player.RADIUS, Player.RADIUS);
         for (Enemy enemy : world.enemies()) {
             float r = enemy.hitbox().radius();
-            shadow(enemy.position(), r, r);
+            // La lanterne flotte : son ombre est plus bas qu'elle.
+            float drop = enemy instanceof Archer ? EnemySprites.LANTERN_SHADOW_DROP : 0f;
+            shadow(enemy.position(), r, r + drop);
         }
         for (Projectile projectile : world.projectiles()) {
             shadow(projectile.position().add(new Vec2(0f, -6f)), 3f, 0f);

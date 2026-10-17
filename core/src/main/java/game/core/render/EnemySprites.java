@@ -1,15 +1,19 @@
 package game.core.render;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
+import game.model.combat.Projectile;
+import game.model.commun.Faction;
 import game.model.commun.Vec2;
 import game.model.entity.Archer;
 import game.model.entity.Charger;
 import game.model.entity.Enemy;
+import game.model.entity.Player;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -17,24 +21,46 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Dessine les ennemis ordinaires avec leurs feuilles de sprites animées. Le boss a sa propre
- * classe, {@link BossSprite}.
+ * Dessine les yōkai ordinaires avec leurs feuilles de sprites animées : l'oni bleu (Rôdeur), la
+ * lanterne hantée (Archer) et la roue de feu (Chargeur). Le boss a sa propre classe,
+ * {@link BossSprite}.
  *
- * <p>Le modèle ne dit pas si un ennemi marche ou vient d'être touché : la vue le déduit en
- * comparant chaque image à la précédente (la position a bougé, les points de vie ont baissé).
- * Ces petits états de vue sont gardés ici, par ennemi, et oubliés quand l'ennemi disparaît.
- * Les ennemis regardent toujours vers le joueur.</p>
+ * <p>Comme le héros, ils sont dessinés de 3/4 et se retournent seulement vers la gauche ou la
+ * droite, vers le joueur (la roue, pendant sa charge, regarde là où elle fonce).</p>
+ *
+ * <p>Le modèle ne dit pas si un ennemi marche, griffe ou crache : la vue le déduit en comparant
+ * chaque image à la précédente (la position a bougé, les points de vie ont baissé, un projectile
+ * ennemi vient d'apparaître devant une lanterne, un oni est au contact du joueur). Ces petits
+ * états de vue sont gardés ici, par ennemi, et oubliés quand l'ennemi disparaît.</p>
  */
 public final class EnemySprites implements Disposable {
 
-    private static final float IDLE_FRAME = 0.15f;
-    private static final float MOVE_FRAME = 0.1f;
+    private static final float IDLE_FRAME = 0.14f;
+    private static final float MOVE_FRAME = 0.09f;
     /** Durée du flash blanc après un coup reçu, en secondes. */
     private static final float HURT_FLASH = 0.1f;
-    /** Durée d'une phase de clignotement pendant l'annonce du Chargeur, en secondes. */
+    /** Opacité du flash blanc, ajouté en lumière par-dessus l'image. */
+    private static final float FLASH_ALPHA = 0.65f;
+    /** Durée d'une phase de clignotement pendant l'élan du Chargeur, en secondes. */
     private static final float WIND_UP_BLINK = 0.08f;
     /** Déplacement minimal entre deux images pour considérer qu'un ennemi marche, en unités. */
     private static final float MOVE_EPSILON = 0.05f;
+    /** Écart horizontal minimal avec le joueur pour se retourner, en unités. */
+    private static final float FACE_DEAD_ZONE = 4f;
+    /** Écart entre les bords de l'oni et du joueur en dessous duquel l'oni griffe, en unités. */
+    private static final float SWIPE_REACH = 6f;
+    /** Durée d'un coup de griffe ou d'un crachat, en secondes. */
+    private static final float ACTION_DURATION = 0.24f;
+    /** Distance maximale entre une lanterne et un projectile neuf pour dire qu'elle l'a craché. */
+    private static final float SPIT_DETECT = 20f;
+    /**
+     * Décalage de l'ombre de la lanterne sous sa position, en unités : la lanterne est dessinée
+     * la bouche à hauteur de son centre (les braises sortent bien de sa bouche), et son ombre
+     * descend d'autant pour qu'elle paraisse flotter.
+     */
+    public static final float LANTERN_SHADOW_DROP = 8f;
+    /** Petit relèvement de la lanterne pour que sa bouche tombe sur son centre, en unités. */
+    private static final float LANTERN_LIFT = 1f;
 
     /** Ce que la vue retient d'un ennemi d'une image à l'autre. */
     private static final class View {
@@ -43,11 +69,19 @@ public final class EnemySprites implements Disposable {
         private float flashLeft;
         private float time;
         private boolean moving;
+        private boolean facingLeft;
+        private float actionLeft;
     }
 
-    /** Les animations d'un type d'ennemi. */
-    private record Sheet(int cell, float feetPad, Animation<TextureRegion> idle, Animation<TextureRegion> move,
-            TextureRegion hurt) {
+    /**
+     * Les animations d'un type d'ennemi.
+     *
+     * @param cell       taille d'une case, en pixels
+     * @param emptyBelow lignes vides sous les pieds (ou sous le bas de la lanterne), en pixels
+     * @param lift       relèvement de l'image au-dessus de sa position normale, en unités
+     */
+    private record Sheet(int cell, float emptyBelow, float lift, Animation<TextureRegion> idle,
+            Animation<TextureRegion> move, Animation<TextureRegion> action, TextureRegion hurt) {
     }
 
     private final Texture prowlerTexture = load("prowler");
@@ -60,16 +94,24 @@ public final class EnemySprites implements Disposable {
     private final Animation<TextureRegion> chargerCharge;
     private final Animation<TextureRegion> chargerStunned;
     private final Map<Enemy, View> views = new IdentityHashMap<>();
+    private final Set<Projectile> knownProjectiles = Collections.newSetFromMap(new IdentityHashMap<>());
 
     /** Charge les feuilles et prépare les animations. */
     public EnemySprites() {
-        prowler = sheet(prowlerTexture, 32, 2f, 0, 1, 2);
-        archer = sheet(archerTexture, 32, 1f, 0, 1, 2);
-        charger = sheet(chargerTexture, 32, 1f, 0, 1, 2);
-        TextureRegion[][] grid = TextureRegion.split(chargerTexture, 32, 32);
-        chargerWindUp = loop(grid[3], 2, IDLE_FRAME);
-        chargerCharge = loop(grid[4], 2, MOVE_FRAME);
-        chargerStunned = loop(grid[5], 4, IDLE_FRAME);
+        // Oni bleu : repos, course, griffe, touché.
+        TextureRegion[][] p = TextureRegion.split(prowlerTexture, 48, 48);
+        prowler = new Sheet(48, 0f, 0f, loop(p[0], 0, 4, IDLE_FRAME), loop(p[1], 0, 6, MOVE_FRAME),
+                once(p[2], 0, 4, ACTION_DURATION / 4), p[3][1]);
+        // Lanterne : flotte, avance, crache (sans l'image d'élan : on ne voit le tir qu'au départ), touchée.
+        TextureRegion[][] a = TextureRegion.split(archerTexture, 48, 48);
+        archer = new Sheet(48, 12f, LANTERN_LIFT, loop(a[0], 0, 6, IDLE_FRAME), loop(a[1], 0, 6, IDLE_FRAME),
+                once(a[2], 1, 3, ACTION_DURATION / 3), a[3][1]);
+        // Roue de feu : repos, roule, élan, charge, sonnée, touchée.
+        TextureRegion[][] c = TextureRegion.split(chargerTexture, 64, 64);
+        charger = new Sheet(64, 8f, 0f, loop(c[0], 0, 4, IDLE_FRAME), loop(c[1], 0, 6, MOVE_FRAME), null, c[5][1]);
+        chargerWindUp = loop(c[2], 0, 4, 0.06f);
+        chargerCharge = loop(c[3], 0, 4, 0.05f);
+        chargerStunned = loop(c[4], 0, 6, IDLE_FRAME);
     }
 
     private static Texture load(String name) {
@@ -78,81 +120,142 @@ public final class EnemySprites implements Disposable {
         return texture;
     }
 
-    private static Sheet sheet(Texture texture, int cell, float feetPad, int idleRow, int moveRow, int hurtRow) {
-        TextureRegion[][] grid = TextureRegion.split(texture, cell, cell);
-        return new Sheet(cell, feetPad, loop(grid[idleRow], 4, IDLE_FRAME), loop(grid[moveRow], 4, MOVE_FRAME),
-                grid[hurtRow][0]);
-    }
-
-    private static Animation<TextureRegion> loop(TextureRegion[] row, int frames, float duration) {
-        TextureRegion[] regions = new TextureRegion[frames];
-        System.arraycopy(row, 0, regions, 0, frames);
-        Animation<TextureRegion> animation = new Animation<>(duration, regions);
+    private static Animation<TextureRegion> loop(TextureRegion[] row, int first, int frames, float duration) {
+        Animation<TextureRegion> animation = new Animation<>(duration, slice(row, first, frames));
         animation.setPlayMode(Animation.PlayMode.LOOP);
         return animation;
     }
 
+    private static Animation<TextureRegion> once(TextureRegion[] row, int first, int frames, float duration) {
+        Animation<TextureRegion> animation = new Animation<>(duration, slice(row, first, frames));
+        animation.setPlayMode(Animation.PlayMode.NORMAL);
+        return animation;
+    }
+
+    private static TextureRegion[] slice(TextureRegion[] row, int first, int frames) {
+        TextureRegion[] regions = new TextureRegion[frames];
+        System.arraycopy(row, first, regions, 0, frames);
+        return regions;
+    }
+
     /**
-     * Met à jour ce que la vue sait de chaque ennemi : s'il marche, s'il vient d'être touché.
-     * À appeler une fois par image tant que la partie avance.
+     * Met à jour ce que la vue sait de chaque ennemi : s'il marche, s'il vient d'être touché, s'il
+     * griffe ou crache, de quel côté il regarde. À appeler une fois par image tant que la partie
+     * avance.
      *
-     * @param enemies les ennemis encore en vie
-     * @param delta   temps écoulé depuis l'image précédente, en secondes
+     * @param enemies     les ennemis encore en vie
+     * @param projectiles les projectiles en vol, pour voir quelle lanterne vient de cracher
+     * @param player      la position du joueur
+     * @param delta       temps écoulé depuis l'image précédente, en secondes
      */
-    public void update(List<Enemy> enemies, float delta) {
+    public void update(List<Enemy> enemies, List<Projectile> projectiles, Vec2 player, float delta) {
         Set<Enemy> alive = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Enemy enemy : enemies) {
             alive.add(enemy);
-            View view = views.get(enemy);
-            if (view == null) {
-                view = new View();
-                view.lastPosition = enemy.position();
-                view.lastHp = enemy.hp();
-                views.put(enemy, view);
-            }
-            view.moving = enemy.position().distanceTo(view.lastPosition) > MOVE_EPSILON;
+            View view = views.computeIfAbsent(enemy, e -> newView(e));
+            Vec2 p = enemy.position();
+            float dx = p.x() - view.lastPosition.x();
+            view.moving = p.distanceTo(view.lastPosition) > MOVE_EPSILON;
             if (enemy.hp() < view.lastHp) {
                 view.flashLeft = HURT_FLASH;
             } else {
                 view.flashLeft = Math.max(0f, view.flashLeft - delta);
             }
-            view.lastPosition = enemy.position();
+            view.actionLeft = Math.max(0f, view.actionLeft - delta);
+            if (enemy instanceof Charger c && c.isCharging()) {
+                if (Math.abs(dx) > MOVE_EPSILON) {
+                    view.facingLeft = dx < 0f;
+                }
+            } else if (!(enemy instanceof Charger c2 && c2.isStunned())
+                    && Math.abs(player.x() - p.x()) > FACE_DEAD_ZONE) {
+                view.facingLeft = player.x() < p.x();
+            }
+            if (!(enemy instanceof Archer) && !(enemy instanceof Charger) && view.actionLeft <= 0f) {
+                float gap = p.distanceTo(player) - enemy.hitbox().radius() - Player.RADIUS;
+                if (gap < SWIPE_REACH) {
+                    view.actionLeft = ACTION_DURATION;
+                }
+            }
+            view.lastPosition = p;
             view.lastHp = enemy.hp();
             view.time += delta;
         }
         views.keySet().retainAll(alive);
+        detectSpits(projectiles);
+    }
+
+    private static View newView(Enemy enemy) {
+        View view = new View();
+        view.lastPosition = enemy.position();
+        view.lastHp = enemy.hp();
+        return view;
+    }
+
+    // Un projectile ennemi qui n'existait pas à l'image d'avant, juste à côté d'une lanterne :
+    // c'est elle qui vient de le cracher.
+    private void detectSpits(List<Projectile> projectiles) {
+        for (Projectile projectile : projectiles) {
+            if (projectile.faction() != Faction.ENEMY || knownProjectiles.contains(projectile)) {
+                continue;
+            }
+            for (Map.Entry<Enemy, View> entry : views.entrySet()) {
+                if (entry.getKey() instanceof Archer
+                        && entry.getKey().position().distanceTo(projectile.position()) < SPIT_DETECT) {
+                    entry.getValue().actionLeft = ACTION_DURATION;
+                    break;
+                }
+            }
+        }
+        knownProjectiles.clear();
+        knownProjectiles.addAll(projectiles);
     }
 
     /**
-     * Dessine un ennemi, tourné vers le joueur. Le {@link SpriteBatch} doit déjà être ouvert.
+     * Dessine un ennemi. Le {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch  le pinceau d'images
-     * @param enemy  l'ennemi
-     * @param target la position du joueur, vers qui l'ennemi regarde
+     * @param batch le pinceau d'images
+     * @param enemy l'ennemi
      */
-    public void draw(SpriteBatch batch, Enemy enemy, Vec2 target) {
+    public void draw(SpriteBatch batch, Enemy enemy) {
         View view = views.get(enemy);
         float time = view == null ? 0f : view.time;
         Sheet sheet = sheetOf(enemy);
+        boolean flashing = view != null && view.flashLeft > 0f;
+        boolean blink = false;
         TextureRegion frame;
-        if (view != null && view.flashLeft > 0f) {
-            frame = sheet.hurt();
-        } else if (enemy instanceof Charger c && c.isWindingUp()) {
-            boolean blink = (int) (c.phaseTime() / WIND_UP_BLINK) % 2 == 0;
-            frame = blink ? sheet.hurt() : chargerWindUp.getKeyFrame(time);
+        if (enemy instanceof Charger c && c.isWindingUp()) {
+            // L'élan clignote : c'est l'annonce de la charge.
+            blink = (int) (c.phaseTime() / WIND_UP_BLINK) % 2 == 0;
+            frame = chargerWindUp.getKeyFrame(time);
         } else if (enemy instanceof Charger c && c.isCharging()) {
             frame = chargerCharge.getKeyFrame(time);
         } else if (enemy instanceof Charger c && c.isStunned()) {
             frame = chargerStunned.getKeyFrame(time);
+        } else if (view != null && view.actionLeft > 0f && sheet.action() != null) {
+            frame = sheet.action().getKeyFrame(ACTION_DURATION - view.actionLeft);
+        } else if (flashing) {
+            frame = sheet.hurt();
         } else {
             boolean moving = view != null && view.moving;
             frame = (moving ? sheet.move() : sheet.idle()).getKeyFrame(time);
         }
+        boolean left = view != null && view.facingLeft;
+        drawFrame(batch, frame, enemy, sheet, left);
+        if (flashing || blink) {
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+            batch.setColor(1f, 1f, 1f, flashing ? FLASH_ALPHA : FLASH_ALPHA * 0.6f);
+            drawFrame(batch, frame, enemy, sheet, left);
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        }
+    }
+
+    private static void drawFrame(SpriteBatch batch, TextureRegion frame, Enemy enemy, Sheet sheet, boolean left) {
         Vec2 p = enemy.position();
         float size = sheet.cell();
         float x = p.x() - size / 2f;
-        float y = p.y() - enemy.hitbox().radius() - sheet.feetPad();
-        if (target.x() < p.x()) {
+        float y = p.y() - enemy.hitbox().radius() - sheet.emptyBelow() + sheet.lift();
+        if (left) {
             batch.draw(frame, x + size, y, -size, size);
         } else {
             batch.draw(frame, x, y, size, size);
