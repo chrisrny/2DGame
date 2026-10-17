@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.combat.Projectile;
 import game.model.commun.Circle;
 import game.model.commun.Faction;
@@ -13,6 +15,7 @@ import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Archer;
 import game.model.entity.Boss;
+import game.model.entity.Charger;
 import game.model.entity.Enemy;
 import game.model.entity.Player;
 import game.model.event.EventBus;
@@ -55,19 +58,32 @@ public final class SceneRenderer implements Disposable {
     private final BossEffects bossEffects;
     private final MotionSmoothing smoothing = new MotionSmoothing();
     private final DeathPuffs puffs;
+    private final LightingRenderer lighting;
+    private final AmbientEffects ambient = new AmbientEffects();
+    private final TextureRegion white;
     private final List<Item> items = new ArrayList<>();
+    private final List<Light> frameLights = new ArrayList<>();
+    private final float viewW;
+    private final float viewH;
+    private float time;
 
     /**
      * Charge les sprites de la scène.
      *
      * @param events le bus de la partie, pour les nuages de mort
+     * @param viewW  largeur de la vue, en unités du monde
+     * @param viewH  hauteur de la vue, en unités du monde
      */
-    public SceneRenderer(EventBus events) {
+    public SceneRenderer(EventBus events, float viewW, float viewH) {
+        this.viewW = viewW;
+        this.viewH = viewH;
         fx = new Texture(Gdx.files.internal("sprites/fx.png"));
         fx.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         map = new MapRenderer(fx);
         puffs = new DeathPuffs(events);
         bossEffects = new BossEffects(fx);
+        lighting = new LightingRenderer(viewW, viewH);
+        white = new TextureRegion(fx, 62, 0, 1, 1);
     }
 
     /**
@@ -120,6 +136,8 @@ public final class SceneRenderer implements Disposable {
         }
         bossEffects.update(delta);
         puffs.update(delta);
+        time += delta;
+        ambient.update(smoothing.of(run.player(), run.player().position()), viewW, viewH, map.fireSpots(), delta);
     }
 
     /**
@@ -133,13 +151,14 @@ public final class SceneRenderer implements Disposable {
     public void drawGround(OrthographicCamera camera, Run run, float viewW, float viewH) {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        map.drawGround(batch, run.map().arena(), run.map().walls(), camera, viewW, viewH);
+        map.drawGround(batch, run.map().arena(), run.map().walls(), camera, viewW, viewH, time);
         bossEffects.drawGround(batch);
         batch.end();
     }
 
     /**
-     * Dessine les ombres, les murs et les personnages triés par profondeur, puis les lueurs.
+     * Dessine les ombres, les murs et les personnages triés par profondeur. La nuit, les lueurs et
+     * les braises viennent ensuite, avec {@link #drawLight}.
      *
      * @param camera      la caméra du monde
      * @param run         la partie
@@ -155,7 +174,7 @@ public final class SceneRenderer implements Disposable {
 
         items.clear();
         for (Rect wall : world.walls()) {
-            items.add(new Item(wall.y(), () -> map.drawWall(batch, wall)));
+            items.add(new Item(wall.y(), () -> map.drawWall(batch, wall, heroPos, time)));
         }
         for (Enemy enemy : world.enemies()) {
             Vec2 pos = smoothing.of(enemy, enemy.position());
@@ -188,8 +207,62 @@ public final class SceneRenderer implements Disposable {
             item.draw().run();
         }
 
-        drawGlows(world, hero);
         batch.end();
+    }
+
+    /**
+     * Pose la nuit et ses lumières sur la scène, puis ce qui doit rester vif : fumée, lueurs des
+     * projectiles et du boss, onde de choc, braises. À appeler juste après {@link #drawObjects}.
+     *
+     * @param camera   la caméra du monde
+     * @param viewport la vue de l'écran de jeu
+     * @param run      la partie
+     */
+    public void drawLight(OrthographicCamera camera, Viewport viewport, Run run) {
+        GameMap world = run.map();
+        Player hero = run.player();
+        collectLights(world, hero);
+        lighting.apply(batch, camera, viewport, frameLights, time);
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        ambient.drawSmoke(batch, lighting.smoke());
+        drawGlows(world, hero);
+        ambient.drawEmbers(batch, white);
+        batch.end();
+    }
+
+    // Les lumières de l'image : celles du décor, puis tout ce qui bouge et brille.
+    private void collectLights(GameMap world, Player hero) {
+        frameLights.clear();
+        frameLights.addAll(map.lights());
+        Vec2 h = smoothing.of(hero, hero.position());
+        // Le héros porte une lumière froide et douce : on le voit toujours, même loin des feux.
+        frameLights.add(Light.steady(h.x(), h.y() + 10f, 80f, 0.75f, 0.72f, 0.95f, 0.6f));
+        if (slash.visible()) {
+            frameLights.add(Light.steady(h.x(), h.y() + 6f, 46f, 1f, 0.85f, 0.55f, 0.6f));
+        }
+        for (Projectile projectile : world.projectiles()) {
+            Vec2 p = smoothing.of(projectile, projectile.position());
+            if (projectile.faction() == Faction.PLAYER) {
+                frameLights.add(Light.steady(p.x(), p.y(), 26f, 0.45f, 1f, 0.95f, 0.6f));
+            } else {
+                frameLights.add(Light.flame(p.x(), p.y(), 30f, 0.8f));
+            }
+        }
+        for (Enemy enemy : world.enemies()) {
+            Vec2 p = smoothing.of(enemy, enemy.position());
+            if (enemy instanceof Boss b) {
+                frameLights.add(Light.flame(p.x(), p.y() + 30f, 120f, b.phaseNumber() >= 2 ? 1f : 0.7f));
+            } else if (enemy instanceof Archer) {
+                frameLights.add(Light.steady(p.x(), p.y() + 10f, 44f, 1f, 0.6f, 0.3f, 0.75f));
+            } else if (enemy instanceof Charger) {
+                frameLights.add(Light.flame(p.x(), p.y() + 8f, 50f, 0.9f));
+            }
+        }
+        boss.dying().ifPresent(p -> frameLights.add(Light.flame(p.x(), p.y() + 30f, 120f, 1f)));
+        for (Circle zone : hero.fireZones()) {
+            frameLights.add(Light.flame(zone.center().x(), zone.center().y(), zone.radius() * 2.2f, 0.8f));
+        }
     }
 
     private void drawShadows(GameMap world, Vec2 heroPos) {
@@ -268,6 +341,7 @@ public final class SceneRenderer implements Disposable {
         player.dispose();
         boss.dispose();
         bossEffects.dispose();
+        lighting.dispose();
         slash.dispose();
         puffs.dispose();
     }
