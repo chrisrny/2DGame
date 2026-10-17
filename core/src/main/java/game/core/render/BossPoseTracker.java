@@ -55,6 +55,13 @@ public final class BossPoseTracker {
     /** Déplacement minimal entre deux images pour considérer qu'il marche, en unités. */
     private static final float MOVE_EPSILON = 0.05f;
 
+    /**
+     * Temps pendant lequel il reste « en marche » après son dernier mouvement, en secondes. À plus
+     * de 60 images par seconde, certaines images arrivent sans pas du modèle : sans ce délai, la
+     * marche serait coupée une image sur deux.
+     */
+    private static final float WALK_GRACE = 0.12f;
+
     private Pose pose = Pose.IDLE;
     private float poseTime;
     private Vec2 position;
@@ -68,6 +75,7 @@ public final class BossPoseTracker {
     private float stunLeft;
     private float flinchLeft;
     private float flashLeft;
+    private float walkLeft;
     private boolean facingLeft;
     private Vec2 impactNow;
     private boolean phaseChangedNow;
@@ -91,6 +99,7 @@ public final class BossPoseTracker {
         stunLeft = Math.max(0f, stunLeft - delta);
         flinchLeft = Math.max(0f, flinchLeft - delta);
         flashLeft = Math.max(0f, flashLeft - delta);
+        walkLeft = moved ? WALK_GRACE : Math.max(0f, walkLeft - delta);
         impactNow = null;
         phaseChangedNow = false;
 
@@ -151,7 +160,7 @@ public final class BossPoseTracker {
         } else if (flinchLeft > 0f) {
             next = Pose.FLINCH;
         } else {
-            next = moved ? Pose.WALK : Pose.IDLE;
+            next = walkLeft > 0f ? Pose.WALK : Pose.IDLE;
         }
         if (next != pose) {
             pose = next;

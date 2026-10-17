@@ -145,17 +145,18 @@ public final class BossSprite implements Disposable {
     /**
      * Dessine le boss vivant. Le {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch le pinceau d'images
-     * @param boss  le boss
+     * @param batch    le pinceau d'images
+     * @param boss     le boss
+     * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
      */
-    public void draw(SpriteBatch batch, Boss boss) {
+    public void draw(SpriteBatch batch, Boss boss, Vec2 position) {
         TextureRegion frame = currentFrame();
-        drawFrame(batch, frame, boss.position(), boss.hitbox().radius());
+        drawFrame(batch, frame, position, boss.hitbox().radius());
         if (tracker.flashing()) {
             // Flash blanc : la même image ajoutée en lumière, le geste reste lisible.
             batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
             batch.setColor(1f, 1f, 1f, FLASH_ALPHA);
-            drawFrame(batch, frame, boss.position(), boss.hitbox().radius());
+            drawFrame(batch, frame, position, boss.hitbox().radius());
             batch.setColor(1f, 1f, 1f, 1f);
             batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         }

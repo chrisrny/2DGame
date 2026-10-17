@@ -141,11 +141,12 @@ public final class PlayerSprite implements Disposable {
      * Dessine le joueur, et ses images fantômes s'il esquive. Le {@link SpriteBatch} doit déjà
      * être ouvert.
      *
-     * @param batch  le pinceau d'images, réglé sur la caméra du monde
-     * @param player le joueur à dessiner
-     * @param alpha  opacité, de 0 à 1 (pour le clignotement d'invincibilité)
+     * @param batch    le pinceau d'images, réglé sur la caméra du monde
+     * @param player   le joueur à dessiner
+     * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
+     * @param alpha    opacité, de 0 à 1 (pour le clignotement d'invincibilité)
      */
-    public void draw(SpriteBatch batch, Player player, float alpha) {
+    public void draw(SpriteBatch batch, Player player, Vec2 position, float alpha) {
         int i = 0;
         for (Ghost ghost : ghosts) {
             // Teinte turquoise, de plus en plus visible vers le joueur.
@@ -154,7 +155,7 @@ public final class PlayerSprite implements Disposable {
             i++;
         }
         batch.setColor(1f, 1f, 1f, alpha);
-        drawFrame(batch, currentFrame(player), player.position(), facingLeft);
+        drawFrame(batch, currentFrame(player), position, facingLeft);
         batch.setColor(1f, 1f, 1f, 1f);
     }
 

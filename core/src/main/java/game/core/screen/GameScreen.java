@@ -138,8 +138,12 @@ public class GameScreen extends ScreenAdapter {
         // 2. Modèle : 0, 1 ou plusieurs pas de durée fixe selon le temps écoulé.
         int steps = clock.advance(delta);
         for (int i = 0; i < steps; i++) {
+            // Positions avant le pas : la vue dessine entre elles et les nouvelles (interpolation),
+            // pour que le mouvement reste fluide quand l'écran affiche plus de 60 images par seconde.
+            scene.beforeStep(run);
             run.update(intent, FixedStep.DT);
         }
+        scene.setStepProgress(clock.pending() / FixedStep.DT);
         // Les chiffres de dégâts avancent avec le temps réel : c'est purement visuel.
         // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
         damageNumbers.update(delta);
@@ -199,7 +203,7 @@ public class GameScreen extends ScreenAdapter {
      */
     private void followPlayer() {
         Rect arena = run.map().arena();
-        Vec2 target = run.player().position();
+        Vec2 target = scene.playerOnScreen(run);
         float x = Math.clamp(target.x(), arena.x() + WORLD_WIDTH / 2f, arena.right() - WORLD_WIDTH / 2f);
         float y = Math.clamp(target.y(), arena.y() + WORLD_HEIGHT / 2f, arena.top() - WORLD_HEIGHT / 2f);
         // Tremblement d'écran des gros coups du boss : purement visuel, ajouté après le cadrage.
