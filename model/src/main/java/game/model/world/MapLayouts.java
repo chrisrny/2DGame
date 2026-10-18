@@ -15,6 +15,11 @@ import java.util.List;
  * <p>Le centre sert aussi d'arène au boss ({@link #BOSS_ARENA}) : entre les passages et les
  * couloirs, il n'a que les quatre petits piliers du départ, assez pour se mettre à l'abri d'une
  * charge sans gêner l'esquive.</p>
+ *
+ * <p>Comme le quartier des plaisirs qu'elle représente, la map est bordée à l'ouest et à l'est
+ * par un canal ({@link #CANALS}), qu'un pont permet de traverser ({@link #BRIDGES}). Deux torii
+ * marquent les portes nord et sud du centre ({@link #TORII}). Pour les règles, canaux et piliers
+ * sont des murs comme les autres ; ces listes servent à la vue, qui les habille.</p>
  */
 public final class MapLayouts {
 
@@ -23,6 +28,19 @@ public final class MapLayouts {
 
     /** Arène du boss dans la map de la démo : la zone centrale, la plus dégagée. */
     public static final Rect BOSS_ARENA = new Rect(460f, 230f, 1000f, 560f);
+
+    /** Canaux de l'ouest et de l'est, coupés en deux par un pont : de l'eau, infranchissable. */
+    public static final List<Rect> CANALS = List.of(
+            r(168, 280, 40, 200), r(168, 560, 40, 180),
+            r(1712, 280, 40, 200), r(1712, 560, 40, 180));
+
+    /** Ponts entre les deux moitiés de chaque canal : des passages libres, pas des murs. */
+    public static final List<Rect> BRIDGES = List.of(r(168, 480, 40, 80), r(1712, 480, 40, 80));
+
+    /** Piliers des torii, deux par porte, au bout des couloirs du nord et du sud. */
+    public static final List<Rect> TORII = List.of(
+            r(896, 885, 14, 14), r(1010, 885, 14, 14),
+            r(896, 175, 14, 14), r(1010, 175, 14, 14));
 
     private MapLayouts() {
     }
@@ -58,6 +76,8 @@ public final class MapLayouts {
                 r(260, 180, 64, 48), r(360, 280, 48, 48), r(470, 120, 80, 40),
                 // Piliers épars.
                 r(1380, 120, 32, 32), r(1520, 230, 32, 32), r(1660, 120, 32, 32)));
+        walls.addAll(CANALS);
+        walls.addAll(TORII);
         List<Vec2> spawnPoints = List.of(
                 v(90, 880), v(300, 980), v(780, 1000), v(1140, 1000), v(1560, 1010), v(1840, 880),
                 v(100, 560), v(480, 600), v(1440, 560), v(1760, 520),

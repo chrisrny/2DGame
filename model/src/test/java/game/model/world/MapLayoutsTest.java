@@ -91,6 +91,27 @@ class MapLayoutsTest {
     }
 
     @Test
+    void chaquePontTraverseUnCanalEtResteLibre() {
+        for (Rect pont : MapLayouts.BRIDGES) {
+            Vec2 milieu = new Vec2(pont.x() + pont.width() / 2f, pont.y() + pont.height() / 2f);
+            assertTrue(libre(new Circle(milieu, 16f)), "on passe sur le pont " + milieu);
+            Vec2 nord = new Vec2(milieu.x(), pont.top() + 8f);
+            Vec2 sud = new Vec2(milieu.x(), pont.y() - 8f);
+            assertTrue(MapLayouts.CANALS.stream().anyMatch(canal -> canal.contains(nord)), "canal au nord du pont");
+            assertTrue(MapLayouts.CANALS.stream().anyMatch(canal -> canal.contains(sud)), "canal au sud du pont");
+        }
+    }
+
+    @Test
+    void lesCanauxEtLesToriiSontDesMursEtLesPortesRestentOuvertes() {
+        assertTrue(MAP.walls().containsAll(MapLayouts.CANALS));
+        assertTrue(MAP.walls().containsAll(MapLayouts.TORII));
+        for (Vec2 porte : List.of(new Vec2(960f, 892f), new Vec2(960f, 182f))) {
+            assertTrue(libre(new Circle(porte, 16f)), "porte du torii " + porte);
+        }
+    }
+
+    @Test
     void lAreneDuBossADesPointsDApparitionAssezLargesPourLui() {
         List<Vec2> points = MAP.spawnPoints().stream().filter(MAP.bossArena()::contains).toList();
         assertTrue(points.size() >= 2, "le boss peut apparaître loin du joueur, où qu'il soit");
