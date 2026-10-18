@@ -15,7 +15,7 @@ class RelicTest {
 
     @Test
     void laLameAffuteeAjoute20PourcentDeDegats() {
-        assertEquals(BASE.withAttackDamage(12), new SharpenedBlade().apply(BASE));
+        assertEquals(BASE.withAttackDamage(14), new SharpenedBlade().apply(BASE));   // 12 × 1,2 arrondi
     }
 
     @Test
@@ -33,7 +33,7 @@ class RelicTest {
     @Test
     void laPlumeDOmbreRaccourcitLaRechargeDEsquiveDe20Pourcent() {
         PlayerStats apres = new ShadowFeather().apply(BASE);
-        assertEquals(0.64f, apres.dodgeCooldown(), 1e-4f);
+        assertEquals(0.48f, apres.dodgeCooldown(), 1e-4f);              // 0,6 × 0,8
         assertEquals(BASE.withDodgeCooldown(apres.dodgeCooldown()), apres);
     }
 
@@ -58,7 +58,7 @@ class RelicTest {
     @Test
     void deuxReliquesSeCumulent() {
         PlayerStats apres = new HunterEye().apply(new SharpenedBlade().apply(BASE));
-        assertEquals(12, apres.attackDamage());
+        assertEquals(14, apres.attackDamage());
         assertEquals(0.20f, apres.critChance(), 1e-4f);
     }
 

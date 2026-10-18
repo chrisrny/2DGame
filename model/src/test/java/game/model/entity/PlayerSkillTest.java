@@ -119,17 +119,17 @@ class PlayerSkillTest {
     }
 
     @Test
-    void pasDeDeuxiemeOndeAvantSixSecondes() {
+    void pasDeDeuxiemeOndeAvantLaFinDeLaRecharge() {
         pas(intention(false, false, true), 1);
-        pas(PlayerIntent.NONE, 300);
+        pas(PlayerIntent.NONE, pasDe(Shockwave.COOLDOWN) - 10);
         pas(intention(false, false, true), 1);
         assertEquals(1, ondes());
     }
 
     @Test
-    void apresSixSecondesUneNouvelleOndePart() {
+    void apresLaRechargeUneNouvelleOndePart() {
         pas(intention(false, false, true), 1);
-        pas(PlayerIntent.NONE, 370);
+        pas(PlayerIntent.NONE, pasDe(Shockwave.COOLDOWN) + 10);
         pas(intention(false, false, true), 1);
         assertEquals(2, ondes());
     }
@@ -168,13 +168,18 @@ class PlayerSkillTest {
     }
 
     @Test
-    void unNouvelEventailPartApresTroisSecondes() {
+    void unNouvelEventailPartApresSaRecharge() {
         pas(lancer(), 1);
-        pas(PlayerIntent.NONE, 170);
+        pas(PlayerIntent.NONE, pasDe(BladeFan.COOLDOWN) - 20);
         pas(lancer(), 1);
         assertEquals(BladeFan.BLADE_COUNT, monde.projectiles().size());
         pas(PlayerIntent.NONE, 20);
         pas(lancer(), 1);
         assertEquals(2 * BladeFan.BLADE_COUNT, monde.projectiles().size());
+    }
+
+    // Nombre de pas de jeu correspondant à une durée.
+    private static int pasDe(float secondes) {
+        return Math.round(secondes / FixedStep.DT);
     }
 }

@@ -113,7 +113,14 @@ class ShockwaveTest {
     }
 
     @Test
-    void laRechargeDureSixSecondes() {
-        assertEquals(6f, onde.cooldown());
+    void laRechargeDureCinqSecondes() {
+        assertEquals(5f, onde.cooldown());
+    }
+
+    @Test
+    void lOndeEtourditLesCiblesTouchees() {
+        Cible proche = cible(20f, 0f, Faction.ENEMY);
+        onde.tryActivate(joueur, monde);
+        assertEquals(Shockwave.STUN, proche.coups.get(0).stun(), 1e-6f);
     }
 }
