@@ -26,7 +26,6 @@ import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
-import game.model.skill.Shockwave;
 import game.model.world.Run;
 import java.util.List;
 
@@ -55,9 +54,6 @@ public class GameScreen extends ScreenAdapter {
 
     /** Temps laissé après la fin de la partie avant l'écran de fin, en secondes. */
     public static final float END_DELAY = 1.5f;
-
-    /** Durée de l'anneau dessiné quand l'Onde de choc part, en secondes (purement visuel). */
-    private static final float SHOCKWAVE_VISUAL_DURATION = 0.2f;
 
     /** Durée d'une phase de clignotement pendant l'invincibilité, en secondes. */
     private static final float BLINK_PERIOD = 0.1f;
@@ -142,7 +138,8 @@ public class GameScreen extends ScreenAdapter {
         PlayerIntent intent = input.poll(run.player().position());
 
         // 2. Modèle : 0, 1 ou plusieurs pas de durée fixe selon le temps écoulé.
-        int steps = clock.advance(delta);
+        // Arrêt sur image après l'Onde de choc : le modèle attend un instant, le coup « pèse ».
+        int steps = scene.frozen() ? 0 : clock.advance(delta);
         for (int i = 0; i < steps; i++) {
             // Positions avant le pas : la vue dessine entre elles et les nouvelles (interpolation),
             // pour que le mouvement reste fluide quand l'écran affiche plus de 60 images par seconde.
@@ -188,10 +185,9 @@ public class GameScreen extends ScreenAdapter {
         drawFireZones();
         Player player = run.player();
         scene.drawObjects(camera, run, blinkHidden(player) ? BLINK_ALPHA : 1f);
-        // La nuit et ses lumières, puis ce qui reste vif : annonces, onde de choc, chiffres, HUD.
+        // La nuit et ses lumières, puis ce qui reste vif : annonces, chiffres, HUD.
         scene.drawLight(camera, viewport, run);
         worldRenderer.drawTelegraphs(shapes, run.map());
-        drawShockwave();
         // Réglage des options : lu à chaque image, il prend effet dès la reprise de la partie.
         if (run.settings().showDamageNumbers()) {
             damageNumbers.draw(camera.combined);
@@ -252,25 +248,6 @@ public class GameScreen extends ScreenAdapter {
             return false;
         }
         return (int) (left / BLINK_PERIOD) % 2 == 1;
-    }
-
-    /**
-     * Anneau de l'Onde de choc : il grandit de 0 au rayon de l'onde juste après son utilisation.
-     * La vue lit le temps écoulé depuis l'utilisation, gardé par la compétence : le modèle n'a
-     * pas besoin d'un événement de plus.
-     */
-    private void drawShockwave() {
-        float age = run.player().skill1().timeSinceActivation();
-        if (age >= SHOCKWAVE_VISUAL_DURATION) {
-            return;
-        }
-        Vec2 center = run.player().position();
-        float radius = Shockwave.RADIUS * (age / SHOCKWAVE_VISUAL_DURATION);
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(0.45f, 0.75f, 1f, 1f);
-        shapes.circle(center.x(), center.y(), Math.max(1f, radius), 40);
-        shapes.circle(center.x(), center.y(), Math.max(1f, radius - 2f), 40);
-        shapes.end();
     }
 
     @Override

@@ -37,11 +37,11 @@ import java.util.List;
  */
 public final class SceneRenderer implements Disposable {
 
-    // Dans fx.png : ombre (0), lueur (16), flèche (32), lame (48), pixel blanc (62, 0).
+    // Dans fx.png : ombre (0), lueur (16), flèche (32), pixel blanc (62, 0). Les lames du joueur
+    // sont dans skill_fx.png (voir SkillEffects).
     private static final int FX_SHADOW = 0;
     private static final int FX_GLOW = 16;
     private static final int FX_ARROW = 32;
-    private static final int FX_BLADE = 48;
     private static final int FX = 16;
 
     /** Un élément à dessiner, avec sa profondeur. */
@@ -56,6 +56,7 @@ public final class SceneRenderer implements Disposable {
     private final SlashEffect slash = new SlashEffect();
     private final BossSprite boss = new BossSprite();
     private final BossEffects bossEffects;
+    private final SkillEffects skills = new SkillEffects();
     private final MotionSmoothing smoothing = new MotionSmoothing();
     private final DeathPuffs puffs;
     private final LightingRenderer lighting;
@@ -135,6 +136,8 @@ public final class SceneRenderer implements Disposable {
             bossEffects.death(pose.position());
         }
         bossEffects.update(delta);
+        skills.update(run, smoothing.of(run.player(), run.player().position()),
+                projectile -> smoothing.of(projectile, projectile.position()), delta);
         puffs.update(delta);
         time += delta;
         ambient.update(smoothing.of(run.player(), run.player().position()), viewW, viewH, map.fireSpots(), delta);
@@ -153,6 +156,7 @@ public final class SceneRenderer implements Disposable {
         batch.begin();
         map.drawGround(batch, run.map().arena(), run.map().walls(), camera, viewW, viewH, time);
         bossEffects.drawGround(batch);
+        skills.drawGround(batch);
         batch.end();
     }
 
@@ -242,13 +246,13 @@ public final class SceneRenderer implements Disposable {
             frameLights.add(Light.steady(h.x(), h.y() + 6f, 46f, 1f, 0.85f, 0.55f, 0.6f));
         }
         for (Projectile projectile : world.projectiles()) {
-            Vec2 p = smoothing.of(projectile, projectile.position());
-            if (projectile.faction() == Faction.PLAYER) {
-                frameLights.add(Light.steady(p.x(), p.y(), 26f, 0.45f, 1f, 0.95f, 0.6f));
-            } else {
+            if (projectile.faction() != Faction.PLAYER) {
+                Vec2 p = smoothing.of(projectile, projectile.position());
                 frameLights.add(Light.flame(p.x(), p.y(), 30f, 0.8f));
             }
         }
+        // Les lames du joueur, l'éclat de l'onde et des coups : voir SkillEffects.
+        skills.addLights(frameLights);
         for (Enemy enemy : world.enemies()) {
             Vec2 p = smoothing.of(enemy, enemy.position());
             if (enemy instanceof Boss b) {
@@ -286,20 +290,21 @@ public final class SceneRenderer implements Disposable {
     }
 
     private void drawProjectile(Projectile projectile, Vec2 p) {
+        if (projectile.faction() == Faction.PLAYER) {
+            skills.drawBlade(batch, projectile, p);
+            return;
+        }
         Vec2 v = projectile.velocity();
         float angle = (float) Math.toDegrees(Math.atan2(v.y(), v.x()));
-        int src = projectile.faction() == Faction.PLAYER ? FX_BLADE : FX_ARROW;
         batch.draw(fx, p.x() - FX / 2f, p.y() - FX / 2f, FX / 2f, FX / 2f, FX, FX, 1f, 1f, angle,
-                src, 0, FX, FX, false, false);
+                FX_ARROW, 0, FX, FX, false, false);
     }
 
     // Lueurs additives : la lumière s'ajoute à ce qu'il y a dessous au lieu de le recouvrir.
     private void drawGlows(GameMap world, Player hero) {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         for (Projectile projectile : world.projectiles()) {
-            if (projectile.faction() == Faction.PLAYER) {
-                glow(smoothing.of(projectile, projectile.position()), 18f, 0.25f, 0.95f, 0.95f, 0.55f);
-            } else {
+            if (projectile.faction() != Faction.PLAYER) {
                 glow(smoothing.of(projectile, projectile.position()), 12f, 0.5f, 1f, 0.7f, 0.3f);
             }
         }
@@ -313,18 +318,29 @@ public final class SceneRenderer implements Disposable {
             }
         }
         bossEffects.drawGlows(batch);
+        skills.drawGlows(batch, world.enemies(), enemy -> smoothing.of(enemy, enemy.position()));
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.setColor(1f, 1f, 1f, 1f);
     }
 
     /**
      * Décalage de caméra du tremblement d'écran en cours (coup de massue du boss, passage de
-     * phase, mort du boss).
+     * phase, mort du boss, sorts du héros).
      *
      * @return le décalage à ajouter à la position de la caméra, en unités
      */
     public Vec2 cameraShake() {
-        return bossEffects.shakeOffset();
+        return bossEffects.shakeOffset().add(skills.shakeOffset());
+    }
+
+    /**
+     * Arrêt sur image après un gros coup (Onde de choc) : l'écran de jeu ne fait pas avancer le
+     * modèle tant qu'il dure.
+     *
+     * @return {@code true} pendant l'arrêt sur image
+     */
+    public boolean frozen() {
+        return skills.frozen();
     }
 
     private void glow(Vec2 center, float size, float r, float g, float b, float a) {
@@ -341,6 +357,7 @@ public final class SceneRenderer implements Disposable {
         player.dispose();
         boss.dispose();
         bossEffects.dispose();
+        skills.dispose();
         lighting.dispose();
         slash.dispose();
         puffs.dispose();
