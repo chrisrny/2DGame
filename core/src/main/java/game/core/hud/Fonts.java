@@ -7,7 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * La police du jeu : Inter (licence libre SIL OFL, voir {@code assets/fonts/OFL.txt}).
+ * Les polices du jeu : Inter pour le texte (licence libre SIL OFL, voir {@code assets/fonts/OFL.txt})
+ * et Shojumaru pour les titres ({@link #title()}).
  *
  * <p>La police par défaut de libGDX fait 15 pixels : agrandie à la taille de la fenêtre, elle
  * devient floue. Celle-ci est dessinée en grand (capitales de 70 pixels, générée par
@@ -33,9 +34,24 @@ public final class Fonts {
      * @return une nouvelle police, à l'échelle 1
      */
     public static BitmapFont create() {
-        ScaledFontData data = new ScaledFontData(Gdx.files.internal("fonts/ui.fnt"));
+        return load("ui");
+    }
+
+    /**
+     * Crée la police des titres : Shojumaru (licence libre SIL OFL, voir
+     * {@code assets/fonts/OFL-Shojumaru.txt}), aux lettres taillées comme au pinceau. Elle sert aux
+     * noms (étages, boss, reliques) ; le reste du texte garde Inter, plus lisible en petit.
+     *
+     * @return une nouvelle police de titre, à l'échelle 1 (capitales de 11 unités)
+     */
+    public static BitmapFont title() {
+        return load("title");
+    }
+
+    private static BitmapFont load(String name) {
+        ScaledFontData data = new ScaledFontData(Gdx.files.internal("fonts/" + name + ".fnt"));
         // Mipmaps : la police est réduite proprement, sans scintiller ni crénelage.
-        Texture texture = new Texture(Gdx.files.internal("fonts/ui.png"), true);
+        Texture texture = new Texture(Gdx.files.internal("fonts/" + name + ".png"), true);
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear);
         BitmapFont font = new BitmapFont(data, new TextureRegion(texture), false);
         font.setOwnsTexture(true);

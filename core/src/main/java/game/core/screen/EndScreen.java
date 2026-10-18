@@ -1,5 +1,7 @@
 package game.core.screen;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import game.core.Main;
 import game.model.world.Run;
@@ -17,6 +19,7 @@ public abstract class EndScreen extends MenuScreen {
     private final Run run;
     private final String title;
     private final Color titleColor;
+    private final Sound jingle;
 
     /**
      * Crée l'écran de fin.
@@ -31,6 +34,19 @@ public abstract class EndScreen extends MenuScreen {
         this.run = Objects.requireNonNull(run, "run");
         this.title = Objects.requireNonNull(title, "title");
         this.titleColor = Objects.requireNonNull(titleColor, "titleColor");
+        // Jingle de fin : koto qui monte et gong pour la victoire, koto qui descend pour la défaite.
+        this.jingle = Gdx.audio.newSound(Gdx.files.internal(run.isWon() ? "sfx/victory.ogg" : "sfx/defeat.ogg"));
+    }
+
+    @Override
+    public void show() {
+        jingle.play(0.9f);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        jingle.dispose();
     }
 
     @Override
@@ -51,7 +67,7 @@ public abstract class EndScreen extends MenuScreen {
         batch.begin();
         centered(title, HEIGHT * 0.78f, TITLE_SCALE, titleColor);
         float y = HEIGHT * 0.52f;
-        centered("Stage atteint : " + run.stage(), y, TEXT_SCALE, TEXT);
+        centered("Étage atteint : " + run.stage(), y, TEXT_SCALE, TEXT);
         centered("Ennemis tués : " + run.kills(), y - LINE_GAP, TEXT_SCALE, TEXT);
         centered("Niveau : " + run.experience().level(), y - 2 * LINE_GAP, TEXT_SCALE, TEXT);
         centered("Temps : " + formatTime(run.elapsed()), y - 3 * LINE_GAP, TEXT_SCALE, TEXT);

@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.commun.Circle;
 import game.model.commun.FixedStep;
 import game.core.Main;
+import game.core.audio.GameAudio;
 import game.core.hud.BossBar;
 import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
@@ -76,6 +77,7 @@ public class GameScreen extends ScreenAdapter {
     private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
+    private final GameAudio audio;
     private final DamageNumbers damageNumbers;
     private final SceneRenderer scene;
     private float overFor;
@@ -91,6 +93,7 @@ public class GameScreen extends ScreenAdapter {
         this.run = run;
         this.damageNumbers = new DamageNumbers(run.events());
         this.scene = new SceneRenderer(run.events(), WORLD_WIDTH, WORLD_HEIGHT);
+        this.audio = new GameAudio(run.events());
     }
 
     @Override
@@ -119,6 +122,9 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.F10)) {
             run.forceLose();
         }
+
+        // Le son suit la partie à chaque image, même figée (montée de niveau, fin de partie).
+        audio.update(run, delta);
 
         // Montée de niveau : la partie est figée tant que le joueur n'a pas choisi sa relique.
         // On ne fait pas avancer l'horloge, pour ne pas rattraper ce temps d'un coup ensuite.
@@ -276,5 +282,6 @@ public class GameScreen extends ScreenAdapter {
         damageNumbers.dispose();
         stageBanner.dispose();
         bossBar.dispose();
+        audio.dispose();
     }
 }

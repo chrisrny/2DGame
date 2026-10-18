@@ -2,6 +2,7 @@ package game.model.entity;
 
 import game.model.ai.BossFirstPhase;
 import game.model.ai.BossPhase;
+import game.model.ai.BossSecondPhase;
 import game.model.combat.Hit;
 import game.model.combat.Telegraph;
 import game.model.commun.Vec2;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public final class Boss extends Enemy {
 
     /** Points de vie maximum. */
-    public static final int MAX_HP = 300;
+    public static final int MAX_HP = 600;
 
     /** Rayon de la zone de collision : plus du double d'un Rôdeur. */
     public static final float RADIUS = 20f;
@@ -35,7 +36,7 @@ public final class Boss extends Enemy {
     /** Part des points de vie à laquelle le boss passe en phase 2. */
     public static final float SECOND_PHASE_THRESHOLD = 0.5f;
 
-    private final BossPhase phase = new BossFirstPhase();
+    private BossPhase phase = new BossFirstPhase();
     private int phaseNumber = 1;
 
     /**
@@ -62,8 +63,9 @@ public final class Boss extends Enemy {
 
     private void act(World world, float dt) {
         if (phaseNumber == 1 && hp() <= maxHp() * SECOND_PHASE_THRESHOLD) {
-            // P2-B2 remplacera ici la phase 1 par la vraie phase 2. D'ici là, le boss garde
-            // ses attaques de phase 1 : seul le numéro de phase change.
+            // Changement d'état (pattern State) : la phase 2 reprend le même cycle, plus vite et
+            // plus fort, et chaque frappe projette un anneau de braises.
+            phase = new BossSecondPhase();
             phaseNumber = 2;
         }
         phase.update(this, world, dt);

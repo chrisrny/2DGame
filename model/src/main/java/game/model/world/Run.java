@@ -55,6 +55,9 @@ public final class Run {
     /** Durée de l'annonce d'un stage, en secondes : la vue affiche « Stage N » pendant ce temps. */
     public static final float STAGE_INTRO = 2f;
 
+    /** Part des points de vie max rendue au joueur quand il finit un étage. */
+    public static final float STAGE_HEAL = 0.3f;
+
     /**
      * Crée une partie dont la difficulté reste celle de {@code config}.
      *
@@ -96,6 +99,8 @@ public final class Run {
             stageIndex++;
             stageIntroLeft = STAGE_INTRO;
             nextStagePending = true;
+            // Répit entre deux étages : le joueur reprend une part de sa vie.
+            player.heal(Math.round(player.maxHp() * STAGE_HEAL));
         }
     }
 

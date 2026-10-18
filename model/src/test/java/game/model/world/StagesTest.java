@@ -39,7 +39,8 @@ class StagesTest {
     void leStage2EstPlusDurAvecDesChargeurs() {
         StageConfig stage1 = stages.get(0);
         StageConfig stage2 = stages.get(1);
-        assertEquals(1.3f, stage2.multiplier(), 1e-6f);
+        assertEquals(Stages.STAGE_2_MULTIPLIER, stage2.multiplier(), 1e-6f);
+        assertTrue(stage2.multiplier() > 1f, "le stage 2 renforce les ennemis");
         assertTrue(stage2.waves().stream().anyMatch(v -> nombre(v, EnemyType.CHARGER) > 0));
         assertTrue(stage2.killsToClear() > stage1.killsToClear());
     }
@@ -61,7 +62,7 @@ class StagesTest {
 
     @Test
     void scaledMultiplieLeMultiplicateur() {
-        assertEquals(1.3f * 1.25f, stages.get(1).scaled(1.25f).multiplier(), 1e-6f);
+        assertEquals(Stages.STAGE_2_MULTIPLIER * 1.25f, stages.get(1).scaled(1.25f).multiplier(), 1e-6f);
         assertEquals(stages.get(1).waves(), stages.get(1).scaled(1.25f).waves());
     }
 
