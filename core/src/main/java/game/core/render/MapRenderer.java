@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
+import game.model.world.MapLayouts;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,10 @@ import java.util.Random;
  * <p>À l'écran, le dessus d'un mur est remonté de la hauteur de sa façade : il paraît avoir un
  * volume. Le tri par profondeur ({@link SceneRenderer}) fait le reste. Quand le héros passe
  * derrière un mur qui le cacherait, ce mur devient transparent.</p>
+ *
+ * <p>Quelques obstacles ont un rôle nommé dans {@link MapLayouts} : les canaux (de l'eau, au
+ * niveau du sol, enjambée par des ponts) et les piliers des torii (un portique vermillon, dont le
+ * linteau passe au-dessus des personnages).</p>
  *
  * <p>Les feux, lanternes et fenêtres sont aussi des sources de lumière pour
  * {@link LightingRenderer} ({@link #lights()}).</p>
@@ -60,10 +65,16 @@ public final class MapRenderer implements Disposable {
     private static final int DEBRIS_FIRES = 14;
     private static final int SCORCHES = 60;
 
-    /** Les trois façons d'habiller un mur. */
+    /** Les façons d'habiller un mur. */
     enum Kind {
-        HOUSE, FENCE, LANTERN
+        HOUSE, FENCE, LANTERN, CANAL, TORII
     }
+
+    /** Durée d'une image de l'eau des canaux, en secondes. */
+    private static final float WATER_FRAME = 0.15f;
+
+    // Débord du linteau du torii de chaque côté de ses piliers, en unités.
+    private static final float BEAM_OVERHANG = 14f;
 
     private final Texture tiles;
     private final Texture floor;
@@ -78,6 +89,12 @@ public final class MapRenderer implements Disposable {
     private final TextureRegion stoneLantern;
     private final TextureRegion[] fire = new TextureRegion[4];
     private final TextureRegion scorch;
+    private final TextureRegion[] water = new TextureRegion[4];
+    private final TextureRegion bank;
+    private final TextureRegion planks;
+    private final TextureRegion railing;
+    private final TextureRegion beam;
+    private final TextureRegion pillar;
     private final TextureRegion white;
     private final TextureRegion shadow;
 
@@ -88,6 +105,9 @@ public final class MapRenderer implements Disposable {
     private final Map<Rect, List<Vec2>> roofFires = new HashMap<>();
     private final List<Vec2> scorches = new ArrayList<>();
     private final List<Light> lights = new ArrayList<>();
+    // Pour chaque pilier gauche d'un torii, son pilier droit.
+    private final Map<Rect, Rect> toriiPairs = new HashMap<>();
+    private final List<Rect> canals = new ArrayList<>();
 
     /**
      * Charge le sol et l'atlas du décor.
@@ -116,6 +136,14 @@ public final class MapRenderer implements Disposable {
             fire[i] = new TextureRegion(tiles, 32 + i * 32, 64, 32, 24);
         }
         scorch = new TextureRegion(tiles, 0, 112, 32, 16);
+        for (int i = 0; i < water.length; i++) {
+            water[i] = new TextureRegion(tiles, 160 + i * 16, 64, 16, 16);
+        }
+        bank = new TextureRegion(tiles, 224, 64, 16, 8);
+        planks = new TextureRegion(tiles, 160, 80, 16, 16);
+        railing = new TextureRegion(tiles, 176, 80, 16, 8);
+        beam = new TextureRegion(tiles, 192, 80, 16, 14);
+        pillar = new TextureRegion(tiles, 240, 64, 12, 48);
         white = new TextureRegion(fx, 62, 0, 1, 1);
         shadow = new TextureRegion(fx, 0, 4, 16, 8);
     }
@@ -138,13 +166,27 @@ public final class MapRenderer implements Disposable {
         roofFires.clear();
         scorches.clear();
         lights.clear();
+        toriiPairs.clear();
+        canals.clear();
         for (Rect wall : walls) {
             Kind kind = classify(wall, arena);
             kinds.put(wall, kind);
             switch (kind) {
                 case LANTERN -> lights.add(Light.flame(wall.x() + wall.width() / 2f, lanternBase(wall) + 28f, 95f, 1f));
                 case HOUSE -> decorateHouse(wall, arena, walls);
-                case FENCE -> { }
+                case CANAL -> canals.add(wall);
+                case FENCE, TORII -> { }
+            }
+        }
+        pairTorii(walls);
+        // Petites lanternes rouges aux quatre coins de chaque pont.
+        if (!canals.isEmpty()) {
+            for (Rect bridge : MapLayouts.BRIDGES) {
+                for (float x : new float[] {bridge.x(), bridge.right()}) {
+                    for (float y : new float[] {bridge.y(), bridge.top()}) {
+                        lights.add(new Light(x, y + 6f, 34f, 1f, 0.35f, 0.25f, 0.55f, 0.06f, x + y));
+                    }
+                }
             }
         }
         Random random = new Random(7L);
@@ -166,6 +208,12 @@ public final class MapRenderer implements Disposable {
     // La bordure nord est une rangée de maisons dont on voit la façade ; les autres bordures, vues
     // de dos ou de côté, sont des murs d'enceinte bas, pour ne pas cacher le bas de l'écran.
     static Kind classify(Rect wall, Rect arena) {
+        if (MapLayouts.CANALS.contains(wall)) {
+            return Kind.CANAL;
+        }
+        if (MapLayouts.TORII.contains(wall)) {
+            return Kind.TORII;
+        }
         if (wall.width() <= 32f && wall.height() <= 32f) {
             return Kind.LANTERN;
         }
@@ -210,6 +258,22 @@ public final class MapRenderer implements Disposable {
         }
     }
 
+    // Les piliers d'un torii vont par deux, à la même hauteur : on retient lequel est à gauche.
+    private void pairTorii(List<Rect> walls) {
+        for (Rect left : walls) {
+            if (kinds.get(left) != Kind.TORII) {
+                continue;
+            }
+            for (Rect right : walls) {
+                if (kinds.get(right) == Kind.TORII && right.y() == left.y() && right.x() > left.x()) {
+                    toriiPairs.put(left, right);
+                    float mid = (left.x() + right.right()) / 2f;
+                    lights.add(Light.steady(mid, lanternBase(left) + 40f, 70f, 1f, 0.4f, 0.3f, 0.45f));
+                }
+            }
+        }
+    }
+
     private void addGroundFire(Vec2 p) {
         groundFires.add(p);
         lights.add(Light.flame(p.x(), p.y() + 8f, 80f, 1f));
@@ -217,6 +281,11 @@ public final class MapRenderer implements Disposable {
 
     // Vrai si le point est loin de tout mur d'au moins « margin ».
     private static boolean clear(Vec2 p, List<Rect> walls, float margin) {
+        for (Rect b : MapLayouts.BRIDGES) {
+            if (p.x() > b.x() - margin && p.x() < b.right() + margin && p.y() > b.y() - margin && p.y() < b.top() + margin) {
+                return false;
+            }
+        }
         for (Rect w : walls) {
             if (p.x() > w.x() - margin && p.x() < w.right() + margin && p.y() > w.y() - margin
                     && p.y() < w.top() + margin + HOUSE_FRONT) {
@@ -279,6 +348,7 @@ public final class MapRenderer implements Disposable {
         // Une seule image pour tout le sol : la texture se répète, calée sur le monde.
         float s = FLOOR_SIZE;
         batch.draw(floor, x0, y0, x1 - x0, y1 - y0, x0 / s, -y0 / s, x1 / s, -y1 / s);
+        drawCanals(batch, time);
         for (Vec2 p : scorches) {
             if (visible(p, x0, y0, x1, y1, 32f)) {
                 batch.draw(scorch, p.x() - 16f, p.y() - 8f);
@@ -287,9 +357,14 @@ public final class MapRenderer implements Disposable {
         // Ombre portée sous chaque façade, et ombre ronde sous les lanternes de pierre.
         batch.setColor(0f, 0f, 0f, 0.5f);
         for (Rect wall : walls) {
-            if (kinds.get(wall) == Kind.LANTERN) {
+            Kind kind = kinds.get(wall);
+            if (kind == Kind.CANAL) {
+                continue;
+            }
+            if (kind == Kind.LANTERN || kind == Kind.TORII) {
                 float cx = wall.x() + wall.width() / 2f;
-                batch.draw(shadow, cx - 11f, lanternBase(wall) - 4f, 22f, 9f);
+                float w = kind == Kind.LANTERN ? 22f : 14f;
+                batch.draw(shadow, cx - w / 2f, lanternBase(wall) - 4f, w, 9f);
             } else {
                 batch.draw(white, wall.x() - 3f, wall.y() - WALL_SHADOW, wall.width(), WALL_SHADOW);
             }
@@ -299,6 +374,32 @@ public final class MapRenderer implements Disposable {
             if (visible(p, x0, y0, x1, y1, 32f)) {
                 drawFire(batch, p, time);
             }
+        }
+    }
+
+    // L'eau est au niveau du sol : le quai nord se voit de face, le bord sud n'est qu'une margelle.
+    private void drawCanals(SpriteBatch batch, float time) {
+        if (canals.isEmpty()) {
+            return;
+        }
+        TextureRegion frame = water[(int) (time / WATER_FRAME) % water.length];
+        for (Rect canal : canals) {
+            fill(batch, frame, canal.x(), canal.y(), canal.width(), canal.height());
+            fill(batch, bank, canal.x(), canal.top() - bank.getRegionHeight(), canal.width(), bank.getRegionHeight());
+            tint(batch, 0.42f, 0.38f, 0.36f, 1f);
+            batch.draw(white, canal.x() - 1f, canal.y() - 1f, canal.width() + 2f, 2f);
+            batch.draw(white, canal.x() - 1f, canal.y(), 1f, canal.height());
+            batch.draw(white, canal.right(), canal.y(), 1f, canal.height());
+            batch.setColor(1f, 1f, 1f, 1f);
+        }
+        // Ponts de bois : planches en travers, garde-corps vermillon au nord et au sud.
+        for (Rect bridge : MapLayouts.BRIDGES) {
+            fill(batch, planks, bridge.x() - 4f, bridge.y(), bridge.width() + 8f, bridge.height());
+            tint(batch, 1f, 0.85f, 0.65f, 0.25f);
+            batch.draw(white, bridge.x() + bridge.width() / 2f - 6f, bridge.y(), 12f, bridge.height());   // dos d'âne
+            batch.setColor(1f, 1f, 1f, 1f);
+            fill(batch, railing, bridge.x() - 4f, bridge.top() - 8f, bridge.width() + 8f, 8f);
+            fill(batch, railing, bridge.x() - 4f, bridge.y() - 2f, bridge.width() + 8f, 8f);
         }
     }
 
@@ -329,6 +430,8 @@ public final class MapRenderer implements Disposable {
             case HOUSE -> drawHouse(batch, wall, alpha, time);
             case FENCE -> drawFence(batch, wall);
             case LANTERN -> batch.draw(stoneLantern, wall.x() + wall.width() / 2f - 12f, lanternBase(wall));
+            case TORII -> drawTorii(batch, wall);
+            case CANAL -> { }
         }
         batch.setColor(1f, 1f, 1f, 1f);
     }
@@ -342,7 +445,18 @@ public final class MapRenderer implements Disposable {
         float left = wall.x() - 2f;
         float right = wall.right() + 2f;
         float top;
-        if (kind == Kind.LANTERN) {
+        if (kind == Kind.CANAL) {
+            return false;
+        }
+        if (kind == Kind.TORII) {
+            Rect partner = toriiPairs.get(wall);
+            if (partner == null) {
+                return false;
+            }
+            left = wall.x() - BEAM_OVERHANG;
+            right = partner.right() + BEAM_OVERHANG;
+            top = lanternBase(wall) + pillar.getRegionHeight() + 6f;
+        } else if (kind == Kind.LANTERN) {
             float cx = wall.x() + wall.width() / 2f;
             left = cx - 12f;
             right = cx + 12f;
@@ -388,6 +502,22 @@ public final class MapRenderer implements Disposable {
                 drawFire(batch, spot, time);
             }
         }
+    }
+
+    // Le pilier gauche dessine tout le portique (ses deux piliers et le linteau) : le linteau passe
+    // ainsi toujours par-dessus les piliers. Le pilier droit ne dessine rien.
+    private void drawTorii(SpriteBatch batch, Rect wall) {
+        Rect partner = toriiPairs.get(wall);
+        if (partner == null) {
+            return;
+        }
+        float base = lanternBase(wall);
+        float leftX = wall.x() + wall.width() / 2f;
+        float rightX = partner.x() + partner.width() / 2f;
+        batch.draw(pillar, leftX - pillar.getRegionWidth() / 2f, base);
+        batch.draw(pillar, rightX - pillar.getRegionWidth() / 2f, base);
+        float beamY = base + pillar.getRegionHeight() - 14f;
+        fill(batch, beam, leftX - BEAM_OVERHANG, beamY, rightX - leftX + 2 * BEAM_OVERHANG, beam.getRegionHeight());
     }
 
     private void drawFence(SpriteBatch batch, Rect wall) {
