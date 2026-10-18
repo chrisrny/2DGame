@@ -84,7 +84,7 @@ class PlayerRelicTest {
         Player joueur = joueur(PlayerStats.defaults());
         joueur.addRelic(new SharpenedBlade());
         joueur.addRelic(new HunterEye());
-        assertEquals(12, joueur.stats().attackDamage());
+        assertEquals(14, joueur.stats().attackDamage());     // 12 × 1,2 arrondi
         assertEquals(0.20f, joueur.stats().critChance(), 1e-4f);
         assertEquals(PlayerStats.defaults(), joueur.baseStats());
     }
@@ -105,7 +105,7 @@ class PlayerRelicTest {
         monde.addTarget(cible);
         attaquer(joueur);
         assertEquals(1, cible.coups.size());
-        assertEquals(12, cible.coups.get(0).damage());
+        assertEquals(14, cible.coups.get(0).damage());       // 12 × 1,2 arrondi
     }
 
     @Test

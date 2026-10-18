@@ -9,7 +9,8 @@ import game.model.event.GameEvent;
 import game.model.world.World;
 
 /**
- * Onde de choc : frappe tous les ennemis autour du joueur et les repousse vers l'extérieur.
+ * Onde de choc : frappe tous les ennemis autour du joueur, les repousse vers l'extérieur et les
+ * étourdit un court instant. C'est le sort de dégagement : il fait le vide quand on est encerclé.
  *
  * <p>Comme l'attaque, c'est la cible qui décide si elle encaisse le coup, et chaque coup accepté
  * publie un {@link GameEvent.EntityHit}. L'onde ne déclenche pas les reliques (le Croc vampire
@@ -18,16 +19,19 @@ import game.model.world.World;
 public final class Shockwave extends Skill {
 
     /** Rayon de l'onde autour du centre du joueur, en unités. */
-    public static final float RADIUS = 64f;
+    public static final float RADIUS = 96f;
 
     /** Dégâts infligés à chaque cible touchée. */
-    public static final int DAMAGE = 15;
+    public static final int DAMAGE = 28;
 
     /** Vitesse de recul donnée aux cibles, en unités par seconde : plus fort que l'attaque de base. */
     public static final float KNOCKBACK = 400f;
 
     /** Temps de recharge, en secondes. */
-    public static final float COOLDOWN = 6f;
+    public static final float COOLDOWN = 5f;
+
+    /** Durée d'étourdissement des cibles, en secondes (le boss y est insensible). */
+    public static final float STUN = 0.5f;
 
     /** Crée l'Onde de choc. */
     public Shockwave() {
@@ -43,7 +47,7 @@ public final class Shockwave extends Skill {
             if (away.length() == 0f) {
                 away = player.facing();
             }
-            Hit hit = new Hit(DAMAGE, player.faction(), false, away.scale(KNOCKBACK));
+            Hit hit = new Hit(DAMAGE, player.faction(), false, away.scale(KNOCKBACK), STUN);
             if (target.receive(hit)) {
                 world.events().publish(new GameEvent.EntityHit(targetCenter, DAMAGE, false, target.faction()));
             }

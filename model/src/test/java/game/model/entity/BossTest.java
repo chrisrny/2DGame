@@ -198,4 +198,11 @@ class BossTest {
         assertTrue(vraiJoueur.hp() <= vraiJoueur.maxHp() - BossFirstPhase.SLAM_DAMAGE - Boss.CHARGE_DAMAGE,
                 "la frappe puis la charge ont touché le joueur immobile");
     }
+
+    @Test
+    void leBossEstInsensibleALEtourdissement() {
+        boss.receive(new Hit(10, Faction.PLAYER, false, Vec2.ZERO, 2f));
+        assertEquals(Boss.MAX_HP - 10, boss.hp());
+        assertTrue(!boss.isStunned(), "l'Onde de choc ne fige pas le boss");
+    }
 }

@@ -22,7 +22,7 @@ import java.util.Optional;
 public final class Boss extends Enemy {
 
     /** Points de vie maximum. */
-    public static final int MAX_HP = 600;
+    public static final int MAX_HP = 800;
 
     /** Rayon de la zone de collision : plus du double d'un Rôdeur. */
     public static final float RADIUS = 20f;

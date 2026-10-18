@@ -48,7 +48,7 @@ public record PlayerStats(
      * @return les valeurs par défaut
      */
     public static PlayerStats defaults() {
-        return new PlayerStats(120f, 100, 10, 28f, 0.4f, 0.10f, 48f, 0.2f, 0.8f);
+        return new PlayerStats(120f, 100, 12, 36f, 0.4f, 0.10f, 48f, 0.2f, 0.6f);
     }
 
     /**

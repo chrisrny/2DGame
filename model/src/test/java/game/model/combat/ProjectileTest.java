@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests des projectiles. */
 class ProjectileTest {
@@ -126,5 +127,29 @@ class ProjectileTest {
         Vec2 position = fleche.position();
         avancer(fleche, monde, 10);
         assertEquals(position, fleche.position());
+    }
+
+    @Test
+    void uneLamePercanteTraverseSesPremieresCiblesPuisDisparait() {
+        FakeWorld monde = FakeWorld.empty();
+        Prowler a = new Prowler(new Vec2(120f, 100f));
+        Prowler b = new Prowler(new Vec2(160f, 100f));
+        Prowler c = new Prowler(new Vec2(200f, 100f));
+        monde.addTarget(a);
+        monde.addTarget(b);
+        monde.addTarget(c);
+        Projectile lame = new Projectile(new Vec2(100f, 100f), DROITE, 3f, Faction.PLAYER, 10, 3f, 2);
+        avancer(lame, monde, 60);
+        assertEquals(Prowler.MAX_HP - 10, a.hp(), "touchée une seule fois malgré plusieurs pas au contact");
+        assertEquals(Prowler.MAX_HP - 10, b.hp());
+        assertEquals(Prowler.MAX_HP, c.hp(), "la troisième cible n'est pas touchée");
+        assertEquals(2, lame.hits());
+        assertFalse(lame.isAlive());
+    }
+
+    @Test
+    void unProjectileDoitPouvoirToucherAuMoinsUneCible() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Projectile(Vec2.ZERO, DROITE, 3f, Faction.PLAYER, 10, 3f, 0));
     }
 }

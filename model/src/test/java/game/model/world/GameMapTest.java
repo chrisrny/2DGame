@@ -127,4 +127,14 @@ class GameMapTest {
         assertTrue(MapLayouts.BOSS_ARENA.contains(apparition));
         assertTrue(apparition.x() > MapLayouts.main().center().x(), "du côté opposé au joueur");
     }
+
+    @Test
+    void unEnnemiEtourdiNeBlessePasAuContact() {
+        Prowler rodeur = new Prowler(aCoteDuJoueur());
+        rodeur.receive(new Hit(0, Faction.PLAYER, false, Vec2.ZERO, 0.5f));
+        map.addEnemy(rodeur);
+        int pvMax = PlayerStats.defaults().maxHp();
+        pas(20);
+        assertEquals(pvMax, joueur.hp());
+    }
 }
