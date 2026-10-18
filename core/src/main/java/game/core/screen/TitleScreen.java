@@ -38,8 +38,8 @@ public final class TitleScreen extends MenuScreen {
     @Override
     protected void drawContent() {
         batch.begin();
-        centered("2D GAME", HEIGHT * 0.72f, TITLE_SCALE, SELECTED);
-        centered("Action-roguelite", HEIGHT * 0.72f - 50f, TEXT_SCALE, HINT);
+        centered("Kagaribi", HEIGHT * 0.74f, TITLE_SCALE * 1.2f, SELECTED);
+        centered("Le quartier des braises  ·  action-roguelite", HEIGHT * 0.74f - 46f, TEXT_SCALE, TEXT);
         centered("Entrée : jouer", HEIGHT * 0.40f, TEXT_SCALE, TEXT);
         centered("O : options", HEIGHT * 0.40f - 22f, TEXT_SCALE, TEXT);
         centered("Échap : quitter", HEIGHT * 0.40f - 44f, TEXT_SCALE, HINT);

@@ -6,6 +6,8 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.core.Main;
 import game.core.hud.Fonts;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Base commune des écrans de menu : titre, pause, options, victoire, défaite.
@@ -61,6 +64,23 @@ public abstract class MenuScreen extends ScreenAdapter {
     /** La police de l'écran. */
     protected final BitmapFont font = Fonts.create();
 
+    /** Police des titres (Shojumaru), utilisée par {@link #centered} pour les grandes tailles. */
+    protected final BitmapFont titleFont = Fonts.title();
+
+    /** À partir de cette échelle, un texte centré est un titre : il prend la police des titres. */
+    private static final float TITLE_FONT_FROM = 1.9f;
+
+    /** Nombre de braises qui montent sur le fond des menus. */
+    private static final int EMBERS = 70;
+
+    private final Texture backdrop = new Texture(Gdx.files.internal("sprites/menu_bg.png"));
+    private final Texture white;
+    private final float[] emberX = new float[EMBERS];
+    private final float[] emberY = new float[EMBERS];
+    private final float[] emberSpeed = new float[EMBERS];
+    private final Random random = new Random();
+    private float time;
+
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport = new FitViewport(WIDTH, HEIGHT, camera);
 
@@ -72,6 +92,17 @@ public abstract class MenuScreen extends ScreenAdapter {
     protected MenuScreen(Main main) {
         this.main = Objects.requireNonNull(main, "main");
         font.setUseIntegerPositions(false);
+        backdrop.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        Pixmap pixel = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixel.setColor(Color.WHITE);
+        pixel.fill();
+        white = new Texture(pixel);
+        pixel.dispose();
+        for (int i = 0; i < EMBERS; i++) {
+            emberX[i] = random.nextFloat() * WIDTH;
+            emberY[i] = random.nextFloat() * HEIGHT;
+            emberSpeed[i] = 8f + random.nextFloat() * 22f;
+        }
     }
 
     @Override
@@ -95,7 +126,30 @@ public abstract class MenuScreen extends ScreenAdapter {
 
     /** Dessine le fond. Par défaut, un fond uni sombre. */
     protected void drawBackground() {
-        ScreenUtils.clear(0.05f, 0.04f, 0.07f, 1f);
+        ScreenUtils.clear(0f, 0f, 0f, 1f);
+        viewport.apply();
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        batch.begin();
+        // Le quartier qui brûle sous la lune, et des braises qui montent.
+        batch.draw(backdrop, 0f, 0f, WIDTH, HEIGHT);
+        float delta = Math.min(Gdx.graphics.getDeltaTime(), 0.1f);
+        time += delta;
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+        for (int i = 0; i < EMBERS; i++) {
+            emberY[i] += emberSpeed[i] * delta;
+            emberX[i] += (float) Math.sin(time * 1.3 + i) * 6f * delta;
+            if (emberY[i] > HEIGHT) {
+                emberY[i] = -4f;
+                emberX[i] = random.nextFloat() * WIDTH;
+            }
+            float twinkle = 0.55f + 0.45f * (float) Math.sin(time * 5 + i * 1.7);
+            batch.setColor(1f, 0.45f + 0.35f * (i % 3) / 2f, 0.15f, twinkle * (1f - emberY[i] / HEIGHT * 0.6f));
+            float size = i % 5 == 0 ? 2f : 1f;
+            batch.draw(white, emberX[i], emberY[i], size, size);
+        }
+        batch.setColor(1f, 1f, 1f, 1f);
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        batch.end();
     }
 
     /** Dessine le contenu de l'écran, dans les unités logiques 640x360. */
@@ -115,9 +169,15 @@ public abstract class MenuScreen extends ScreenAdapter {
      * @param color couleur du texte
      */
     protected void centered(String text, float y, float scale, Color color) {
-        font.getData().setScale(scale);
-        font.setColor(color);
-        font.draw(batch, text, 0f, y, WIDTH, Align.center, false);
+        BitmapFont f = scale >= TITLE_FONT_FROM ? titleFont : font;
+        f.getData().setScale(scale);
+        if (f == titleFont) {
+            // Ombre portée sous les titres.
+            f.setColor(0f, 0f, 0f, 0.75f * color.a);
+            f.draw(batch, text, 1.5f, y - 1.5f, WIDTH, Align.center, false);
+        }
+        f.setColor(color);
+        f.draw(batch, text, 0f, y, WIDTH, Align.center, false);
     }
 
     /**
@@ -165,5 +225,8 @@ public abstract class MenuScreen extends ScreenAdapter {
         batch.dispose();
         shapes.dispose();
         font.dispose();
+        titleFont.dispose();
+        backdrop.dispose();
+        white.dispose();
     }
 }
