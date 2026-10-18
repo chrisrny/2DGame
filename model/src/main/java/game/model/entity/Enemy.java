@@ -24,6 +24,7 @@ public abstract class Enemy implements Damageable {
     private Vec2 position;
     private Vec2 knockbackVelocity = Vec2.ZERO;
     private float knockbackTimer;
+    private float stunLeft;
     private int hp;
     private final int maxHp;
     private final float radius;
@@ -77,17 +78,21 @@ public abstract class Enemy implements Damageable {
 
     /**
      * Fait avancer l'ennemi d'un pas de jeu : s'il est repoussé, il subit son recul sans agir ;
-     * sinon, son comportement décide de ce qu'il fait.
+     * s'il est étourdi, il reste sur place ; sinon, son comportement décide de ce qu'il fait.
      *
      * @param world le monde où il évolue
      * @param dt    durée du pas, en secondes
      */
     public void update(World world, float dt) {
+        boolean stunned = stunLeft > 0f;
+        stunLeft = Math.max(0f, stunLeft - dt);
         if (knockbackTimer > 0f) {
             applyKnockback(world, dt);
             return;
         }
-        behavior.act(this, world, dt);
+        if (!stunned) {
+            behavior.act(this, world, dt);
+        }
     }
 
     /**
@@ -131,7 +136,8 @@ public abstract class Enemy implements Damageable {
     /**
      * Applique un coup : ignore le tir ami et les coups reçus une fois mort, puis retire les
      * points de vie. Le recul du coup est une vitesse, en unités par seconde, amortie
-     * jusqu'à zéro en {@link #KNOCKBACK_DURATION}.
+     * jusqu'à zéro en {@link #KNOCKBACK_DURATION}. Un coup qui étourdit fige l'ennemi : un
+     * nouvel étourdissement ne raccourcit jamais celui en cours.
      *
      * @param hit le coup reçu
      * @return {@code true} si le coup a été appliqué
@@ -146,7 +152,22 @@ public abstract class Enemy implements Damageable {
             knockbackVelocity = hit.knockback();
             knockbackTimer = KNOCKBACK_DURATION;
         }
+        stunLeft = Math.max(stunLeft, hit.stun());
         return true;
+    }
+
+    /**
+     * Un ennemi étourdi ne bouge plus, n'attaque plus et ne blesse pas au contact.
+     *
+     * @return {@code true} tant que l'ennemi est étourdi
+     */
+    public boolean isStunned() {
+        return stunLeft > 0f;
+    }
+
+    /** @return le temps d'étourdissement restant, en secondes ({@code 0} s'il n'est pas étourdi) */
+    public float stunLeft() {
+        return stunLeft;
     }
 
     private void applyKnockback(World world, float dt) {

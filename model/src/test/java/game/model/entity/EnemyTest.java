@@ -114,4 +114,40 @@ class EnemyTest {
         e.moveToward(new Vec2(15f, 50f), MONDE_VIDE, 0.5f);
         assertEquals(15f, e.position().x(), EPSILON);
     }
+
+    @Test
+    void unEnnemiEtourdiNAgitPlusPuisReprend() {
+        int[] actions = {0};
+        Enemy e = ennemi((self, world, dt) -> actions[0]++);
+        e.receive(new Hit(0, Faction.PLAYER, false, Vec2.ZERO, 0.5f));
+        assertTrue(e.isStunned());
+        avancer(e, MONDE_VIDE, 29);
+        assertEquals(0, actions[0], "aucune action pendant l'étourdissement");
+        avancer(e, MONDE_VIDE, 5);
+        assertFalse(e.isStunned());
+        assertTrue(actions[0] > 0, "il agit de nouveau une fois réveillé");
+    }
+
+    @Test
+    void unEtourdissementPlusCourtNeRaccourcitPasCeluiEnCours() {
+        Enemy e = ennemi();
+        e.receive(new Hit(0, Faction.PLAYER, false, Vec2.ZERO, 1f));
+        e.receive(new Hit(0, Faction.PLAYER, false, Vec2.ZERO, 0.2f));
+        assertEquals(1f, e.stunLeft(), EPSILON);
+    }
+
+    @Test
+    void unEnnemiEtourdiSubitQuandMemeSonRecul() {
+        Enemy e = ennemi();
+        e.receive(new Hit(0, Faction.PLAYER, false, new Vec2(120f, 0f), 0.5f));
+        avancer(e, MONDE_VIDE, 20);
+        assertEquals(20f, e.position().x(), 0.01f);
+    }
+
+    @Test
+    void unCoupOrdinaireNEtourditPas() {
+        Enemy e = ennemi();
+        e.receive(coup(Faction.PLAYER, 5, Vec2.ZERO));
+        assertFalse(e.isStunned());
+    }
 }

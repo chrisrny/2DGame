@@ -83,9 +83,14 @@ public final class Charger extends Enemy {
         return behavior.isCharging();
     }
 
-    /** @return {@code true} pendant l'étourdissement */
+    /**
+     * Étourdi après une charge (sonné par son élan) ou par un coup qui étourdit.
+     *
+     * @return {@code true} pendant l'un ou l'autre étourdissement
+     */
+    @Override
     public boolean isStunned() {
-        return behavior.isStunned();
+        return super.isStunned() || behavior.isStunned();
     }
 
     /** Résistance à la poussée pendant la charge : il bouscule les autres et reste sur sa ligne. */
