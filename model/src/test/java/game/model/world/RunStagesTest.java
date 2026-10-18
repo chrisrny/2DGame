@@ -67,7 +67,7 @@ class RunStagesTest {
     }
 
     @Test
-    void stageClearedFaitPasserAuStageSuivantEtLeJoueurGardeSesPv() {
+    void stageClearedFaitPasserAuStageSuivantEtSoigneLeJoueur() {
         run.player().receive(new Hit(25, Faction.ENEMY, false, Vec2.ZERO));
         for (int i = 0; i < 3600 && run.stage() == 1; i++) {
             while (run.isChoosingRelic()) {
@@ -79,12 +79,13 @@ class RunStagesTest {
             run.update(PlayerIntent.NONE, FixedStep.DT);
             tuerLesEnnemis();
             if (run.stage() == 2) {
-                assertEquals(pv, run.player().hp());
+                // Répit entre deux étages : une part de la vie revient, sans dépasser le max.
+                int soin = Math.round(run.player().maxHp() * Run.STAGE_HEAL);
+                assertEquals(Math.min(run.player().maxHp(), pv + soin), run.player().hp());
                 assertEquals(position, run.player().position());
             }
         }
         assertEquals(2, run.stage());
-        assertTrue(run.player().hp() < run.player().maxHp(), "pas de soin entre deux stages");
         assertEquals(Stages.demo().get(0).killsToClear(), run.kills());
         assertEquals(0, run.stageKills());
         assertTrue(run.stageIntroLeft() > 0f);

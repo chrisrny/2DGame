@@ -12,7 +12,7 @@ import java.util.Map;
 public final class Stages {
 
     /** Multiplicateur des ennemis du stage 2. */
-    public static final float STAGE_2_MULTIPLIER = 1.3f;
+    public static final float STAGE_2_MULTIPLIER = 1.2f;
 
     private Stages() {
     }
@@ -34,7 +34,7 @@ public final class Stages {
                 wave(2f, 3, 2, 0),
                 wave(2f, 4, 3, 0)), 16, 1f);
         StageConfig stage2 = new StageConfig(2, List.of(
-                wave(2f, 4, 0, 2),
+                wave(2f, 4, 1, 1),
                 wave(2f, 4, 3, 2),
                 wave(2f, 5, 3, 3)), 26, STAGE_2_MULTIPLIER);
         StageConfig stage3 = new StageConfig(3, List.of(), 1, 1f);
