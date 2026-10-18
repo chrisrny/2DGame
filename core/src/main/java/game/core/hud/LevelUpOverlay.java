@@ -4,10 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
@@ -17,22 +16,25 @@ import game.model.relic.Relic;
 import java.util.List;
 
 /**
- * Écran de montée de niveau, dessiné par-dessus le jeu figé : un voile sombre et une carte par
- * relique proposée, avec son numéro, son nom et sa description.
+ * Écran de montée de niveau, par-dessus le jeu figé : un voile sombre, un titre sur un coup de
+ * pinceau, et une carte laquée par relique proposée (icône dans un médaillon, nom, effet).
  *
- * <p>Le joueur choisit avec les touches 1, 2, 3 (rangée du haut ou pavé numérique) ou en
+ * <p>Les cartes entrent l'une après l'autre en montant. Celle sous la souris s'élève et
+ * s'illumine. Le joueur choisit avec les touches 1, 2, 3 (rangée du haut ou pavé numérique) ou en
  * cliquant sur une carte. L'écran ne fait que lire le choix : c'est la partie
  * ({@code Run.chooseRelic}) qui donne la relique.</p>
  */
 public final class LevelUpOverlay implements Disposable {
 
-    private static final float CARD_WIDTH = 160f;
-    private static final float CARD_HEIGHT = 110f;
-    private static final float CARD_GAP = 20f;
-    private static final float CARD_PADDING = 10f;
-    private static final float TITLE_SCALE = 1f;
-    private static final float NAME_SCALE = 0.8f;
-    private static final float TEXT_SCALE = 0.6f;
+    private static final float CARD_WIDTH = 152f;
+    private static final float CARD_HEIGHT = 200f;
+    private static final float CARD_GAP = 22f;
+    private static final float ICON_SCALE = 2f;
+    /** Durée de l'entrée d'une carte, et décalage entre deux cartes, en secondes. */
+    private static final float CARD_IN = 0.28f;
+    private static final float CARD_STAGGER = 0.09f;
+    /** Hauteur dont s'élève la carte survolée, en unités. */
+    private static final float HOVER_LIFT = 5f;
 
     private static final int[][] KEYS = {
         {Input.Keys.NUM_1, Input.Keys.NUMPAD_1},
@@ -42,10 +44,14 @@ public final class LevelUpOverlay implements Disposable {
 
     private final OrthographicCamera camera = new OrthographicCamera();
     private final Viewport viewport;
-    private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font = Fonts.create();
+    private final BitmapFont title = Fonts.title();
+    private final UiAtlas ui = new UiAtlas();
     private final Vector3 touch = new Vector3();
+    private List<Relic> shown;
+    private float time;
+    private final float[] hover = new float[3];
 
     /**
      * Crée l'écran de montée de niveau.
@@ -55,8 +61,6 @@ public final class LevelUpOverlay implements Disposable {
      */
     public LevelUpOverlay(float width, float height) {
         this.viewport = new FitViewport(width, height, camera);
-        font.setUseIntegerPositions(false);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
 
     /**
@@ -84,67 +88,121 @@ public final class LevelUpOverlay implements Disposable {
             }
         }
         if (Gdx.input.justTouched()) {
-            touch.set(Gdx.input.getX(), Gdx.input.getY(), 0f);
-            viewport.unproject(touch);
-            for (int i = 0; i < count; i++) {
-                float x = cardX(i, count);
-                float y = cardY();
-                if (touch.x >= x && touch.x <= x + CARD_WIDTH && touch.y >= y && touch.y <= y + CARD_HEIGHT) {
-                    return i;
-                }
+            int index = cardUnderPointer(count);
+            if (index >= 0) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    private int cardUnderPointer(int count) {
+        touch.set(Gdx.input.getX(), Gdx.input.getY(), 0f);
+        viewport.unproject(touch);
+        for (int i = 0; i < count; i++) {
+            float x = cardX(i, count);
+            float y = cardY();
+            if (touch.x >= x && touch.x <= x + CARD_WIDTH && touch.y >= y && touch.y <= y + CARD_HEIGHT) {
+                return i;
             }
         }
         return -1;
     }
 
     /**
-     * Dessine le voile et les cartes. À appeler en dernier, par-dessus le jeu et le HUD.
+     * Dessine le voile, le titre et les cartes. À appeler en dernier, par-dessus le jeu et le HUD.
      *
      * @param offer les reliques proposées
      */
     public void draw(List<Relic> offer) {
+        if (offer != shown) {
+            // Nouvelle offre : les cartes refont leur entrée.
+            shown = offer;
+            time = 0f;
+        }
+        float delta = Math.min(Gdx.graphics.getDeltaTime(), 0.1f);
+        time += delta;
         viewport.apply();
         float width = viewport.getWorldWidth();
         float height = viewport.getWorldHeight();
+        int under = cardUnderPointer(offer.size());
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapes.setProjectionMatrix(camera.combined);
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
-        shapes.setColor(0f, 0f, 0f, 0.65f);
-        shapes.rect(0f, 0f, width, height);
-        for (int i = 0; i < offer.size(); i++) {
-            float x = cardX(i, offer.size());
-            float y = cardY();
-            shapes.setColor(0.95f, 0.78f, 0.25f, 1f);
-            shapes.rect(x - 1f, y - 1f, CARD_WIDTH + 2f, CARD_HEIGHT + 2f);
-            shapes.setColor(0.12f, 0.12f, 0.15f, 1f);
-            shapes.rect(x, y, CARD_WIDTH, CARD_HEIGHT);
-        }
-        shapes.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        font.getData().setScale(TITLE_SCALE);
-        font.setColor(0.95f, 0.78f, 0.25f, 1f);
-        font.draw(batch, "Niveau supérieur ! Choisis une relique", 0f, cardY() + CARD_HEIGHT + 34f,
-                width, Align.center, false);
+        float veil = Math.min(1f, time / 0.2f);
+        batch.setColor(0.02f, 0.01f, 0.03f, 0.72f * veil);
+        batch.draw(ui.white, 0f, 0f, width, height);
+        batch.setColor(0f, 0f, 0f, 0.8f * veil);
+        batch.draw(ui.vignette, 0f, 0f, width, height);
+        batch.setColor(1f, 1f, 1f, veil);
+        float rw = ui.ribbon.getRegionWidth() * 1.25f;
+        float rh = ui.ribbon.getRegionHeight() * 1.1f;
+        float ry = cardY() + CARD_HEIGHT + 2f;
+        batch.draw(ui.ribbon, (width - rw) / 2f, ry, rw, rh);
+        title.getData().setScale(1.05f);
+        title.setColor(0.98f, 0.84f, 0.42f, veil);
+        title.draw(batch, "Choisis une relique", 0f, ry + rh * 0.68f, width, Align.center, false);
+        title.setColor(1f, 1f, 1f, 1f);
+
         for (int i = 0; i < offer.size(); i++) {
-            Relic relic = offer.get(i);
-            float x = cardX(i, offer.size()) + CARD_PADDING;
-            float inner = CARD_WIDTH - 2f * CARD_PADDING;
-            float top = cardY() + CARD_HEIGHT - CARD_PADDING;
-            font.getData().setScale(NAME_SCALE);
-            font.setColor(0.95f, 0.78f, 0.25f, 1f);
-            font.draw(batch, String.valueOf(i + 1), x, top, inner, Align.left, false);
-            font.setColor(1f, 1f, 1f, 1f);
-            font.draw(batch, relic.name(), x, top - 22f, inner, Align.center, true);
-            font.getData().setScale(TEXT_SCALE);
-            font.setColor(0.80f, 0.80f, 0.85f, 1f);
-            font.draw(batch, relic.description(), x, top - 50f, inner, Align.center, true);
+            float target = i == under ? 1f : 0f;
+            hover[i] += (target - hover[i]) * Math.min(1f, delta * 14f);
+            drawCard(offer.get(i), i, offer.size());
         }
         batch.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    private void drawCard(Relic relic, int index, int count) {
+        float t = Math.clamp((time - index * CARD_STAGGER) / CARD_IN, 0f, 1f);
+        float ease = 1f - (1f - t) * (1f - t) * (1f - t);
+        float lift = hover[index] * HOVER_LIFT;
+        float x = cardX(index, count);
+        float y = cardY() - (1f - ease) * 40f + lift;
+        float alpha = ease;
+
+        // Lueur derrière la carte survolée.
+        if (hover[index] > 0.01f) {
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+            batch.setColor(1f, 0.7f, 0.3f, 0.35f * hover[index] * alpha);
+            batch.draw(ui.glow, x - 30f, y - 30f, CARD_WIDTH + 60f, CARD_HEIGHT + 60f);
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        }
+        batch.setColor(1f, 1f, 1f, alpha);
+        batch.draw(ui.card, x, y);
+
+        // Médaillon et icône, agrandie deux fois (pixels nets).
+        float discX = x + (CARD_WIDTH - ui.cardDisc.getRegionWidth()) / 2f;
+        float discY = y + CARD_HEIGHT - 26f - ui.cardDisc.getRegionHeight() - 14f;
+        batch.draw(ui.cardDisc, discX, discY);
+        TextureRegion icon = ui.icon(relic);
+        float iw = icon.getRegionWidth() * ICON_SCALE;
+        float bob = (float) Math.sin(time * 2.4 + index) * 1.5f * hover[index];
+        batch.draw(icon, discX + 26f - iw / 2f, discY + 26f - iw / 2f + bob, iw, iw);
+
+        // Sceau du numéro, en haut à gauche.
+        batch.draw(ui.seal, x + 10f, y + CARD_HEIGHT - 28f);
+        font.getData().setScale(0.6f);
+        font.setColor(1f, 0.95f, 0.88f, alpha);
+        font.draw(batch, String.valueOf(index + 1), x + 10f, y + CARD_HEIGHT - 19f + font.getCapHeight() / 2f, 18f,
+                Align.center, false);
+
+        // Nom sur la plaque, puis effet.
+        title.getData().setScale(0.62f);
+        title.setColor(0.98f, 0.84f, 0.42f, alpha);
+        title.draw(batch, relic.name(), x + 14f, y + CARD_HEIGHT - 100f - 11f + title.getCapHeight() / 2f + 1f,
+                CARD_WIDTH - 28f, Align.center, false);
+        font.getData().setScale(0.52f);
+        font.setColor(0.9f, 0.88f, 0.84f, alpha);
+        font.draw(batch, relic.description(), x + 16f, y + 62f, CARD_WIDTH - 32f, Align.center, true);
+        font.getData().setScale(0.38f);
+        font.setColor(0.75f, 0.6f, 0.35f, alpha * (0.6f + 0.4f * hover[index]));
+        font.draw(batch, "TOUCHE " + (index + 1) + " OU CLIC", x, y + 20f, CARD_WIDTH, Align.center, false);
+        font.setColor(1f, 1f, 1f, 1f);
+        title.setColor(1f, 1f, 1f, 1f);
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     private float cardX(int index, int count) {
@@ -154,13 +212,14 @@ public final class LevelUpOverlay implements Disposable {
     }
 
     private float cardY() {
-        return (viewport.getWorldHeight() - CARD_HEIGHT) / 2f - 10f;
+        return (viewport.getWorldHeight() - CARD_HEIGHT) / 2f - 22f;
     }
 
     @Override
     public void dispose() {
-        shapes.dispose();
         batch.dispose();
         font.dispose();
+        title.dispose();
+        ui.dispose();
     }
 }
