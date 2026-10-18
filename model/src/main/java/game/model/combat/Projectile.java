@@ -6,8 +6,11 @@ import game.model.commun.Vec2;
 import game.model.entity.Damageable;
 import game.model.event.GameEvent;
 import game.model.world.World;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Un projectile en vol : flèche d'Archer, lame de l'Éventail du joueur, projectile du boss.
@@ -16,6 +19,9 @@ import java.util.Objects;
  * est écoulée, il entre dans un mur, ou il touche une cible de l'autre faction (qui reçoit
  * un {@link Hit}). Une cible qui refuse le coup, par exemple le joueur pendant son esquive,
  * est traversée : c'est ce qui permet d'esquiver les tirs.</p>
+ *
+ * <p>Un projectile perçant ({@code pierce > 1}) traverse ses premières cibles : il en touche
+ * jusqu'à {@code pierce}, chacune une seule fois, puis disparaît.</p>
  */
 public class Projectile {
 
@@ -27,6 +33,8 @@ public class Projectile {
     private final float radius;
     private final Faction faction;
     private final int damage;
+    private final int pierce;
+    private final Set<Damageable> alreadyHit = Collections.newSetFromMap(new IdentityHashMap<>());
     private float lifetime;
     private boolean alive = true;
 
@@ -41,6 +49,26 @@ public class Projectile {
      * @param lifetime durée de vie maximale, en secondes
      */
     public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime) {
+        this(position, velocity, radius, faction, damage, lifetime, 1);
+    }
+
+    /**
+     * Crée un projectile perçant.
+     *
+     * @param position position de départ
+     * @param velocity vitesse, en unités par seconde
+     * @param radius   rayon de la zone de collision
+     * @param faction  faction de celui qui tire
+     * @param damage   dégâts infligés à chaque cible touchée
+     * @param lifetime durée de vie maximale, en secondes
+     * @param pierce   nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins 1
+     */
+    public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime,
+            int pierce) {
+        if (pierce < 1) {
+            throw new IllegalArgumentException("Un projectile touche au moins une cible");
+        }
+        this.pierce = pierce;
         this.position = Objects.requireNonNull(position, "position");
         this.velocity = Objects.requireNonNull(velocity, "velocity");
         this.faction = Objects.requireNonNull(faction, "faction");
@@ -66,7 +94,7 @@ public class Projectile {
             alive = false;
             return;
         }
-        hitFirstTarget(world);
+        hitTargets(world);
     }
 
     // Les murs sont épais (16 u au moins) et un projectile avance de quelques unités par pas :
@@ -76,17 +104,23 @@ public class Projectile {
         return world.walls().stream().anyMatch(wall -> Collisions.overlaps(box, wall));
     }
 
-    // Un projectile ne touche qu'une cible : la première qui accepte le coup.
-    private void hitFirstTarget(World world) {
+    // Chaque cible n'est touchée qu'une fois ; le projectile disparaît à sa dernière cible.
+    private void hitTargets(World world) {
         List<Damageable> targets = world.targetsIn(hitbox(), faction);
         Vec2 push = velocity.normalized().scale(KNOCKBACK);
         for (Damageable target : targets) {
+            if (alreadyHit.contains(target)) {
+                continue;
+            }
             Hit hit = new Hit(damage, faction, false, push);
             if (target.receive(hit)) {
                 world.events().publish(new GameEvent.EntityHit(
                         target.hitbox().center(), damage, false, target.faction()));
-                alive = false;
-                return;
+                alreadyHit.add(target);
+                if (alreadyHit.size() >= pierce) {
+                    alive = false;
+                    return;
+                }
             }
         }
     }
@@ -119,6 +153,16 @@ public class Projectile {
     /** @return les dégâts infligés à la cible touchée */
     public int damage() {
         return damage;
+    }
+
+    /** @return le nombre de cibles différentes que le projectile peut toucher */
+    public int pierce() {
+        return pierce;
+    }
+
+    /** @return le nombre de cibles déjà touchées */
+    public int hits() {
+        return alreadyHit.size();
     }
 
     /** @return le temps de vie restant, en secondes */
