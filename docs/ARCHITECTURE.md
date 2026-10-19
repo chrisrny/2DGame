@@ -32,6 +32,10 @@ modèle par pas fixes de 1/60 s (`FixedStep`), puis dessine. Pendant un pas, `Ru
 
 ## 3. Design patterns
 
+![Classes : entités, ennemis, IA](uml/02-classes-entites-ia.png)
+
+![Classes : joueur, états, compétences, reliques](uml/03-classes-joueur.png)
+
 **State — états du joueur** ([02](uml/02-classes-entites-ia.png), [03](uml/03-classes-joueur.png)).
 `Player` délègue son comportement à un `PlayerState` : `IdleState`, `MovingState`,
 `AttackingState`, `DodgingState`, `HurtState`, `DeadState`. Chaque état décide de l'état

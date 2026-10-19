@@ -23,6 +23,7 @@ Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARC
 | Lancer les tests et afficher la couverture | `./scripts/run_tests.sh` |
 | Générer la Javadoc | `./gradlew javadoc` |
 | Construire un jar exécutable | `./gradlew lwjgl3:jar` |
+| Lancer le jar (déploiement : seul Java 21 est nécessaire) | `java -jar lwjgl3/build/libs/2dgame-0.1.0.jar` |
 
 - Rapport de couverture : `model/build/reports/jacoco/test/html/index.html`
 - Javadoc : `<module>/build/docs/javadoc/index.html`
