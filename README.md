@@ -17,6 +17,7 @@ Une run : trois salles d'ennemis, une relique à choisir après chaque salle, pu
 | Lancer le jeu | `./gradlew lwjgl3:run` |
 | Compiler tout le projet | `./gradlew build` |
 | Lancer les tests du modèle + rapport de couverture | `./gradlew model:test` |
+| Lancer les tests et afficher la couverture | `./scripts/run_tests.sh` |
 | Générer la Javadoc | `./gradlew javadoc` |
 | Construire un jar exécutable | `./gradlew lwjgl3:jar` |
 
