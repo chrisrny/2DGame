@@ -307,12 +307,21 @@ public final class Player implements Damageable {
             if (target.receive(hit)) {
                 touched++;
                 world.events().publish(new GameEvent.EntityHit(targetCenter, damage, critical, target.faction()));
-                for (Relic relic : relics) {
-                    relic.onHit(this);
-                }
+                registerHit();
             }
         }
         return touched;
+    }
+
+    /**
+     * Prévient chaque relique qu'une cible vient d'être touchée ({@link Relic#onHit}) : par
+     * l'attaque, mais aussi par l'Onde de choc ou une lame de l'Éventail. C'est ce qui fait
+     * soigner le Croc vampire à chaque coup, sorts compris.
+     */
+    public void registerHit() {
+        for (Relic relic : relics) {
+            relic.onHit(this);
+        }
     }
 
     /**

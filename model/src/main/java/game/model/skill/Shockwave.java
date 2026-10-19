@@ -13,8 +13,8 @@ import game.model.world.World;
  * étourdit un court instant. C'est le sort de dégagement : il fait le vide quand on est encerclé.
  *
  * <p>Comme l'attaque, c'est la cible qui décide si elle encaisse le coup, et chaque coup accepté
- * publie un {@link GameEvent.EntityHit}. L'onde ne déclenche pas les reliques (le Croc vampire
- * reste lié à l'attaque de base).</p>
+ * publie un {@link GameEvent.EntityHit}. Chaque cible touchée prévient les reliques
+ * ({@link Player#registerHit()}) : le Croc vampire soigne aussi sur l'onde.</p>
  */
 public final class Shockwave extends Skill {
 
@@ -50,6 +50,7 @@ public final class Shockwave extends Skill {
             Hit hit = new Hit(DAMAGE, player.faction(), false, away.scale(KNOCKBACK), STUN);
             if (target.receive(hit)) {
                 world.events().publish(new GameEvent.EntityHit(targetCenter, DAMAGE, false, target.faction()));
+                player.registerHit();
             }
         }
     }

@@ -29,7 +29,10 @@ public final class MapLayouts {
     /** Arène du boss dans la map de la démo : la zone centrale, la plus dégagée. */
     public static final Rect BOSS_ARENA = new Rect(460f, 230f, 1000f, 560f);
 
-    /** Canaux de l'ouest et de l'est, coupés en deux par un pont : de l'eau, infranchissable. */
+    /**
+     * Canaux de l'ouest et de l'est, coupés en deux par un pont : de l'eau, infranchissable à pied,
+     * mais les projectiles et les sorts passent au-dessus.
+     */
     public static final List<Rect> CANALS = List.of(
             r(168, 280, 40, 200), r(168, 560, 40, 180),
             r(1712, 280, 40, 200), r(1712, 560, 40, 180));
@@ -82,7 +85,7 @@ public final class MapLayouts {
                 v(90, 880), v(300, 980), v(780, 1000), v(1140, 1000), v(1560, 1010), v(1840, 880),
                 v(100, 560), v(480, 600), v(1440, 560), v(1760, 520),
                 v(140, 240), v(560, 260), v(780, 110), v(1160, 110), v(1460, 60), v(1700, 250));
-        return new MapLayout(arena, walls, spawnPoints, BOSS_ARENA);
+        return new MapLayout(arena, walls, spawnPoints, BOSS_ARENA, CANALS);
     }
 
     private static List<Rect> border(Rect arena) {
