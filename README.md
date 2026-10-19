@@ -1,9 +1,12 @@
-# 2D Game — B-OOP-301
+# Kagaribi — 2D Game (B-OOP-301)
 
 Action-roguelite en vue de dessus, en Java 21 avec [libGDX](https://libgdx.com/).
-Une run : trois salles d'ennemis, une relique à choisir après chaque salle, puis un boss en deux phases.
+Un héros chibi traverse un quartier japonais en flammes, sur une grande carte : deux étages de
+vagues d'ennemis, une relique à choisir (1 parmi 3) à chaque niveau gagné, puis le Gardien, un
+boss en deux phases. Jouable au clavier et à la souris ou à la manette.
 
-> Projet en cours de développement.
+Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARCHITECTURE.md) ·
+[Diagrammes UML](docs/uml/)
 
 ## Prérequis
 
@@ -85,7 +88,7 @@ Le projet est découpé en trois modules Gradle :
 │       │   ├── skill/         compétences et recharges
 │       │   ├── relic/         reliques et tirage (Factory)
 │       │   ├── ai/            comportements des ennemis (Strategy)
-│       │   └── world/         salles, vagues, run
+│       │   └── world/         carte, étages, vagues, run
 │       └── test/java/game/model/   même arborescence
 │
 ├── core/                    libGDX : affiche et écoute, ne décide rien
