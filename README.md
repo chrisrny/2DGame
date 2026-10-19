@@ -25,19 +25,6 @@ Une run : trois salles d'ennemis, une relique à choisir après chaque salle, pu
 - Javadoc : `<module>/build/docs/javadoc/index.html`
 - Jar : `lwjgl3/build/libs/`
 
-## Tests automatiques
-
-Les tests du modèle sont lancés automatiquement avant chaque `git push` par un hook git versionné
-(`.githooks/pre-push`), qui appelle `scripts/run_tests.sh`. Si un test échoue, le push est annulé.
-
-À activer une fois après avoir cloné le dépôt :
-
-```sh
-git config core.hooksPath .githooks
-```
-
-Le script affiche aussi le pourcentage de lignes et de branches couvertes (rapport JaCoCo).
-
 ## Démo
 
 | Touche | Action |
