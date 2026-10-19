@@ -4,4 +4,12 @@
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api project(':model')
+
+  // Tests des entrées (manette, aide à la visée) : du Java pur, sans fenêtre.
+  testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+  useJUnitPlatform()
 }
