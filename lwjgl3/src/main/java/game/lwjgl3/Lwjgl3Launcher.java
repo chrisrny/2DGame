@@ -22,12 +22,14 @@ public final class Lwjgl3Launcher {
         if (StartupHelper.startNewJvmIfRequired()) {
             return;
         }
-        new Lwjgl3Application(new Main(), createConfiguration());
+        // La manette est lue avec GLFW, déjà présent dans le lanceur : le jeu ne dépend que de
+        // l'abstraction Gamepad (module core).
+        new Lwjgl3Application(new Main(new GlfwGamepad()), createConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration createConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
-        configuration.setTitle("2D Game");
+        configuration.setTitle("Kagaribi");
         // Vsync : limite les images par seconde au rafraîchissement de l'écran, évite le déchirement.
         configuration.useVsync(true);
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
