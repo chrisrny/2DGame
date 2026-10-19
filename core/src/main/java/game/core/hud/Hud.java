@@ -82,6 +82,7 @@ public final class Hud implements Disposable {
     private float hurtFlash;
     private final float[] readyFlash = new float[2];
     private final boolean[] wasReady = {true, true};
+    private boolean gamepadLabels;
 
     /**
      * Crée le HUD.
@@ -305,8 +306,17 @@ public final class Hud implements Disposable {
     }
 
     private void drawSlotTexts(Player player, float x, float y) {
-        slotText(Optional.of(player.skill1()), "CLIC D", x, y);
-        slotText(player.skill2(), "E", x + SLOT + SLOT_GAP, y);
+        slotText(Optional.of(player.skill1()), gamepadLabels ? "RB" : "CLIC D", x, y);
+        slotText(player.skill2(), gamepadLabels ? "LB" : "E", x + SLOT + SLOT_GAP, y);
+    }
+
+    /**
+     * Choisit les touches affichées sous les compétences : celles de la manette ou du clavier.
+     *
+     * @param gamepad {@code true} si le joueur joue à la manette
+     */
+    public void setGamepadLabels(boolean gamepad) {
+        this.gamepadLabels = gamepad;
     }
 
     private void slotText(Optional<Skill> skill, String key, float x, float y) {

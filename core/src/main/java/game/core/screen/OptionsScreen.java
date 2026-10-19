@@ -1,6 +1,5 @@
 package game.core.screen;
 
-import com.badlogic.gdx.Input.Keys;
 import game.core.Main;
 import game.model.commun.Difficulty;
 import game.model.commun.Settings;
@@ -12,8 +11,8 @@ import game.model.commun.Settings;
  * à la partie, les chiffres de dégâts sont tout de suite affichés ou masqués, sans relancer. La
  * difficulté s'applique à partir du stage suivant.</p>
  *
- * <p>On choisit une ligne avec les flèches (ou Z / S), on la règle avec gauche / droite (ou Q / D)
- * ou Entrée. Échap revient à l'écran d'où on l'a ouvert.</p>
+ * <p>On choisit une ligne avec les flèches (ou Z / S, la croix, le stick), on la règle avec gauche /
+ * droite (ou Q / D) ou Entrée (A). Échap (B) revient à l'écran d'où on l'a ouvert.</p>
  */
 public final class OptionsScreen extends MenuScreen {
 
@@ -44,15 +43,15 @@ public final class OptionsScreen extends MenuScreen {
             main.pop();
             return true;
         }
-        if (pressed(Keys.UP, Keys.W)) {
+        if (upPressed()) {
             selected = (selected + ITEM_COUNT - 1) % ITEM_COUNT;
         }
-        if (pressed(Keys.DOWN, Keys.S)) {
+        if (downPressed()) {
             selected = (selected + 1) % ITEM_COUNT;
         }
-        if (pressed(Keys.LEFT, Keys.A)) {
+        if (leftPressed()) {
             change(-1);
-        } else if (pressed(Keys.RIGHT, Keys.D) || confirmPressed()) {
+        } else if (rightPressed() || confirmPressed()) {
             change(1);
         }
         return false;
@@ -86,7 +85,8 @@ public final class OptionsScreen extends MenuScreen {
         }
         centered("La difficulté change à partir du prochain stage.", y - ITEM_COUNT * ITEM_GAP - 8f,
                 TEXT_SCALE * 0.7f, HINT);
-        centered("Flèches : choisir et régler · Entrée : valider · Échap : retour", 30f, TEXT_SCALE * 0.7f, HINT);
+        centered(hint("Flèches : choisir et régler · Entrée : valider · Échap : retour",
+                "Croix : choisir et régler · A : valider · B : retour"), 30f, TEXT_SCALE * 0.7f, HINT);
         batch.end();
     }
 
