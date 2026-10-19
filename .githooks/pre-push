@@ -1,0 +1,13 @@
+#!/bin/sh
+# Hook git : lance les tests avant chaque push et annule le push s'ils échouent.
+# Activation (une fois par clone) : git config core.hooksPath .githooks
+# Contournement exceptionnel : git push --no-verify
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+echo "==> pre-push : lancement des tests…"
+if ! ./scripts/run_tests.sh; then
+  echo ""
+  echo "Des tests échouent : push annulé."
+  exit 1
+fi
