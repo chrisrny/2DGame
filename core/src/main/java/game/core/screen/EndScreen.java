@@ -8,8 +8,8 @@ import game.model.world.Run;
 import java.util.Objects;
 
 /**
- * Base des écrans de fin de partie : un grand titre, le bilan de la partie, puis Entrée pour
- * rejouer (nouvelle partie, nouvelle graine) ou Échap pour revenir au titre.
+ * Base des écrans de fin de partie : un grand titre, le bilan de la partie, puis Entrée (A) pour
+ * rejouer (nouvelle partie, nouvelle graine) ou Échap (B) pour revenir au titre.
  */
 public abstract class EndScreen extends MenuScreen {
 
@@ -71,8 +71,8 @@ public abstract class EndScreen extends MenuScreen {
         centered("Ennemis tués : " + run.kills(), y - LINE_GAP, TEXT_SCALE, TEXT);
         centered("Niveau : " + run.experience().level(), y - 2 * LINE_GAP, TEXT_SCALE, TEXT);
         centered("Temps : " + formatTime(run.elapsed()), y - 3 * LINE_GAP, TEXT_SCALE, TEXT);
-        centered("Entrée : rejouer", HEIGHT * 0.18f, TEXT_SCALE, TEXT);
-        centered("Échap : menu titre", HEIGHT * 0.18f - 22f, TEXT_SCALE, HINT);
+        centered(hint("Entrée : rejouer", "A : rejouer"), HEIGHT * 0.18f, TEXT_SCALE, TEXT);
+        centered(hint("Échap : menu titre", "B : menu titre"), HEIGHT * 0.18f - 22f, TEXT_SCALE, HINT);
         batch.end();
     }
 

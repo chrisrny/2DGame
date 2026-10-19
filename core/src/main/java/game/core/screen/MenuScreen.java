@@ -17,6 +17,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import game.core.Main;
 import game.core.hud.Fonts;
+import game.core.input.Gamepad;
+import game.core.input.Gamepad.Button;
+import game.core.input.Gamepad.Direction;
 import java.util.Objects;
 import java.util.Random;
 
@@ -210,14 +213,50 @@ public abstract class MenuScreen extends ScreenAdapter {
         return false;
     }
 
-    /** @return {@code true} si Entrée vient d'être enfoncée */
-    protected static boolean confirmPressed() {
-        return pressed(Keys.ENTER, Keys.NUMPAD_ENTER);
+    /** @return {@code true} si Entrée, ou A (✕) sur la manette, vient d'être enfoncé */
+    protected boolean confirmPressed() {
+        return pressed(Keys.ENTER, Keys.NUMPAD_ENTER) || pad().justPressed(Button.A);
     }
 
-    /** @return {@code true} si Échap vient d'être enfoncée */
-    protected static boolean backPressed() {
-        return pressed(Keys.ESCAPE);
+    /** @return {@code true} si Échap, ou B (○) sur la manette, vient d'être enfoncé */
+    protected boolean backPressed() {
+        return pressed(Keys.ESCAPE) || pad().justPressed(Button.B);
+    }
+
+    /** @return {@code true} si haut vient d'être demandé : flèche, Z (W), croix ou stick */
+    protected boolean upPressed() {
+        return pressed(Keys.UP, Keys.W) || pad().justPressed(Direction.UP);
+    }
+
+    /** @return {@code true} si bas vient d'être demandé : flèche, S, croix ou stick */
+    protected boolean downPressed() {
+        return pressed(Keys.DOWN, Keys.S) || pad().justPressed(Direction.DOWN);
+    }
+
+    /** @return {@code true} si gauche vient d'être demandé : flèche, Q (A), croix ou stick */
+    protected boolean leftPressed() {
+        return pressed(Keys.LEFT, Keys.A) || pad().justPressed(Direction.LEFT);
+    }
+
+    /** @return {@code true} si droite vient d'être demandé : flèche, D, croix ou stick */
+    protected boolean rightPressed() {
+        return pressed(Keys.RIGHT, Keys.D) || pad().justPressed(Direction.RIGHT);
+    }
+
+    /**
+     * Choisit le texte d'aide selon la source utilisée en dernier.
+     *
+     * @param keyboard le texte pour le clavier
+     * @param gamepad  le texte pour la manette
+     * @return celui qui correspond à ce que le joueur a en main
+     */
+    protected String hint(String keyboard, String gamepad) {
+        return main.usingGamepad() ? gamepad : keyboard;
+    }
+
+    /** @return la manette du jeu */
+    protected Gamepad pad() {
+        return main.gamepad();
     }
 
     @Override

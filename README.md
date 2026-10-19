@@ -26,17 +26,21 @@ Une run : trois salles d'ennemis, une relique à choisir après chaque salle, pu
 
 ## Démo
 
-| Touche | Action |
-|---|---|
-| Z Q S D ou flèches | Se déplacer |
-| Souris | Viser |
-| Clic gauche | Attaque de base |
-| Clic droit | Onde de choc |
-| E | Éventail de lames |
-| Espace | Esquive |
-| Échap | Pause : reprendre, options ou quitter |
-| **F9** | Triche de démo : victoire immédiate |
-| **F10** | Triche de démo : défaite immédiate |
+| Clavier et souris | Manette (Xbox / PlayStation) | Action |
+|---|---|---|
+| Z Q S D ou flèches | Stick gauche ou croix | Se déplacer |
+| Souris | Stick droit (sinon sens de la marche, avec aide à la visée) | Viser |
+| Clic gauche | X / □ ou gâchette droite | Attaque de base |
+| Clic droit | RB / R1 ou Y / △ | Onde de choc |
+| E | LB / L1 ou B / ○ | Éventail de lames |
+| Espace | A / ✕ ou gâchette gauche | Esquive |
+| Échap | Start | Pause : reprendre, options ou quitter |
+| 1 2 3 ou clic | Croix puis A / ✕ | Choisir une relique |
+| **F9** | — | Triche de démo : victoire immédiate |
+| **F10** | — | Triche de démo : défaite immédiate |
+
+La manette est détectée toute seule, branchée avant ou pendant la partie : on passe du clavier à
+la manette sans rien régler, et les touches affichées (menus, HUD, cartes) suivent.
 
 Pour la soutenance :
 

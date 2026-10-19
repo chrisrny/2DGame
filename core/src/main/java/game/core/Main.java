@@ -1,7 +1,10 @@
 package game.core;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
+import game.core.input.Gamepad;
 import game.core.screen.DefeatScreen;
 import game.core.screen.GameScreen;
 import game.core.screen.TitleScreen;
@@ -29,12 +32,60 @@ import java.util.Objects;
  * <p>Un écran quitté est donc toujours libéré ({@code dispose}) : il n'y a pas de fuite.</p>
  *
  * <p>{@code Main} garde aussi les réglages du joueur ({@link #settings()}), partagés par l'écran
- * des options et la partie en cours, le temps que le jeu est ouvert.</p>
+ * des options et la partie en cours, le temps que le jeu est ouvert, et la manette
+ * ({@link #gamepad()}) : il la lit une fois par image et retient si le joueur joue à la manette ou
+ * au clavier ({@link #usingGamepad()}), pour que les écrans affichent les bons boutons.</p>
  */
 public class Main extends Game {
 
     private final Deque<Screen> suspended = new ArrayDeque<>();
     private final Settings settings = new Settings(Difficulty.NORMAL);
+    private final Gamepad gamepad;
+    private boolean usingGamepad;
+
+    /** Crée le jeu sans manette. */
+    public Main() {
+        this(Gamepad.NONE);
+    }
+
+    /**
+     * Crée le jeu avec une manette, fournie par le lanceur.
+     *
+     * @param gamepad la manette ({@link Gamepad#NONE} s'il n'y en a pas)
+     */
+    public Main(Gamepad gamepad) {
+        this.gamepad = Objects.requireNonNull(gamepad, "gamepad");
+    }
+
+    @Override
+    public void render() {
+        gamepad.update();
+        trackDevice();
+        super.render();
+    }
+
+    // Le joueur joue à la manette dès qu'il s'en sert, au clavier dès qu'il touche le clavier ou
+    // la souris : on suit la dernière source utilisée.
+    private void trackDevice() {
+        if (!gamepad.connected()) {
+            usingGamepad = false;
+        } else if (gamepad.active()) {
+            usingGamepad = true;
+        } else if (Gdx.input.isKeyJustPressed(Keys.ANY_KEY) || Gdx.input.justTouched()
+                || Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0) {
+            usingGamepad = false;
+        }
+    }
+
+    /** @return la manette, lue une fois par image */
+    public Gamepad gamepad() {
+        return gamepad;
+    }
+
+    /** @return {@code true} si la dernière source utilisée par le joueur est la manette */
+    public boolean usingGamepad() {
+        return usingGamepad;
+    }
 
     @Override
     public void create() {

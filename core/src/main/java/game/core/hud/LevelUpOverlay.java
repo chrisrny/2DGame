@@ -12,16 +12,22 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import game.core.input.Gamepad;
+import game.core.input.Gamepad.Button;
+import game.core.input.Gamepad.Direction;
 import game.model.relic.Relic;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * Écran de montée de niveau, par-dessus le jeu figé : un voile sombre, un titre sur un coup de
  * pinceau, et une carte laquée par relique proposée (icône dans un médaillon, nom, effet).
  *
  * <p>Les cartes entrent l'une après l'autre en montant. Celle sous la souris s'élève et
- * s'illumine. Le joueur choisit avec les touches 1, 2, 3 (rangée du haut ou pavé numérique) ou en
- * cliquant sur une carte. L'écran ne fait que lire le choix : c'est la partie
+ * s'illumine. Le joueur choisit avec les touches 1, 2, 3 (rangée du haut ou pavé numérique), en
+ * cliquant sur une carte, ou à la manette : la croix ou le stick passe d'une carte à l'autre et A
+ * valide. L'écran ne fait que lire le choix : c'est la partie
  * ({@code Run.chooseRelic}) qui donne la relique.</p>
  */
 public final class LevelUpOverlay implements Disposable {
@@ -52,15 +58,24 @@ public final class LevelUpOverlay implements Disposable {
     private List<Relic> shown;
     private float time;
     private final float[] hover = new float[3];
+    private final Gamepad pad;
+    private final BooleanSupplier usingPad;
+    private int focus;
+    private boolean padPrompt;
 
     /**
      * Crée l'écran de montée de niveau.
      *
-     * @param width  largeur de l'écran logique, en unités
-     * @param height hauteur de l'écran logique, en unités
+     * @param width    largeur de l'écran logique, en unités
+     * @param height   hauteur de l'écran logique, en unités
+     * @param pad      la manette
+     * @param usingPad {@code true} quand le joueur joue à la manette : la carte choisie suit alors
+     *                 la croix, et non la souris
      */
-    public LevelUpOverlay(float width, float height) {
+    public LevelUpOverlay(float width, float height, Gamepad pad, BooleanSupplier usingPad) {
         this.viewport = new FitViewport(width, height, camera);
+        this.pad = Objects.requireNonNull(pad, "pad");
+        this.usingPad = Objects.requireNonNull(usingPad, "usingPad");
     }
 
     /**
@@ -93,6 +108,18 @@ public final class LevelUpOverlay implements Disposable {
                 return index;
             }
         }
+        if (count > 0) {
+            focus = Math.clamp(focus, 0, count - 1);
+            if (pad.justPressed(Direction.LEFT)) {
+                focus = (focus + count - 1) % count;
+            }
+            if (pad.justPressed(Direction.RIGHT)) {
+                focus = (focus + 1) % count;
+            }
+            if (pad.justPressed(Button.A)) {
+                return focus;
+            }
+        }
         return -1;
     }
 
@@ -119,13 +146,17 @@ public final class LevelUpOverlay implements Disposable {
             // Nouvelle offre : les cartes refont leur entrée.
             shown = offer;
             time = 0f;
+            // À la manette, la carte du milieu est proposée d'abord.
+            focus = offer.size() / 2;
         }
         float delta = Math.min(Gdx.graphics.getDeltaTime(), 0.1f);
         time += delta;
         viewport.apply();
         float width = viewport.getWorldWidth();
         float height = viewport.getWorldHeight();
-        int under = cardUnderPointer(offer.size());
+        boolean withPad = usingPad.getAsBoolean();
+        int under = withPad ? focus : cardUnderPointer(offer.size());
+        this.padPrompt = withPad;
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         batch.setProjectionMatrix(camera.combined);
@@ -199,7 +230,10 @@ public final class LevelUpOverlay implements Disposable {
         font.draw(batch, relic.description(), x + 16f, y + 62f, CARD_WIDTH - 32f, Align.center, true);
         font.getData().setScale(0.38f);
         font.setColor(0.75f, 0.6f, 0.35f, alpha * (0.6f + 0.4f * hover[index]));
-        font.draw(batch, "TOUCHE " + (index + 1) + " OU CLIC", x, y + 20f, CARD_WIDTH, Align.center, false);
+        String prompt = padPrompt
+                ? (index == focus ? "A : CHOISIR" : "CROIX : CHANGER")
+                : "TOUCHE " + (index + 1) + " OU CLIC";
+        font.draw(batch, prompt, x, y + 20f, CARD_WIDTH, Align.center, false);
         font.setColor(1f, 1f, 1f, 1f);
         title.setColor(1f, 1f, 1f, 1f);
         batch.setColor(1f, 1f, 1f, 1f);

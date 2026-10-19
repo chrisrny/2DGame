@@ -17,6 +17,9 @@ import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
 import game.core.hud.StageBanner;
+import game.core.input.CombinedInput;
+import game.core.input.Gamepad;
+import game.core.input.GamepadInput;
 import game.core.input.InputSource;
 import game.core.input.KeyboardMouseInput;
 import game.core.render.SceneRenderer;
@@ -24,9 +27,11 @@ import game.core.render.WorldRenderer;
 import game.model.commun.PlayerIntent;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
+import game.model.entity.Enemy;
 import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
 import game.model.world.Run;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,7 +41,7 @@ import java.util.List;
  * le modèle à pas fixe, dessiner. L'écran ne décide jamais des règles : il transmet
  * l'intention du joueur au modèle et dessine ce que le modèle contient.</p>
  *
- * <p>Échap ouvre la pause, F9 et F10 gagnent ou perdent tout de suite (triche de démo pour la
+ * <p>Échap (Start à la manette) ouvre la pause, F9 et F10 gagnent ou perdent tout de suite (triche de démo pour la
  * soutenance). Quand la partie est finie, l'écran laisse {@link #END_DELAY}
  * secondes pour voir ce qui s'est passé, puis passe à l'écran de victoire ou de défaite.</p>
  *
@@ -67,10 +72,11 @@ public class GameScreen extends ScreenAdapter {
     private final FixedStep clock = new FixedStep();
     private final Main main;
     private final Run run;
-    private final InputSource input = new KeyboardMouseInput(viewport);
+    private final InputSource input;
+    private final GamepadInput gamepadInput;
     private final WorldRenderer worldRenderer = new WorldRenderer();
     private final Hud hud = new Hud(WORLD_WIDTH, WORLD_HEIGHT);
-    private final LevelUpOverlay levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT);
+    private final LevelUpOverlay levelUp;
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
     private final GameAudio audio;
@@ -90,6 +96,27 @@ public class GameScreen extends ScreenAdapter {
         this.damageNumbers = new DamageNumbers(run.events());
         this.scene = new SceneRenderer(run.events(), WORLD_WIDTH, WORLD_HEIGHT);
         this.audio = new GameAudio(run.events());
+        // Clavier et manette en même temps : on passe de l'un à l'autre sans rien régler.
+        this.gamepadInput = new GamepadInput(main.gamepad(), this::enemyPositions);
+        this.input = new CombinedInput(new KeyboardMouseInput(viewport), gamepadInput, main::usingGamepad);
+        this.levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT, main.gamepad(), main::usingGamepad);
+    }
+
+    // Positions des ennemis en vie, pour l'aide à la visée de la manette.
+    private List<Vec2> enemyPositions() {
+        List<Vec2> positions = new ArrayList<>();
+        for (Enemy enemy : run.map().enemies()) {
+            if (enemy.isAlive()) {
+                positions.add(enemy.position());
+            }
+        }
+        return positions;
+    }
+
+    @Override
+    public void show() {
+        // En revenant de la pause, le A qui a validé « Reprendre » ne doit pas faire esquiver.
+        gamepadInput.ignoreUntilReleased();
     }
 
     @Override
@@ -105,7 +132,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         // Pause : cet écran est gardé tel quel derrière l'écran de pause, et n'avance plus.
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || main.gamepad().justPressed(Gamepad.Button.START)) {
             main.push(new PauseScreen(main, this));
             return;
         }
@@ -128,6 +155,8 @@ public class GameScreen extends ScreenAdapter {
             int choice = levelUp.readChoice(run.pendingChoice().size());
             if (choice >= 0) {
                 run.chooseRelic(choice);
+                // Le A qui a validé la carte ne doit pas faire esquiver à la reprise.
+                gamepadInput.ignoreUntilReleased();
             }
             draw();
             return;
@@ -194,6 +223,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         // Le HUD en dernier, par-dessus le monde, avec sa propre caméra fixe.
+        hud.setGamepadLabels(main.usingGamepad());
         hud.draw(run.player(), run.experience());
         stageBanner.draw(run);
         bossBar.draw(run);

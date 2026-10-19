@@ -1,16 +1,16 @@
 package game.core.screen;
 
-import com.badlogic.gdx.Input.Keys;
 import game.core.Main;
+import game.core.input.Gamepad.Button;
 import java.util.Objects;
 
 /**
- * Écran de pause, ouvert avec Échap pendant la partie.
+ * Écran de pause, ouvert avec Échap (Start à la manette) pendant la partie.
  *
  * <p>La partie reste dessinée derrière, figée sous un voile : son écran est gardé de côté par
  * {@link Main#push}, et il n'est pas mis à jour tant que la pause est affichée. On choisit avec
- * les flèches (ou Z / S) et Entrée : reprendre, options ou quitter vers le titre. Échap reprend
- * directement.</p>
+ * les flèches (ou Z / S, la croix, le stick) et Entrée (A) : reprendre, options ou quitter vers le
+ * titre. Échap (B ou Start) reprend directement.</p>
  */
 public final class PauseScreen extends MenuScreen {
 
@@ -38,14 +38,14 @@ public final class PauseScreen extends MenuScreen {
 
     @Override
     protected boolean handleInput() {
-        if (backPressed()) {
+        if (backPressed() || pad().justPressed(Button.START)) {
             main.pop();
             return true;
         }
-        if (pressed(Keys.UP, Keys.W)) {
+        if (upPressed()) {
             selected = (selected + ITEMS.length - 1) % ITEMS.length;
         }
-        if (pressed(Keys.DOWN, Keys.S)) {
+        if (downPressed()) {
             selected = (selected + 1) % ITEMS.length;
         }
         if (!confirmPressed()) {
@@ -76,7 +76,8 @@ public final class PauseScreen extends MenuScreen {
             String label = isSelected ? "> " + ITEMS[i] + " <" : ITEMS[i];
             centered(label, y - i * ITEM_GAP, TEXT_SCALE * 1.2f, isSelected ? SELECTED : TEXT);
         }
-        centered("Flèches : choisir · Entrée : valider · Échap : reprendre", 30f, TEXT_SCALE * 0.7f, HINT);
+        centered(hint("Flèches : choisir · Entrée : valider · Échap : reprendre",
+                "Croix : choisir · A : valider · B ou Start : reprendre"), 30f, TEXT_SCALE * 0.7f, HINT);
         batch.end();
     }
 
