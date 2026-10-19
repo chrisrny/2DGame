@@ -15,8 +15,9 @@ import game.model.world.World;
  * une file d'ennemis est fauchée d'un coup.</p>
  *
  * <p>Chaque lame est un {@link Projectile} ordinaire, le même que les flèches des archers : il
- * avance, s'arrête contre les murs, touche une cible de l'autre faction et publie le coup. Comme
- * l'Onde de choc, l'éventail ne déclenche pas les reliques.</p>
+ * avance, s'arrête contre les murs, survole l'eau, touche une cible de l'autre faction et publie le
+ * coup. Comme l'Onde de choc, chaque coup de lame prévient les reliques
+ * ({@link Player#registerHit()}) : le Croc vampire soigne aussi sur les lames.</p>
  */
 public final class BladeFan extends Skill {
 
@@ -61,7 +62,7 @@ public final class BladeFan extends Skill {
         for (int i = 0; i < BLADE_COUNT; i++) {
             Vec2 direction = aim.rotated(-spread / 2f + i * step);
             world.spawnProjectile(new Projectile(start, direction.scale(SPEED), RADIUS,
-                    player.faction(), DAMAGE, LIFETIME, PIERCE));
+                    player.faction(), DAMAGE, LIFETIME, PIERCE, player::registerHit));
         }
     }
 }

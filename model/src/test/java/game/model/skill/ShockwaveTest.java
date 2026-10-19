@@ -11,6 +11,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Damageable;
 import game.model.entity.Player;
 import game.model.event.GameEvent;
+import game.model.relic.VampireFang;
 import game.model.world.FakeWorld;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,5 +123,16 @@ class ShockwaveTest {
         Cible proche = cible(20f, 0f, Faction.ENEMY);
         onde.tryActivate(joueur, monde);
         assertEquals(Shockwave.STUN, proche.coups.get(0).stun(), 1e-6f);
+    }
+
+    @Test
+    void leCrocVampireSoigneAChaqueCibleDeLOnde() {
+        joueur.addRelic(new VampireFang());
+        joueur.receive(new Hit(10, Faction.ENEMY, false, Vec2.ZERO));
+        int pvAvant = joueur.hp();
+        cible(30f, 0f, Faction.ENEMY);
+        cible(-30f, 0f, Faction.ENEMY);
+        onde.tryActivate(joueur, monde);
+        assertEquals(pvAvant + 2 * VampireFang.HEAL_PER_HIT, joueur.hp());
     }
 }

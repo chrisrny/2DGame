@@ -13,6 +13,7 @@ import game.model.commun.PlayerStats;
 import game.model.commun.Vec2;
 import game.model.entity.Damageable;
 import game.model.entity.Player;
+import game.model.relic.VampireFang;
 import game.model.world.FakeWorld;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,5 +162,18 @@ class BladeFanTest {
         eventail.update(BladeFan.COOLDOWN);
         assertTrue(eventail.tryActivate(joueur, monde));
         assertEquals(2 * BladeFan.BLADE_COUNT, monde.projectiles().size());
+    }
+
+    @Test
+    void leCrocVampireSoigneAChaqueCoupDeLame() {
+        joueur.addRelic(new VampireFang());
+        joueur.receive(new Hit(10, Faction.ENEMY, false, Vec2.ZERO));
+        int pvAvant = joueur.hp();
+        monde.addTarget(new Cible(DEPART.add(new Vec2(40f, 0f))));
+        eventail.tryActivate(joueur, monde);
+        voler(20);
+        int coups = (int) monde.projectiles().stream().mapToInt(Projectile::hits).sum();
+        assertTrue(coups > 0, "au moins une lame a touché");
+        assertEquals(Math.min(joueur.maxHp(), pvAvant + coups * VampireFang.HEAL_PER_HIT), joueur.hp());
     }
 }
