@@ -1,6 +1,7 @@
 package game.model.world;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import game.model.combat.Collisions;
@@ -118,5 +119,19 @@ class MapLayoutsTest {
         for (Vec2 point : points) {
             assertTrue(libre(new Circle(point, Boss.RADIUS)), point.toString());
         }
+    }
+
+    @Test
+    void lesCanauxSontDeLEauQueLesProjectilesSurvolent() {
+        assertEquals(MapLayouts.CANALS, MAP.water());
+        assertTrue(MAP.walls().containsAll(MAP.water()), "on ne marche pas sur l'eau");
+    }
+
+    @Test
+    void uneEauQuiNEstPasUnMurEstRefusee() {
+        Rect eau = new Rect(10f, 10f, 20f, 20f);
+        assertThrows(IllegalArgumentException.class,
+                () -> new MapLayout(new Rect(0f, 0f, 100f, 100f), List.of(), List.of(), new Rect(0f, 0f, 100f, 100f),
+                        List.of(eau)));
     }
 }

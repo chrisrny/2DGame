@@ -16,7 +16,7 @@ import java.util.Set;
  * Un projectile en vol : flèche d'Archer, lame de l'Éventail du joueur, projectile du boss.
  *
  * <p>À chaque pas, il avance en ligne droite et disparaît dans trois cas : sa durée de vie
- * est écoulée, il entre dans un mur, ou il touche une cible de l'autre faction (qui reçoit
+ * est écoulée, il entre dans un mur (l'eau ne l'arrête pas : il passe au-dessus), ou il touche une cible de l'autre faction (qui reçoit
  * un {@link Hit}). Une cible qui refuse le coup, par exemple le joueur pendant son esquive,
  * est traversée : c'est ce qui permet d'esquiver les tirs.</p>
  *
@@ -34,6 +34,7 @@ public class Projectile {
     private final Faction faction;
     private final int damage;
     private final int pierce;
+    private final Runnable onHit;
     private final Set<Damageable> alreadyHit = Collections.newSetFromMap(new IdentityHashMap<>());
     private float lifetime;
     private boolean alive = true;
@@ -53,7 +54,7 @@ public class Projectile {
     }
 
     /**
-     * Crée un projectile perçant.
+     * Crée un projectile perçant, sans personne à prévenir de ses coups.
      *
      * @param position position de départ
      * @param velocity vitesse, en unités par seconde
@@ -65,10 +66,28 @@ public class Projectile {
      */
     public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime,
             int pierce) {
+        this(position, velocity, radius, faction, damage, lifetime, pierce, () -> { });
+    }
+
+    /**
+     * Crée un projectile perçant dont le tireur est prévenu à chaque coup.
+     *
+     * @param position position de départ
+     * @param velocity vitesse, en unités par seconde
+     * @param radius   rayon de la zone de collision
+     * @param faction  faction de celui qui tire
+     * @param damage   dégâts infligés à chaque cible touchée
+     * @param lifetime durée de vie maximale, en secondes
+     * @param pierce   nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins 1
+     * @param onHit    appelé à chaque cible touchée : le tireur en est prévenu (reliques du joueur)
+     */
+    public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime,
+            int pierce, Runnable onHit) {
         if (pierce < 1) {
             throw new IllegalArgumentException("Un projectile touche au moins une cible");
         }
         this.pierce = pierce;
+        this.onHit = Objects.requireNonNull(onHit, "onHit");
         this.position = Objects.requireNonNull(position, "position");
         this.velocity = Objects.requireNonNull(velocity, "velocity");
         this.faction = Objects.requireNonNull(faction, "faction");
@@ -101,7 +120,7 @@ public class Projectile {
     // il ne peut pas traverser un mur entre deux pas.
     private boolean hitsWall(World world) {
         Circle box = hitbox();
-        return world.walls().stream().anyMatch(wall -> Collisions.overlaps(box, wall));
+        return world.solidWalls().stream().anyMatch(wall -> Collisions.overlaps(box, wall));
     }
 
     // Chaque cible n'est touchée qu'une fois ; le projectile disparaît à sa dernière cible.
@@ -117,6 +136,7 @@ public class Projectile {
                 world.events().publish(new GameEvent.EntityHit(
                         target.hitbox().center(), damage, false, target.faction()));
                 alreadyHit.add(target);
+                onHit.run();
                 if (alreadyHit.size() >= pierce) {
                     alive = false;
                     return;

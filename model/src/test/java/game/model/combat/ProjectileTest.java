@@ -2,6 +2,7 @@ package game.model.combat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import game.model.commun.Faction;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests des projectiles. */
 class ProjectileTest {
@@ -151,5 +151,30 @@ class ProjectileTest {
     void unProjectileDoitPouvoirToucherAuMoinsUneCible() {
         assertThrows(IllegalArgumentException.class,
                 () -> new Projectile(Vec2.ZERO, DROITE, 3f, Faction.PLAYER, 10, 3f, 0));
+    }
+
+    @Test
+    void unProjectileSurvoleLEauMaisPasUnMur() {
+        Rect canal = new Rect(150f, 0f, 16f, 300f);
+        Rect mur = new Rect(250f, 0f, 16f, 300f);
+        FakeWorld monde = new FakeWorld(new Rect(0f, 0f, 1000f, 1000f), List.of(canal, mur), List.of(canal));
+        Projectile fleche = flecheEnnemie(new Vec2(100f, 100f));
+        avancer(fleche, monde, 20);
+        assertTrue(fleche.isAlive(), "l'eau ne l'arrête pas");
+        assertTrue(fleche.position().x() > canal.right(), "il est passé de l'autre côté du canal");
+        avancer(fleche, monde, 40);
+        assertFalse(fleche.isAlive(), "le mur, lui, l'arrête");
+    }
+
+    @Test
+    void leTireurEstPrevenuACibleTouchee() {
+        FakeWorld monde = FakeWorld.empty();
+        monde.addTarget(new Prowler(new Vec2(120f, 100f)));
+        monde.addTarget(new Prowler(new Vec2(160f, 100f)));
+        int[] coups = {0};
+        Projectile lame = new Projectile(new Vec2(100f, 100f), DROITE, 3f, Faction.PLAYER, 10, 3f, 2,
+                () -> coups[0]++);
+        avancer(lame, monde, 60);
+        assertEquals(2, coups[0]);
     }
 }

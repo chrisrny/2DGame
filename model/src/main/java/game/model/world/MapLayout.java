@@ -14,19 +14,38 @@ import java.util.Objects;
  * @param walls       murs du bord, roche et obstacles
  * @param spawnPoints points où les ennemis peuvent apparaître
  * @param bossArena   zone dégagée où le boss apparaît, parmi les points d'apparition qu'elle contient
+ * @param water       les murs qui sont de l'eau (canaux) : on ne peut pas y marcher, mais les
+ *                    projectiles passent au-dessus ; chacun fait aussi partie de {@code walls}
  */
-public record MapLayout(Rect arena, List<Rect> walls, List<Vec2> spawnPoints, Rect bossArena) {
+public record MapLayout(Rect arena, List<Rect> walls, List<Vec2> spawnPoints, Rect bossArena, List<Rect> water) {
 
     /**
      * Vérifie le plan et fait des copies non modifiables des listes.
      *
-     * @throws NullPointerException si un champ est {@code null}
+     * @throws NullPointerException     si un champ est {@code null}
+     * @throws IllegalArgumentException si une étendue d'eau n'est pas aussi un mur
      */
     public MapLayout {
         Objects.requireNonNull(arena, "arena");
         Objects.requireNonNull(bossArena, "bossArena");
         walls = List.copyOf(walls);
         spawnPoints = List.copyOf(spawnPoints);
+        water = List.copyOf(water);
+        if (!walls.containsAll(water)) {
+            throw new IllegalArgumentException("L'eau doit aussi être un mur : on ne marche pas dessus");
+        }
+    }
+
+    /**
+     * Crée un plan sans eau.
+     *
+     * @param arena       limites de la map
+     * @param walls       murs du bord, roche et obstacles
+     * @param spawnPoints points où les ennemis peuvent apparaître
+     * @param bossArena   zone dégagée où le boss apparaît
+     */
+    public MapLayout(Rect arena, List<Rect> walls, List<Vec2> spawnPoints, Rect bossArena) {
+        this(arena, walls, spawnPoints, bossArena, List.of());
     }
 
     /**

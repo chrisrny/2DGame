@@ -24,8 +24,18 @@ public interface World {
     /** @return les limites de l'arène */
     Rect arena();
 
-    /** @return tous les rectangles infranchissables : murs, obstacles et portes fermées */
+    /** @return tous les rectangles infranchissables : murs, obstacles, eau */
     List<Rect> walls();
+
+    /**
+     * Les murs qui arrêtent les projectiles : tous, sauf l'eau, que les tirs et les sorts survolent.
+     * Par défaut, tous les murs.
+     *
+     * @return les rectangles qui arrêtent un projectile
+     */
+    default List<Rect> solidWalls() {
+        return walls();
+    }
 
     /**
      * Les cibles qu'un attaquant peut toucher dans une zone.
@@ -59,14 +69,14 @@ public interface World {
 
     /**
      * Indique si aucun mur ne se trouve entre deux points : un Archer ne tire pas à travers
-     * un mur, un Chargeur ne charge pas dans un mur.
+     * un mur. Il peut tirer au-dessus de l'eau, comme ses projectiles la survolent.
      *
      * @param from le premier point
      * @param to   le second point
      * @return {@code true} si la ligne entre les deux points ne traverse aucun mur
      */
     default boolean hasLineOfSight(Vec2 from, Vec2 to) {
-        return Collisions.pathIsClear(from, to, 0f, walls());
+        return Collisions.pathIsClear(from, to, 0f, solidWalls());
     }
 
     /**

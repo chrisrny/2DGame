@@ -70,6 +70,8 @@ public final class GameMap implements World {
     private static final float EPSILON = 1e-4f;
 
     private final MapLayout layout;
+    // Les murs moins l'eau, calculés une fois : ceux qui arrêtent les projectiles.
+    private final List<Rect> solidWalls;
     private final Player player;
     private final EventBus events;
     private final List<Enemy> enemies = new ArrayList<>();
@@ -95,6 +97,7 @@ public final class GameMap implements World {
      */
     public GameMap(MapLayout layout, Player player, EventBus events, Random random) {
         this.layout = Objects.requireNonNull(layout, "layout");
+        this.solidWalls = layout.walls().stream().filter(wall -> !layout.water().contains(wall)).toList();
         this.player = Objects.requireNonNull(player, "player");
         this.events = Objects.requireNonNull(events, "events");
         this.random = Objects.requireNonNull(random, "random");
@@ -339,6 +342,11 @@ public final class GameMap implements World {
     @Override
     public List<Rect> walls() {
         return layout.walls();
+    }
+
+    @Override
+    public List<Rect> solidWalls() {
+        return solidWalls;
     }
 
     @Override

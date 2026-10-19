@@ -19,6 +19,7 @@ public final class FakeWorld implements World {
 
     private final Rect arena;
     private final List<Rect> walls;
+    private final List<Rect> water;
     private final EventBus events = new EventBus();
     private final List<Projectile> projectiles = new ArrayList<>();
     private final List<Damageable> targets = new ArrayList<>();
@@ -31,8 +32,20 @@ public final class FakeWorld implements World {
      * @param walls les murs
      */
     public FakeWorld(Rect arena, List<Rect> walls) {
+        this(arena, walls, List.of());
+    }
+
+    /**
+     * Crée un faux monde avec de l'eau : des murs que les projectiles survolent.
+     *
+     * @param arena les limites de l'arène
+     * @param walls les murs, eau comprise
+     * @param water ceux des murs qui sont de l'eau
+     */
+    public FakeWorld(Rect arena, List<Rect> walls, List<Rect> water) {
         this.arena = arena;
         this.walls = List.copyOf(walls);
+        this.water = List.copyOf(water);
     }
 
     /**
@@ -80,6 +93,11 @@ public final class FakeWorld implements World {
     @Override
     public List<Rect> walls() {
         return walls;
+    }
+
+    @Override
+    public List<Rect> solidWalls() {
+        return walls.stream().filter(wall -> !water.contains(wall)).toList();
     }
 
     @Override
