@@ -16,6 +16,7 @@ import game.core.hud.BossBar;
 import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
+import game.core.hud.Minimap;
 import game.core.hud.StageBanner;
 import game.core.input.CombinedInput;
 import game.core.input.Gamepad;
@@ -79,6 +80,7 @@ public class GameScreen extends ScreenAdapter {
     private final LevelUpOverlay levelUp;
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
+    private final Minimap minimap;
     private final GameAudio audio;
     private final DamageNumbers damageNumbers;
     private final SceneRenderer scene;
@@ -100,6 +102,7 @@ public class GameScreen extends ScreenAdapter {
         this.gamepadInput = new GamepadInput(main.gamepad(), this::enemyPositions);
         this.input = new CombinedInput(new KeyboardMouseInput(viewport), gamepadInput, main::usingGamepad);
         this.levelUp = new LevelUpOverlay(WORLD_WIDTH, WORLD_HEIGHT, main.gamepad(), main::usingGamepad);
+        this.minimap = new Minimap(run.map(), WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     // Positions des ennemis en vie, pour l'aide à la visée de la manette.
@@ -127,6 +130,7 @@ public class GameScreen extends ScreenAdapter {
         levelUp.resize(width, height);
         stageBanner.resize(width, height);
         bossBar.resize(width, height);
+        minimap.resize(width, height);
     }
 
     @Override
@@ -135,6 +139,11 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || main.gamepad().justPressed(Gamepad.Button.START)) {
             main.push(new PauseScreen(main, this));
             return;
+        }
+
+        // Mini-carte : M au clavier, Back à la manette, pour la masquer ou la réafficher.
+        if (Gdx.input.isKeyJustPressed(Keys.M) || main.gamepad().justPressed(Gamepad.Button.BACK)) {
+            minimap.toggle();
         }
 
         // Triche de démo : F9 gagne, F10 perd tout de suite. C'est le modèle qui décide ; l'écran
@@ -226,6 +235,7 @@ public class GameScreen extends ScreenAdapter {
         hud.setGamepadLabels(main.usingGamepad());
         hud.draw(run.player(), run.experience());
         stageBanner.draw(run);
+        minimap.draw(run, new Vec2(camera.position.x, camera.position.y));
         bossBar.draw(run);
         if (run.isChoosingRelic()) {
             levelUp.draw(run.pendingChoice());
@@ -289,6 +299,7 @@ public class GameScreen extends ScreenAdapter {
         damageNumbers.dispose();
         stageBanner.dispose();
         bossBar.dispose();
+        minimap.dispose();
         audio.dispose();
     }
 }
