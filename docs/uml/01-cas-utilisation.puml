@@ -1,0 +1,50 @@
+@startuml 01-cas-utilisation
+!include style.iuml
+left to right direction
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+  ArrowColor #444444
+}
+title Diagramme de cas d'utilisation — Kagaribi
+
+actor "Joueur" as J
+actor "Présentateur\n(soutenance)" as D
+
+J <|-- D
+
+rectangle "Kagaribi" {
+  usecase "Lancer une partie" as UC_Start
+  usecase "Jouer une run\n(2 étages + boss)" as UC_Run
+  usecase "Se déplacer" as UC_Move
+  usecase "Viser" as UC_Aim
+  usecase "Attaquer" as UC_Attack
+  usecase "Esquiver" as UC_Dodge
+  usecase "Lancer l'Onde de choc" as UC_Shock
+  usecase "Lancer l'Éventail de lames" as UC_Fan
+  usecase "Choisir une relique\n(1 parmi 3)" as UC_Relic
+  usecase "Affronter le boss" as UC_Boss
+  usecase "Mettre en pause" as UC_Pause
+  usecase "Régler les options\n(chiffres de dégâts, difficulté)" as UC_Options
+  usecase "Voir l'écran de fin\n(victoire ou défaite)" as UC_End
+  usecase "Forcer la victoire (F9)\nou la défaite (F10)" as UC_Cheat
+}
+
+J --> UC_Start
+J --> UC_Run
+J --> UC_Pause
+J --> UC_Options
+
+UC_Run ..> UC_Move : <<include>>
+UC_Run ..> UC_Aim : <<include>>
+UC_Run ..> UC_Attack : <<include>>
+UC_Run ..> UC_Dodge : <<include>>
+UC_Run ..> UC_Boss : <<include>>
+UC_Run ..> UC_End : <<include>>
+UC_Shock .> UC_Run : <<extend>>
+UC_Fan .> UC_Run : <<extend>>
+UC_Relic .> UC_Run : <<extend>>\n(niveau gagné)
+UC_Options .> UC_Pause : <<extend>>
+D --> UC_Cheat
+UC_Cheat ..> UC_End : <<include>>
+@enduml
