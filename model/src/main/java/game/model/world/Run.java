@@ -142,7 +142,11 @@ public final class Run {
         if (isChoosingRelic()) {
             return;
         }
-        elapsed += dt;
+        // Le chrono s'arrête à la fin de la partie : le modèle avance encore pendant
+        // l'END_DELAY de l'écran, mais le temps affiché reste celui de la mort.
+        if (!isOver()) {
+            elapsed += dt;
+        }
         updateStageIntro(dt);
         map.update(intent, dt);
         events.flush();
@@ -279,7 +283,12 @@ public final class Run {
         return experience;
     }
 
-    /** @return le temps de jeu écoulé depuis le début de la partie, en secondes */
+    /**
+     * Le temps de jeu écoulé depuis le début de la partie. Il n'avance pas pendant un choix
+     * de relique et s'arrête quand la partie est finie.
+     *
+     * @return le temps de jeu écoulé, en secondes
+     */
     public float elapsed() {
         return elapsed;
     }

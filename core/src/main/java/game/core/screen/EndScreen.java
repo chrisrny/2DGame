@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import game.core.Main;
+import game.core.hud.RunTimer;
 import game.model.world.Run;
 import java.util.Objects;
 
@@ -75,14 +76,9 @@ public abstract class EndScreen extends MenuScreen {
         centered("Étage atteint : " + run.stage(), y, TEXT_SCALE, TEXT);
         centered("Ennemis tués : " + run.kills(), y - LINE_GAP, TEXT_SCALE, TEXT);
         centered("Niveau : " + run.experience().level(), y - 2 * LINE_GAP, TEXT_SCALE, TEXT);
-        centered("Temps : " + formatTime(run.elapsed()), y - 3 * LINE_GAP, TEXT_SCALE, TEXT);
+        centered("Temps : " + RunTimer.format(run.elapsed()), y - 3 * LINE_GAP, TEXT_SCALE, TEXT);
         centered(hint("Entrée : rejouer", "A : rejouer"), HEIGHT * 0.18f, TEXT_SCALE, TEXT);
         centered(hint("Échap : menu titre", "B : menu titre"), HEIGHT * 0.18f - 22f, TEXT_SCALE, HINT);
         batch.end();
-    }
-
-    private static String formatTime(float seconds) {
-        int total = (int) seconds;
-        return String.format("%02d:%02d", total / 60, total % 60);
     }
 }

@@ -21,6 +21,20 @@ class RunTest {
     }
 
     @Test
+    void leChronoSArreteQuandLaPartieEstFinie() {
+        Run run = new Run(GameConfig.defaults(42L));
+        for (int i = 0; i < 60; i++) {
+            run.update(PlayerIntent.NONE, FixedStep.DT);
+        }
+        run.forceLose();
+        float tempsALaFin = run.elapsed();
+        for (int i = 0; i < 90; i++) {
+            run.update(PlayerIntent.NONE, FixedStep.DT);
+        }
+        assertEquals(tempsALaFin, run.elapsed());
+    }
+
+    @Test
     void leJoueurCommenceAuCentreDeLaMap() {
         Run run = new Run(GameConfig.defaults(42L));
         assertEquals(MapLayouts.main().center(), run.player().position());
