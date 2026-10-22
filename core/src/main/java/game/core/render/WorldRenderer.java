@@ -8,11 +8,12 @@ import game.model.commun.Circle;
 import game.model.entity.Boss;
 import game.model.world.GameMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
- * Annonces des attaques du boss, dessinées en formes par-dessus la scène : la zone en rouge
- * transparent, et un disque plus vif qui grandit avec l'avancement donné par le modèle, jusqu'à
- * la remplir quand le coup part.
+ * Annonces des attaques du boss et de ses invocations, dessinées en formes par-dessus la scène :
+ * la zone en rouge transparent, et un disque plus vif qui grandit avec l'avancement donné par le
+ * modèle, jusqu'à la remplir quand le coup part (ou quand le Rôdeur invoqué arrive).
  *
  * <p>La map, les ennemis et les projectiles sont dessinés en sprites par {@link SceneRenderer}.</p>
  */
@@ -30,7 +31,10 @@ public final class WorldRenderer {
     public void drawTelegraphs(ShapeRenderer shapes, GameMap map) {
         List<Telegraph> telegraphs = map.enemies().stream()
                 .filter(Boss.class::isInstance)
-                .flatMap(enemy -> ((Boss) enemy).currentAttackTelegraph().stream())
+                .map(Boss.class::cast)
+                // Ses attaques et, en phase 2, l'arrivée des Rôdeurs qu'il invoque.
+                .flatMap(boss -> Stream.concat(boss.currentAttackTelegraph().stream(),
+                        boss.summonTelegraphs().stream()))
                 .toList();
         if (telegraphs.isEmpty()) {
             return;
