@@ -1,0 +1,60 @@
+@startuml 05-boss
+!include style.iuml
+title Le boss — patterns State et Template Method
+
+class Boss <<focus>> {
+  + {static} MAX_HP = 800
+  + {static} SECOND_PHASE_THRESHOLD = 0.5
+  - phase : BossPhase
+  + receive(hit) : boolean
+  + phaseNumber() : int
+}
+
+interface BossPhase <<interface>> {
+  + update(boss, world, dt)
+  + telegraph(boss) : Optional<Telegraph>
+}
+
+class BossFirstPhase {
+  + update(boss, world, dt) {leaf}
+  # pauseDuration() : float
+  # slamRadius() : float
+  # slamWindUp() : float
+  # chargeSpeed() : float
+  # afterSlam(boss, world, zone)
+}
+
+class BossSecondPhase {
+  # pauseDuration() = 0,6 s
+  # slamRadius() = 72
+  # slamWindUp() = 0,7 s
+  # chargeSpeed() = 470
+  # afterSlam() : 8 braises
+}
+
+class ChargerBehavior {
+  + act(self, world, dt)
+}
+
+Boss *-right- "1" BossPhase : phase >
+BossPhase <|.. BossFirstPhase
+BossFirstPhase <|-- BossSecondPhase
+BossFirstPhase o-- "0..1" ChargerBehavior : charge\n(réutilisée)
+
+note top of Boss
+  <b>State</b>
+  À 50 % de ses PV, le boss remplace
+  BossFirstPhase par BossSecondPhase :
+  même interface, autre comportement.
+end note
+
+note right of BossSecondPhase
+  <b>Template Method</b>
+  L'enchaînement (poursuite → frappe
+  annoncée → charge) reste écrit une
+  seule fois dans BossFirstPhase.
+  La phase 2 ne change que les réglages
+  et ajoute les braises après la frappe.
+end note
+!include legende.iuml
+@enduml

@@ -1,0 +1,68 @@
+@startuml 06-joueur
+!include style.iuml
+set separator none
+title Le joueur — patterns State et Template Method
+
+class Player <<focus>> {
+  - state : PlayerState
+  - skill1, skill2 : Skill
+  - relics : List<Relic>
+  + update(intent, world, dt)
+  + strike(world) : int
+  + receive(hit) : boolean
+  + registerHit()
+}
+
+  interface PlayerState <<interface>> {
+    + next(player, intent) : PlayerState
+    + act(player, intent, world, dt)
+    + invulnerable() : boolean
+  }
+  class IdleState
+  class MovingState
+  class AttackingState
+  class DodgingState {
+    invulnérable
+  }
+  class HurtState
+  class DeadState
+
+  abstract class Skill <<abstract>> {
+    - cooldown, cooldownLeft : float
+    + tryActivate(player, world) : boolean {leaf}
+    # {abstract} activate(player, world)
+  }
+  class Shockwave {
+    rayon 96 · 28 dégâts · étourdit
+  }
+  class BladeFan {
+    7 lames · traversent 2 ennemis
+  }
+
+Player *-right- "1" PlayerState : état courant
+Player *-down- "2" Skill
+PlayerState <|.. IdleState
+PlayerState <|.. MovingState
+PlayerState <|.. AttackingState
+PlayerState <|.. DodgingState
+PlayerState <|.. HurtState
+PlayerState <|.. DeadState
+Skill <|-- Shockwave
+Skill <|-- BladeFan
+
+note right of PlayerState
+  <b>State</b>
+  Chaque état décide du suivant (next)
+  et agit pendant le pas (act).
+  Pas de grand switch dans Player.
+  Les transitions : diagramme 07.
+end note
+
+note left of Skill
+  <b>Template Method</b>
+  tryActivate() est final : vérifier la recharge,
+  appeler activate(), relancer la recharge.
+  Une compétence n'écrit que son effet.
+end note
+!include legende.iuml
+@enduml

@@ -1,0 +1,67 @@
+@startuml 02-modules
+!include style.iuml
+title Modules — la vue lit le modèle, le modèle ignore la vue
+
+skinparam rectangle {
+  BackgroundColor<<pkg>> #FFFFFF
+  BorderColor<<pkg>> #B9B1A8
+  FontStyle<<pkg>> normal
+  FontColor<<pkg>> #2B2724
+  BackgroundColor<<hot>> #FFF2E8
+  BorderColor<<hot>> #D9622B
+  FontStyle<<hot>> normal
+  FontColor<<hot>> #2B2724
+  BackgroundColor<<ext>> #F4F4F4
+  BorderColor<<ext>> #9A9A9A
+}
+hide <<pkg>> stereotype
+hide <<hot>> stereotype
+hide <<ext>> stereotype
+
+rectangle "lwjgl3 — lanceur desktop (libGDX + LWJGL)" as L {
+  rectangle "**Lwjgl3Launcher**\nouvre la fenêtre" <<pkg>> as L1
+  rectangle "**GlfwGamepad**\nlit la vraie manette" <<pkg>> as L2
+}
+
+rectangle "core — vue (libGDX) : affiche, joue le son, lit les entrées" as C {
+  rectangle "**screen**\nMain, GameScreen,\nmenus" <<hot>> as C1
+  rectangle "**render**\nscène, lumières,\neffets" <<pkg>> as C2
+  rectangle "**hud**\nPV, sorts,\nmini-carte" <<pkg>> as C3
+  rectangle "**audio**\neffets,\nmusiques" <<pkg>> as C4
+  rectangle "**input**\nclavier, souris,\nmanette" <<pkg>> as C5
+}
+
+rectangle "model — règles du jeu, Java pur : aucune dépendance à libGDX" as M {
+  rectangle "**world**\nRun, GameMap,\nétages, vagues" <<hot>> as M1
+  rectangle "**entity**\nPlayer, Enemy,\nBoss" <<pkg>> as M2
+  rectangle "**ai**\ncomportements,\nphases du boss" <<pkg>> as M3
+  rectangle "**player.state**\nétats du\njoueur" <<pkg>> as M4
+  rectangle "**skill**\nOnde de choc,\nÉventail" <<pkg>> as M5
+  rectangle "**relic**\n8 reliques,\ntirage" <<pkg>> as M6
+  rectangle "**combat**\nHit, Projectile,\ncollisions" <<pkg>> as M7
+  rectangle "**event**\nEventBus,\nGameEvent" <<pkg>> as M8
+  rectangle "**commun**\nVec2, PlayerIntent,\nPlayerStats" <<pkg>> as M9
+}
+
+L -down-> C : lance
+C -down-> M : envoie un PlayerIntent,\nlit l'état pour dessiner
+
+C1 -[hidden]right- C2
+C2 -[hidden]right- C3
+C3 -[hidden]right- C4
+C4 -[hidden]right- C5
+M1 -[hidden]right- M2
+M2 -[hidden]right- M3
+M3 -[hidden]right- M4
+M4 -[hidden]right- M5
+M1 -[hidden]down- M6
+M6 -[hidden]right- M7
+M7 -[hidden]right- M8
+M8 -[hidden]right- M9
+
+note bottom of M
+  <b>Séparation modèle / vue garantie par le build</b> : le module model
+  ne déclare aucune dépendance vers libGDX, un « import com.badlogic »
+  n'y compile pas. Il se teste donc sans fenêtre (334 tests JUnit).
+end note
+@enduml

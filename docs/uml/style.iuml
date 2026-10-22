@@ -1,24 +1,136 @@
-' Style commun à tous les diagrammes (inclus avec !include style.iuml).
-skinparam classAttributeIconSize 0
-skinparam shadowing false
-skinparam defaultFontName Helvetica
+' ============================================================================
+' Style commun des diagrammes de Kagaribi (inclus avec !include style.iuml).
+'
+' Code couleur, le même sur tous les diagrammes :
+'   bleu    = interface          violet = classe abstraite
+'   blanc   = classe concrète    vert   = record, enum (données)
+'   orange  = classe au centre du diagramme (celle qu'on explique)
+'   encadré jaune = le design pattern illustré
+' ============================================================================
+skinparam backgroundColor #FFFFFF
+skinparam dpi 150
+skinparam defaultFontName Inter
 skinparam defaultFontSize 12
-skinparam packageStyle rectangle
-skinparam linetype polyline
-skinparam nodesep 40
-skinparam ranksep 50
-skinparam class {
-  BackgroundColor #FFFFFF
-  BorderColor #444444
-  ArrowColor #444444
-}
-skinparam note {
-  BackgroundColor #FFF8DC
-  BorderColor #B8A060
-}
-skinparam package {
-  BorderColor #888888
-  FontColor #333333
-}
+skinparam defaultFontColor #2B2724
+skinparam shadowing false
+skinparam roundCorner 12
+skinparam padding 2
+skinparam nodesep 45
+skinparam ranksep 55
+skinparam classAttributeIconSize 0
+skinparam stereotypeFontColor #8A817A
+skinparam stereotypeFontSize 10
+skinparam titleFontSize 20
+skinparam titleFontStyle bold
+skinparam titleFontColor #2B2724
+skinparam ArrowColor #6B635C
+skinparam ArrowFontColor #6B635C
+skinparam ArrowFontSize 11
+skinparam ArrowThickness 1.2
 hide circle
 hide empty members
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #B9B1A8
+  BorderThickness 1.2
+  HeaderBackgroundColor #FFFFFF
+  FontStyle bold
+  FontSize 13
+  AttributeFontSize 11
+  AttributeFontColor #4A4440
+
+  BackgroundColor<<interface>> #EAF1FC
+  BorderColor<<interface>> #4F79C2
+  HeaderBackgroundColor<<interface>> #D9E6FA
+
+  BackgroundColor<<abstract>> #F2EDFC
+  BorderColor<<abstract>> #7D5FC9
+  HeaderBackgroundColor<<abstract>> #E5DCFA
+
+  BackgroundColor<<record>> #EEF7EC
+  BorderColor<<record>> #5A9A4E
+  HeaderBackgroundColor<<record>> #DDF0D8
+
+  BackgroundColor<<enum>> #EEF7EC
+  BorderColor<<enum>> #5A9A4E
+  HeaderBackgroundColor<<enum>> #DDF0D8
+
+  BackgroundColor<<focus>> #FFF2E8
+  BorderColor<<focus>> #D9622B
+  BorderThickness<<focus>> 2
+  HeaderBackgroundColor<<focus>> #FFE1CC
+
+  BackgroundColor<<libgdx>> #F4F4F4
+  BorderColor<<libgdx>> #9A9A9A
+}
+hide <<focus>> stereotype
+
+skinparam package {
+  BackgroundColor #FAF8F5
+  BorderColor #D6CFC6
+  FontColor #6B635C
+  FontStyle bold
+  FontSize 12
+  Style rectangle
+}
+
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #E2B33C
+  FontSize 11
+  FontColor #4A3B12
+}
+
+skinparam legend {
+  BackgroundColor #FAF8F5
+  BorderColor #D6CFC6
+  FontSize 11
+}
+
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #B9B1A8
+  ArrowColor #6B635C
+  BackgroundColor<<jeu>> #FFF2E8
+  BorderColor<<jeu>> #D9622B
+}
+skinparam actor {
+  BorderColor #6B635C
+  BackgroundColor #FFF2E8
+}
+skinparam rectangle {
+  BackgroundColor #FAF8F5
+  BorderColor #D6CFC6
+  FontColor #6B635C
+  FontStyle bold
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantBorderColor #B9B1A8
+  ParticipantFontStyle bold
+  LifeLineBorderColor #C9C1B8
+  LifeLineBackgroundColor #FFF2E8
+  GroupBorderColor #D6CFC6
+  GroupBackgroundColor #FAF8F5
+  GroupHeaderFontColor #6B635C
+  ArrowColor #6B635C
+  DividerBackgroundColor #FAF8F5
+  DividerBorderColor #D6CFC6
+}
+
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #B9B1A8
+  FontStyle bold
+  StartColor #2B2724
+  EndColor #2B2724
+  ArrowColor #6B635C
+  BackgroundColor<<danger>> #FDECEC
+  BorderColor<<danger>> #C94A4A
+  BackgroundColor<<safe>> #EAF1FC
+  BorderColor<<safe>> #4F79C2
+}
+hide <<danger>> stereotype
+hide <<safe>> stereotype

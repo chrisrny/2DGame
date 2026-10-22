@@ -1,0 +1,4 @@
+' Légende des couleurs, ajoutée en bas des diagrammes de classes.
+legend bottom right
+  <back:#D9E6FA>  interface  </back>   <back:#E5DCFA>  classe abstraite  </back>   <back:#DDF0D8>  record / enum  </back>   <back:#FFE1CC>  classe principale  </back>   <back:#FCE7A6>  pattern  </back>
+endlegend

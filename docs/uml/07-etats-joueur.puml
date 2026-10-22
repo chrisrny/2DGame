@@ -1,0 +1,42 @@
+@startuml 07-etats-joueur
+!include style.iuml
+title États du joueur — quand passe-t-on de l'un à l'autre ?
+
+[*] --> Libre
+
+state "Libre" as Libre {
+  state "Repos" as Idle
+  state "Marche" as Moving
+  [*] --> Idle
+  Idle -right-> Moving : on bouge
+  Moving --> Idle : on s'arrête
+}
+
+state "Attaque\n0,2 s" as Attacking
+state "Esquive\n0,2 s · invulnérable" as Dodging <<safe>>
+state "Touché\n0,2 s · recul" as Hurt <<danger>>
+state "Mort" as Dead <<danger>>
+
+Libre --> Attacking : attaque prête
+Libre --> Dodging : esquive prête
+Attacking --> Libre : fin du coup
+Dodging --> Libre : fin de l'esquive
+Libre -[#C94A4A]-> Hurt : coup reçu
+Attacking -[#C94A4A]-> Hurt : coup reçu
+Hurt --> Libre : fin du recul
+Hurt -[#C94A4A]-> Dead : PV à 0
+Dead --> [*]
+
+note right of Dodging
+  Pendant l'esquive, les coups
+  sont ignorés : on traverse
+  les attaques sans dégâts.
+end note
+
+note left of Libre
+  Chaque flèche est décidée par
+  l'état lui-même, dans next().
+  En bleu : invulnérable.
+  En rouge : on a pris un coup.
+end note
+@enduml
