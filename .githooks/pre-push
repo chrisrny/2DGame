@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Lance tous les tests avant chaque push : si un test échoue, le push est refusé.
+# Activation, une fois par clone : git config core.hooksPath .githooks
+# Pour passer outre exceptionnellement : git push --no-verify
+
+echo "==> pre-push : lancement des tests"
+exec "$(git rev-parse --show-toplevel)/scripts/run_tests.sh"

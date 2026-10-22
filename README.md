@@ -20,7 +20,7 @@ Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARC
 | Lancer le jeu | `./gradlew lwjgl3:run` |
 | Compiler tout le projet | `./gradlew build` |
 | Lancer les tests du modèle + rapport de couverture | `./gradlew model:test` |
-| Lancer les tests et afficher la couverture | `./scripts/run_tests.sh` |
+| Lancer tous les tests (model + core) et afficher la couverture | `./scripts/run_tests.sh` |
 | Générer la Javadoc | `./gradlew javadoc` |
 | Construire un jar exécutable | `./gradlew lwjgl3:jar` |
 | Lancer le jar (déploiement : seul Java 21 est nécessaire) | `java -jar lwjgl3/build/libs/2dgame-1.0.0.jar` |
@@ -28,6 +28,13 @@ Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARC
 - Rapport de couverture : `model/build/reports/jacoco/test/html/index.html`
 - Javadoc : `<module>/build/docs/javadoc/index.html`
 - Jar : `lwjgl3/build/libs/`
+
+**Tests automatiques avant chaque push** : le hook versionné `.githooks/pre-push` lance
+`./scripts/run_tests.sh`, et un test qui échoue bloque le push. À activer une fois par clone :
+
+```bash
+git config core.hooksPath .githooks
+```
 
 ## Démo
 
