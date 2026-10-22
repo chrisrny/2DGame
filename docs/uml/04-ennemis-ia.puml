@@ -1,0 +1,81 @@
+@startuml 04-ennemis-ia
+!include style.iuml
+title Ennemis et IA — patterns Strategy et Factory
+
+class GameMap {
+  + update(intent, dt)
+  - spawn(wave)
+}
+class EnemyFactory {
+  + {static} create(type, position, multiplier) : Enemy
+}
+enum EnemyType <<enum>> {
+  PROWLER
+  ARCHER
+  CHARGER
+}
+
+interface Damageable <<interface>> {
+  + receive(hit) : boolean
+  + isAlive() : boolean
+}
+abstract class Enemy <<focus>> {
+  - hp, speed, contactDamage
+  - stunLeft : float
+  + update(world, dt)
+  + receive(hit) : boolean
+  + isStunned() : boolean
+}
+class Prowler {
+  30 PV · fonce au contact
+}
+class Archer {
+  20 PV · tire à distance
+}
+class Charger {
+  40 PV · annonce puis charge
+}
+
+interface EnemyBehavior <<interface>> {
+  + act(self, world, dt)
+}
+class ProwlerBehavior
+class ArcherBehavior {
+  - fireCooldown : float
+}
+class ChargerBehavior {
+  - phase : Phase
+  + isWindingUp() : boolean
+  + isCharging() : boolean
+}
+
+GameMap -right-> EnemyFactory : utilise à\nchaque vague
+EnemyFactory -right-> EnemyType
+GameMap o-down- "0..*" Enemy : enemies
+EnemyFactory ..> Enemy : «create»
+Damageable <|.right. Enemy
+Enemy <|-- Prowler
+Enemy <|-- Archer
+Enemy <|-- Charger
+Enemy *-right- "1" EnemyBehavior : délègue act()
+EnemyBehavior <|.. ProwlerBehavior
+EnemyBehavior <|.. ArcherBehavior
+EnemyBehavior <|.. ChargerBehavior
+
+note right of EnemyBehavior
+  <b>Strategy</b>
+  Enemy gère le commun (PV, recul,
+  étourdissement, collisions) et
+  délègue la décision à son
+  comportement. Nouvel ennemi =
+  nouvelle stratégie, Enemy ne
+  change pas.
+end note
+
+note top of EnemyFactory
+  <b>Factory</b>
+  GameMap n'écrit jamais new Prowler() :
+  il donne un EnemyType à la fabrique.
+end note
+!include legende.iuml
+@enduml

@@ -1,0 +1,41 @@
+@startuml 03-boucle-de-jeu
+!include style.iuml
+hide footbox
+title Boucle de jeu — ce qui se passe à chaque image
+
+participant "GameScreen" as GS <<focus>>
+participant "InputSource\n(clavier + manette)" as IN
+participant "FixedStep" as FS
+participant "Run" as R
+participant "GameMap" as GM
+participant "EventBus" as EB
+participant "Vue\n(rendu, HUD, son)" as V
+
+GS -> IN : poll(position du joueur)
+IN --> GS : PlayerIntent\n(déplacement, visée, boutons)
+
+GS -> FS : advance(delta)
+FS --> GS : n pas de 1/60 s (0 à 5)
+
+loop pour chacun des n pas
+  GS -> R : update(intent, 1/60 s)
+  activate R
+  R -> GM : update(intent, dt)
+  activate GM
+  GM -> GM : joueur, ennemis,\nprojectiles, vagues
+  GM -> EB : publish(EntityHit, EntityDied…)
+  note right of EB : les événements sont\nmis en attente
+  deactivate GM
+  R -> EB : flush()
+  EB -> R : onEvent : XP, étage fini
+  EB -> V : onEvent : son, chiffres\nde dégâts, fumée
+  deactivate R
+end
+
+GS -> V : draw(run)
+note over GS, V
+  <b>Pas fixe</b> : même résultat à 60 Hz ou à 144 Hz.
+  Avec la graine de la partie, une run est rejouable
+  à l'identique, donc testable pas à pas.
+end note
+@enduml

@@ -1,0 +1,58 @@
+@startuml 09-entrees
+!include style.iuml
+title Entrées — patterns Command et Template Method
+
+class PlayerIntent <<record>> {
+  move : Vec2
+  aim : Vec2
+  attack, dodge, skill1, skill2 : boolean
+}
+
+interface InputSource <<interface>> {
+  + poll(playerPosition) : PlayerIntent
+}
+class KeyboardMouseInput {
+  ZQSD, souris, clics, E, Espace
+}
+class GamepadInput {
+  twin-stick + aide à la visée
+}
+class CombinedInput <<focus>> {
+  clavier et manette ensemble
+}
+
+abstract class Gamepad <<abstract>> {
+  + update() {leaf}
+  + stick(left) : Vec2
+  + justPressed(button) : boolean
+  # {abstract} readButton(button) : boolean
+  # {abstract} readAxis(axis) : float
+}
+class GlfwGamepad {
+  module lwjgl3 · lit le matériel
+}
+
+InputSource <|.. KeyboardMouseInput
+InputSource <|.. GamepadInput
+InputSource <|.. CombinedInput
+CombinedInput o-- "2" InputSource : réunit
+InputSource ..> PlayerIntent : produit
+GamepadInput --> Gamepad
+Gamepad <|-- GlfwGamepad
+
+note right of PlayerIntent
+  <b>Command</b>
+  Le modèle ne reçoit que cette intention :
+  il ne sait jamais quelle touche a été
+  pressée. Les tests en fabriquent aussi.
+end note
+
+note bottom of Gamepad
+  <b>Template Method</b>
+  update() fait le travail commun (zone morte,
+  appuis, directions des menus) ; GlfwGamepad
+  ne fournit que la lecture brute. Le module
+  core ne dépend d'aucune bibliothèque de manette.
+end note
+!include legende.iuml
+@enduml

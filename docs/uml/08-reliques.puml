@@ -1,0 +1,82 @@
+@startuml 08-reliques
+!include style.iuml
+title Reliques — patterns Factory et méthodes « crochets »
+
+interface Relic <<interface>> {
+  + apply(stats) : PlayerStats
+  + onHit(player)
+  + onAttack(player)
+  + onDodge(player)
+  + update(player, world, dt)
+}
+
+abstract class AbstractRelic <<abstract>> {
+  - name, description : String
+}
+
+package "Modifient une statistique" {
+  class SharpenedBlade {
+    Lame affûtée · +20 % dégâts
+  }
+  class AshBoots {
+    Bottes de cendre · +15 % vitesse
+  }
+  class EmberHeart {
+    Cœur de braise · +20 PV max
+  }
+  class ShadowFeather {
+    Plume d'ombre · −20 % recharge esquive
+  }
+  class HunterEye {
+    Œil du chasseur · +10 % critique
+  }
+}
+
+package "Réagissent à un moment du jeu" {
+  class VampireFang {
+    Croc vampire · onHit : +1 PV
+  }
+  class EmberStep {
+    Pas de braise · onDodge : zones de feu
+  }
+  class Echo {
+    Écho · onAttack : 1 coup sur 4 double
+  }
+}
+
+class RelicFactory <<focus>> {
+  + {static} draw(3, random, owned) : List<Relic>
+}
+
+class PlayerStats <<record>> {
+  speed, maxHp, attackDamage,
+  critChance, dodgeCooldown…
+}
+
+Relic <|.. AbstractRelic
+AbstractRelic <|-- SharpenedBlade
+AbstractRelic <|-- AshBoots
+AbstractRelic <|-- EmberHeart
+AbstractRelic <|-- ShadowFeather
+AbstractRelic <|-- HunterEye
+AbstractRelic <|-- VampireFang
+AbstractRelic <|-- EmberStep
+AbstractRelic <|-- Echo
+RelicFactory ..> Relic : «create»
+Relic ..> PlayerStats : renvoie une copie modifiée
+
+note right of Relic
+  <b>Crochets</b>
+  onHit, onAttack, onDodge, update sont
+  des méthodes default vides : une relique
+  ne redéfinit que celles qui la concernent.
+end note
+
+note left of RelicFactory
+  <b>Factory</b>
+  Tire 3 reliques que le joueur
+  n'a pas encore. Run n'écrit
+  jamais new SharpenedBlade().
+end note
+!include legende.iuml
+@enduml

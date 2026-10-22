@@ -1,0 +1,75 @@
+@startuml 10-evenements
+!include style.iuml
+title Événements — pattern Observer
+
+class EventBus <<focus>> {
+  + publish(event)
+  + subscribe(listener)
+  + flush()
+}
+
+interface GameEvent <<interface>>
+class EntityHit <<record>> {
+  position, damage, critical, target
+}
+class EntityDied <<record>> {
+  position, faction
+}
+class StageCleared <<record>> {
+  stage
+}
+class PlayerDied <<record>>
+class RelicChosen <<record>>
+
+package "Émetteurs (modèle)" {
+  class Player
+  class GameMap
+  class Projectile
+  class Shockwave
+}
+
+package "Abonnés" {
+  class Run {
+    étage suivant, fin de partie
+  }
+  class Experience {
+    +1 XP par ennemi tué
+  }
+  class GameAudio {
+    sons des coups
+  }
+  class DamageNumbers {
+    chiffres de dégâts
+  }
+  class DeathPuffs {
+    fumée des morts
+  }
+}
+
+GameEvent <|.. EntityHit
+GameEvent <|.. EntityDied
+GameEvent <|.. StageCleared
+GameEvent <|.. PlayerDied
+GameEvent <|.. RelicChosen
+
+Player ..> EventBus : publish
+GameMap ..> EventBus : publish
+Projectile ..> EventBus : publish
+Shockwave ..> EventBus : publish
+EventBus --> Run : flush()
+EventBus --> Experience
+EventBus --> GameAudio
+EventBus --> DamageNumbers
+EventBus --> DeathPuffs
+EventBus ..> GameEvent : transporte
+
+note right of EventBus
+  <b>Observer</b>
+  L'émetteur ne connaît pas ses abonnés :
+  le modèle publie, la vue écoute, sans que
+  le modèle dépende jamais de la vue.
+  Les événements sont distribués en fin de pas
+  (flush), dans l'ordre où ils ont eu lieu.
+end note
+!include legende.iuml
+@enduml
