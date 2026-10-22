@@ -83,7 +83,7 @@ public final class OptionsScreen extends MenuScreen {
             String text = isSelected ? "> " + items[i] + " <" : items[i];
             centered(text, y - i * ITEM_GAP, TEXT_SCALE * 1.2f, isSelected ? SELECTED : TEXT);
         }
-        centered("La difficulté change à partir du prochain stage.", y - ITEM_COUNT * ITEM_GAP - 8f,
+        centered("La difficulté change à partir du prochain étage.", y - ITEM_COUNT * ITEM_GAP - 8f,
                 TEXT_SCALE * 0.7f, HINT);
         centered(hint("Flèches : choisir et régler · Entrée : valider · Échap : retour",
                 "Croix : choisir et régler · A : valider · B : retour"), 30f, TEXT_SCALE * 0.7f, HINT);

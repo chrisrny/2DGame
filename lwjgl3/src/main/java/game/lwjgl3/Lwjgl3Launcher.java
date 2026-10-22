@@ -35,7 +35,7 @@ public final class Lwjgl3Launcher {
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
         // 1280x720 = 2 fois la résolution logique du jeu (640x360), en 16:9.
         configuration.setWindowedMode(1280, 720);
-        configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+        configuration.setWindowIcon("icon128.png", "icon64.png", "icon32.png", "icon16.png");
         return configuration;
     }
 }

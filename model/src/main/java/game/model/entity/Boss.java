@@ -10,7 +10,7 @@ import game.model.world.World;
 import java.util.Optional;
 
 /**
- * Le boss du stage 3, le Gardien : il change de comportement selon ses points de vie.
+ * Le boss de l'étage 3, l'Oni du quartier : il change de comportement selon ses points de vie.
  *
  * <p>Ce qu'il fait est délégué à sa phase actuelle ({@link BossPhase}, pattern State). Il
  * commence en {@link BossFirstPhase} et passe en phase 2 à {@link #SECOND_PHASE_THRESHOLD} de

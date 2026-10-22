@@ -20,6 +20,11 @@ public final class TitleScreen extends MenuScreen {
     }
 
     @Override
+    public void show() {
+        main.menuMusic().play(0f);
+    }
+
+    @Override
     protected boolean handleInput() {
         if (confirmPressed()) {
             main.newGame();
@@ -40,7 +45,7 @@ public final class TitleScreen extends MenuScreen {
     protected void drawContent() {
         batch.begin();
         centered("Kagaribi", HEIGHT * 0.74f, TITLE_SCALE * 1.2f, SELECTED);
-        centered("Le quartier des braises  ·  action-roguelite", HEIGHT * 0.74f - 46f, TEXT_SCALE, TEXT);
+        centered("Le quartier des braises", HEIGHT * 0.74f - 46f, TEXT_SCALE, TEXT);
         centered(hint("Entrée : jouer", "A : jouer"), HEIGHT * 0.40f, TEXT_SCALE, TEXT);
         centered(hint("O : options", "Y : options"), HEIGHT * 0.40f - 22f, TEXT_SCALE, TEXT);
         centered(hint("Échap : quitter", "Back : quitter"), HEIGHT * 0.40f - 44f, TEXT_SCALE, HINT);
