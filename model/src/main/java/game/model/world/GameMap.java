@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -65,6 +66,22 @@ public final class GameMap implements World {
 
     /** Distance minimale au joueur d'un point d'apparition : aucun ennemi n'apparaît sur lui. */
     public static final float MIN_SPAWN_DISTANCE = 200f;
+
+    /**
+     * Distance au joueur où apparaissent les ennemis d'une vague : juste hors de l'écran (sa
+     * demi-diagonale fait 367 unités), pour qu'ils arrivent vite au combat sans surgir sous ses
+     * yeux. Sans place libre à cette distance, on reprend les points d'apparition fixes.
+     */
+    public static final float WAVE_SPAWN_MIN = 380f;
+    public static final float WAVE_SPAWN_MAX = 560f;
+
+    /** Une vague arrive d'un côté : ses ennemis sont répartis à ±75° autour d'une direction tirée au hasard. */
+    public static final float WAVE_SPREAD_DEGREES = 75f;
+
+    // Essais pour trouver une place libre et accessible, et marge autour d'un ennemi qui apparaît
+    // (le plus gros, le Chargeur, a un rayon de 10).
+    private static final int SPAWN_TRIES = 40;
+    private static final float SPAWN_CLEARANCE = 12f;
 
     // Tolérance sur le délai des vagues : 90 pas de 1/60 s font 1,5 s à un arrondi de float près.
     private static final float EPSILON = 1e-4f;
@@ -274,20 +291,48 @@ public final class GameMap implements World {
         }
     }
 
-    // Les points sont mélangés avec le Random de la partie : même graine, mêmes apparitions.
+    // Tout est tiré avec le Random de la partie : même graine, mêmes apparitions.
     // Les types sont parcourus dans l'ordre de l'enum, car l'ordre d'un Map.copyOf change
     // d'une exécution à l'autre et casserait la reproductibilité.
     private void spawn(Wave wave) {
-        List<Vec2> points = spawnPointsAwayFromPlayer();
-        Collections.shuffle(points, random);
+        List<Vec2> fallback = spawnPointsAwayFromPlayer();
+        Collections.shuffle(fallback, random);
+        double side = random.nextDouble() * Math.PI * 2;
         int next = 0;
         for (EnemyType type : EnemyType.values()) {
             int count = wave.enemies().getOrDefault(type, 0);
             for (int i = 0; i < count; i++) {
-                addEnemy(EnemyFactory.create(type, points.get(next % points.size()), stage.multiplier()));
+                Vec2 point = nearSpawnPoint(side).orElse(fallback.get(next % fallback.size()));
+                addEnemy(EnemyFactory.create(type, point, stage.multiplier()));
                 next++;
             }
         }
+    }
+
+    /**
+     * Cherche une place pour un ennemi de vague : hors de l'écran mais près du joueur (entre
+     * {@link #WAVE_SPAWN_MIN} et {@link #WAVE_SPAWN_MAX}), du côté d'où arrive la vague, sur une
+     * case libre d'où l'on peut rejoindre le joueur (pas dans une maison ni dans un canal).
+     */
+    private Optional<Vec2> nearSpawnPoint(double side) {
+        Vec2 center = player.position();
+        int clearance = (int) Math.ceil(SPAWN_CLEARANCE + PATH_MARGIN);
+        NavGrid nav = navGrids.computeIfAbsent(clearance,
+                size -> new NavGrid(layout.arena(), layout.walls(), size));
+        nav.updateTarget(center);
+        double spread = Math.toRadians(WAVE_SPREAD_DEGREES);
+        for (int i = 0; i < SPAWN_TRIES; i++) {
+            double angle = side + (random.nextDouble() * 2 - 1) * spread;
+            float distance = WAVE_SPAWN_MIN + random.nextFloat() * (WAVE_SPAWN_MAX - WAVE_SPAWN_MIN);
+            Vec2 point = center.add(new Vec2((float) Math.cos(angle) * distance, (float) Math.sin(angle) * distance));
+            Circle body = new Circle(point, SPAWN_CLEARANCE);
+            if (layout.arena().contains(point)
+                    && layout.walls().stream().noneMatch(wall -> Collisions.overlaps(body, wall))
+                    && nav.canReachTarget(point)) {
+                return Optional.of(point);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

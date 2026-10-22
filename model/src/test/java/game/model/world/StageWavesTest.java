@@ -3,6 +3,7 @@ package game.model.world;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import game.model.combat.Collisions;
 import game.model.combat.Hit;
 import game.model.commun.Faction;
 import game.model.commun.FixedStep;
@@ -167,5 +168,20 @@ class StageWavesTest {
         map.startStage(new StageConfig(1, List.of(vague(0f, 5, 3)), 8, 1f));
         avancer(0.05f);
         return map.enemies().stream().map(Enemy::position).toList();
+    }
+
+    @Test
+    void uneVagueApparaitHorsDeLEcranMaisPresDuJoueur() {
+        creerMap(MapLayouts.main().center(), 11L);
+        map.startStage(new StageConfig(1, List.of(vague(0f, 6, 3)), 16, 1f));
+        avancer(0.05f);
+        assertEquals(9, map.enemies().size());
+        for (Enemy ennemi : map.enemies()) {
+            float distance = ennemi.position().distanceTo(joueur.position());
+            assertTrue(distance >= GameMap.WAVE_SPAWN_MIN - 1e-3f, "hors de l'écran : " + distance);
+            assertTrue(distance <= GameMap.WAVE_SPAWN_MAX + 1e-3f, "pas à l'autre bout de la carte : " + distance);
+            assertTrue(map.walls().stream().noneMatch(mur -> Collisions.overlaps(ennemi.hitbox(), mur)),
+                    "jamais dans un mur ni dans un canal");
+        }
     }
 }
