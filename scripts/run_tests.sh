@@ -7,7 +7,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-echo "==> Tests du modèle (JUnit 5) + rapport de couverture (JaCoCo)"
+echo "==> Tests du modèle (JUnit 6) + rapport de couverture (JaCoCo)"
 ./gradlew --console=plain model:test
 
 REPORT="model/build/reports/jacoco/test/jacocoTestReport.xml"

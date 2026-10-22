@@ -78,7 +78,7 @@ Le projet est découpé en trois modules Gradle :
 ├── assets/                  sprites, sons, polices
 │
 ├── model/                   règles du jeu, Java pur, AUCUN import libGDX
-│   ├── build.gradle         JUnit 5 + JaCoCo
+│   ├── build.gradle         JUnit 6 + JaCoCo
 │   └── src/
 │       ├── main/java/game/model/
 │       │   ├── commun/        vecteur 2D, configuration, intention du joueur
