@@ -5,8 +5,8 @@
 > `model`). Les écarts avec la v0 sont listés en [section 10](#10-écarts-avec-le-gdd-v0).
 
 **Un héros chibi traverse un quartier japonais en flammes, la nuit. Il survit à deux étages
-de vagues d'ennemis, choisit une relique à chaque niveau gagné, puis affronte le Gardien, un
-boss en deux phases.**
+de vagues d'ennemis, choisit une relique à chaque niveau gagné, puis affronte l'Oni du quartier,
+un boss en deux phases.**
 
 ## Sommaire
 
@@ -23,16 +23,17 @@ boss en deux phases.**
 
 ## 1. Concept
 
-Action-roguelite PvE inspiré de *Cinderia* : on en garde la boucle (vagues de combat,
-compétences, reliques, boss).
+Jeu d'action PvE en vagues, inspiré de *Cinderia* : on en garde le combat (vagues d'ennemis,
+compétences, reliques, boss). Il n'y a pas de progression d'une partie à l'autre : chaque run
+se joue d'une traite, et tout repart de zéro à la suivante.
 
 | Élément | Choix |
 |---|---|
 | Nom | **Kagaribi** (篝火, « feu de veille ») |
-| Genre | Action-roguelite, solo, temps réel |
+| Genre | Action en vagues, solo, temps réel |
 | Vue | De dessus, caméra qui suit le joueur sur une grande carte |
 | Ambiance | Quartier japonais de nuit, en flammes ; personnages chibi |
-| Durée d'une run | 5 à 10 minutes (2 étages + boss) |
+| Durée d'une run | 2 à 4 minutes (2 étages + boss) |
 | Plateforme | Desktop (macOS, Windows, Linux), clavier + souris ou manette |
 | Technique | Java 21, libGDX, résolution logique 640 × 360 (fenêtre 1280 × 720) |
 
@@ -47,10 +48,12 @@ La run se découpe en 3 étages :
 |---|---|---|---|
 | 1 | Vague 1 : 4 Rôdeurs · Vague 2 : 3 Rôdeurs + 2 Archers · Vague 3 : 4 Rôdeurs + 3 Archers | 16 ennemis tués | × 1 |
 | 2 | Vague 1 : 4 Rôdeurs + 1 Archer + 1 Chargeur · Vague 2 : 4 R + 3 A + 2 C · Vague 3 : 5 R + 3 A + 3 C | 26 ennemis tués | × 1,2 |
-| 3 | Le Gardien (boss), dans l'arène centrale | Tuer le boss | × 1 |
+| 3 | L'Oni du quartier (boss), dans l'arène centrale | Tuer le boss | × 1 |
 
-- **Vagues** : la vague suivante apparaît 1,5 à 2 s après la mort du dernier ennemi, loin du
-  joueur (au moins 200 px). Après la dernière vague, elle revient tant que l'étage n'est pas
+- **Vagues** : la vague suivante apparaît 1,5 à 2 s après la mort du dernier ennemi, juste hors
+  de l'écran : entre 380 et 560 px du joueur, toute la vague du même côté (± 75°), sur une case
+  libre d'où l'on peut le rejoindre. Faute de place, elle utilise les points d'apparition fixes
+  (à au moins 200 px). Après la dernière vague, elle revient tant que l'étage n'est pas
   fini.
 - **Entre deux étages** : bandeau d'annonce de 2 s et **soin de 30 % des PV max**.
 - **Progression** : chaque ennemi tué rapporte 1 XP. Il faut 5 XP pour le niveau 2, puis
@@ -101,7 +104,7 @@ Trois ennemis aux comportements opposés, plus un boss qui change de comportemen
 
 Les dégâts de contact ne se répètent pas plus d'une fois toutes les 0,6 s par ennemi.
 
-### Boss — le Gardien
+### Boss — l'Oni du quartier
 
 800 PV, 55 px/s, insensible au recul. Arène fixe au centre de la carte.
 
@@ -173,8 +176,11 @@ Clavier et manette marchent en même temps : la visée suit le dernier périphé
 - **Couleurs de lecture** : rouge = danger (zones d'attaque annoncées, ennemis),
   or / orange = récompenses et feu, cyan = magie et compétences.
 - **Lisibilité avant tout** : chaque attaque ennemie est annoncée par une forme au sol ou un
-  temps d'arrêt ; secousse d'écran et bref arrêt sur image quand une compétence frappe.
-- **Son** : une musique pour le quartier, une pour le boss ; une vingtaine d'effets (coups,
+  temps d'arrêt ; secousse d'écran quand une compétence frappe, et bref arrêt sur image pour
+  l'Onde de choc.
+- **Son** : trois musiques qui bouclent sans couture : le quartier (1 min 30, en deux parties),
+  le combat contre le boss, et un thème calme pour le titre et les écrans de fin ; une vingtaine
+  d'effets (coups,
   critiques, esquive, compétences, annonces du Chargeur et du boss, montée de niveau,
   victoire, défaite).
 

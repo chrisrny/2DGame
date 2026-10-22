@@ -54,7 +54,15 @@ charge du boss réutilise `ChargerBehavior` au lieu de la recopier.
 puis relance la recharge ; `Shockwave` et `BladeFan` n'écrivent que `activate()`.
 `BossSecondPhase` hérite de `BossFirstPhase` et ne redéfinit que des méthodes protégées
 (durées, rayon, `afterSlam()`). Même chose pour les menus : `MenuScreen.render()` est `final`
-et appelle `handleInput()` et `drawContent()`.
+et appelle `handleInput()` et `drawContent()`. Et pour la manette : `Gamepad.update()` est
+`final` (zone morte, appuis, directions des menus) ; `GlfwGamepad`, dans le module `lwjgl3`, ne
+fournit que la lecture brute du matériel, donc `core` ne dépend d'aucune bibliothèque de manette.
+
+**Command — intentions du joueur.**
+Le clavier, la manette et les tests produisent tous un `PlayerIntent` (déplacement, visée,
+boutons maintenus) : le modèle ne sait jamais quelle touche a été pressée. Chaque source
+d'entrées implémente `InputSource` (`KeyboardMouseInput`, `GamepadInput`) ; `CombinedInput` les
+réunit pour jouer avec les deux à la fois.
 
 **Factory — reliques et ennemis** ([02](uml/02-classes-entites-ia.png), [03](uml/03-classes-joueur.png)).
 `RelicFactory.draw(3, …)` tire 3 reliques que le joueur n'a pas encore ; `EnemyFactory.create()`

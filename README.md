@@ -1,8 +1,8 @@
 # Kagaribi — 2D Game (B-OOP-301)
 
-Action-roguelite en vue de dessus, en Java 21 avec [libGDX](https://libgdx.com/).
+Jeu d'action en vue de dessus, en Java 21 avec [libGDX](https://libgdx.com/).
 Un héros chibi traverse un quartier japonais en flammes, sur une grande carte : deux étages de
-vagues d'ennemis, une relique à choisir (1 parmi 3) à chaque niveau gagné, puis le Gardien, un
+vagues d'ennemis, une relique à choisir (1 parmi 3) à chaque niveau gagné, puis l'Oni du quartier, un
 boss en deux phases. Jouable au clavier et à la souris ou à la manette.
 
 Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARCHITECTURE.md) ·
@@ -23,7 +23,7 @@ Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARC
 | Lancer les tests et afficher la couverture | `./scripts/run_tests.sh` |
 | Générer la Javadoc | `./gradlew javadoc` |
 | Construire un jar exécutable | `./gradlew lwjgl3:jar` |
-| Lancer le jar (déploiement : seul Java 21 est nécessaire) | `java -jar lwjgl3/build/libs/2dgame-0.1.0.jar` |
+| Lancer le jar (déploiement : seul Java 21 est nécessaire) | `java -jar lwjgl3/build/libs/2dgame-1.0.0.jar` |
 
 - Rapport de couverture : `model/build/reports/jacoco/test/html/index.html`
 - Javadoc : `<module>/build/docs/javadoc/index.html`
@@ -55,7 +55,7 @@ Pour la soutenance :
 - **Fins de partie** : F9 ou F10 en pleine partie. L'écran de victoire ou de défaite arrive
   1,5 s plus tard ; Entrée relance une partie, Échap revient au titre.
 - **Difficulté** : Options → Difficulté (facile ×0,75, normale ×1, difficile ×1,25 sur les PV
-  et les dégâts des ennemis), appliquée à partir du stage suivant.
+  et les dégâts des ennemis), appliquée à partir de l'étage suivant.
 
 ## Architecture
 
