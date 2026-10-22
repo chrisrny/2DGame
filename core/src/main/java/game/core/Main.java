@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
+import game.core.audio.MenuMusic;
 import game.core.input.Gamepad;
 import game.core.screen.DefeatScreen;
 import game.core.screen.GameScreen;
@@ -42,6 +43,7 @@ public class Main extends Game {
     private final Settings settings = new Settings(Difficulty.NORMAL);
     private final Gamepad gamepad;
     private boolean usingGamepad;
+    private MenuMusic menuMusic;
 
     /** Crée le jeu sans manette. */
     public Main() {
@@ -61,6 +63,9 @@ public class Main extends Game {
     public void render() {
         gamepad.update();
         trackDevice();
+        if (menuMusic != null) {
+            menuMusic.update(Gdx.graphics.getDeltaTime());
+        }
         super.render();
     }
 
@@ -75,6 +80,19 @@ public class Main extends Game {
                 || Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0) {
             usingGamepad = false;
         }
+    }
+
+    /**
+     * La musique des menus, gardée d'un écran à l'autre. Chargée à la première demande : il faut
+     * que le son de libGDX soit prêt.
+     *
+     * @return la musique des menus
+     */
+    public MenuMusic menuMusic() {
+        if (menuMusic == null) {
+            menuMusic = new MenuMusic();
+        }
+        return menuMusic;
     }
 
     /** @return la manette, lue une fois par image */
@@ -163,6 +181,9 @@ public class Main extends Game {
             getScreen().dispose();
         }
         disposeSuspended();
+        if (menuMusic != null) {
+            menuMusic.dispose();
+        }
     }
 
     private void disposeSuspended() {

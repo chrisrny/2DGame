@@ -16,6 +16,9 @@ public abstract class EndScreen extends MenuScreen {
     /** Écart vertical entre deux lignes du bilan, en unités. */
     private static final float LINE_GAP = 20f;
 
+    /** Durée des jingles de fin, en secondes : la musique des menus attend qu'ils soient finis. */
+    private static final float JINGLE_LENGTH = 3f;
+
     private final Run run;
     private final String title;
     private final Color titleColor;
@@ -41,6 +44,8 @@ public abstract class EndScreen extends MenuScreen {
     @Override
     public void show() {
         jingle.play(0.9f);
+        // La musique des menus revient une fois le jingle fini.
+        main.menuMusic().play(JINGLE_LENGTH);
     }
 
     @Override

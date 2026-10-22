@@ -118,6 +118,8 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        // La partie a sa propre musique : celle des menus s'efface.
+        main.menuMusic().stop();
         // En revenant de la pause, le A qui a validé « Reprendre » ne doit pas faire esquiver.
         gamepadInput.ignoreUntilReleased();
     }
