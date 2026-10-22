@@ -7,6 +7,7 @@ import game.model.commun.Faction;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Damageable;
+import game.model.entity.Enemy;
 import game.model.event.EventBus;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public final class FakeWorld implements World {
     private final List<Rect> water;
     private final EventBus events = new EventBus();
     private final List<Projectile> projectiles = new ArrayList<>();
+    private final List<Enemy> spawned = new ArrayList<>();
     private final List<Damageable> targets = new ArrayList<>();
     private Vec2 playerPosition = Vec2.ZERO;
 
@@ -107,6 +109,16 @@ public final class FakeWorld implements World {
                 .filter(target -> target.faction() != attacker)
                 .filter(target -> Collisions.overlaps(zone, target.hitbox()))
                 .toList();
+    }
+
+    /** @return les ennemis apparus en cours de partie (invocations du boss), dans l'ordre */
+    public List<Enemy> spawned() {
+        return spawned;
+    }
+
+    @Override
+    public void spawnEnemy(Enemy enemy) {
+        spawned.add(enemy);
     }
 
     @Override

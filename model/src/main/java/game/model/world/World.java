@@ -7,6 +7,7 @@ import game.model.commun.Faction;
 import game.model.commun.Rect;
 import game.model.commun.Vec2;
 import game.model.entity.Damageable;
+import game.model.entity.Enemy;
 import game.model.event.EventBus;
 import java.util.List;
 
@@ -52,6 +53,20 @@ public interface World {
      * @param projectile le projectile tiré
      */
     void spawnProjectile(Projectile projectile);
+
+    /**
+     * Fait apparaître un ennemi en cours de partie, en dehors des vagues : les Rôdeurs que le
+     * boss invoque en phase 2.
+     *
+     * <p>Par défaut, refusé : un monde qui n'a pas de liste d'ennemis (un faux monde de test)
+     * ne sait pas en ajouter. {@link GameMap} l'ajoute à ses ennemis.</p>
+     *
+     * @param enemy l'ennemi à ajouter, déjà placé
+     * @throws UnsupportedOperationException si ce monde ne gère pas d'ennemis
+     */
+    default void spawnEnemy(Enemy enemy) {
+        throw new UnsupportedOperationException("Ce monde ne fait pas apparaître d'ennemis");
+    }
 
     /**
      * Le point qu'un ennemi doit viser pour rejoindre le joueur en contournant les murs.

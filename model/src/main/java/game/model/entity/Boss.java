@@ -3,10 +3,12 @@ package game.model.entity;
 import game.model.ai.BossFirstPhase;
 import game.model.ai.BossPhase;
 import game.model.ai.BossSecondPhase;
+import game.model.ai.BossSummons;
 import game.model.combat.Hit;
 import game.model.combat.Telegraph;
 import game.model.commun.Vec2;
 import game.model.world.World;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,6 +18,9 @@ import java.util.Optional;
  * commence en {@link BossFirstPhase} et passe en phase 2 à {@link #SECOND_PHASE_THRESHOLD} de
  * ses points de vie. Toutes ses attaques sont annoncées : la vue dessine
  * {@link #currentAttackTelegraph()} avant chaque coup.</p>
+ *
+ * <p>Pendant tout le combat, il appelle aussi des Rôdeurs en renfort ({@link BossSummons}),
+ * annoncés par {@link #summonTelegraphs()}.</p>
  *
  * <p>Comme le Chargeur, il ne blesse au contact que pendant sa charge.</p>
  */
@@ -38,6 +43,7 @@ public final class Boss extends Enemy {
 
     private BossPhase phase = new BossFirstPhase();
     private int phaseNumber = 1;
+    private final BossSummons summons = new BossSummons();
 
     /**
      * Crée le boss aux valeurs de référence.
@@ -69,6 +75,8 @@ public final class Boss extends Enemy {
             phaseNumber = 2;
         }
         phase.update(this, world, dt);
+        // Les renforts arrivent pendant tout le combat, quelle que soit la phase.
+        summons.update(this, world, dt);
     }
 
     /**
@@ -100,6 +108,22 @@ public final class Boss extends Enemy {
      */
     public Optional<Telegraph> currentAttackTelegraph() {
         return phase.telegraph(this);
+    }
+
+    /**
+     * Les renforts que le boss est en train d'invoquer, pour que la vue dessine leur point
+     * d'arrivée avant qu'ils apparaissent.
+     *
+     * @return une annonce par Rôdeur à venir, vide hors invocation
+     * @see BossSummons
+     */
+    public List<Telegraph> summonTelegraphs() {
+        return summons.telegraphs();
+    }
+
+    /** @return le nombre de Rôdeurs qu'il a invoqués encore en vie */
+    public int summonedAlive() {
+        return summons.alive();
     }
 
     /** @return la phase actuelle du boss : 1, puis 2 à partir de la moitié de ses points de vie */

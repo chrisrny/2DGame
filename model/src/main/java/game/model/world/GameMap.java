@@ -406,6 +406,13 @@ public final class GameMap implements World {
     }
 
     @Override
+    public void spawnEnemy(Enemy enemy) {
+        // Ajouté à la liste parcourue par update : celle-ci travaille sur une copie, l'ennemi
+        // invoqué n'agit donc qu'à partir du pas suivant.
+        addEnemy(enemy);
+    }
+
+    @Override
     public void spawnProjectile(Projectile projectile) {
         projectiles.add(Objects.requireNonNull(projectile, "projectile"));
     }
