@@ -124,9 +124,11 @@ jamais de la vue.
 
 ## 4. Tests
 
-`./scripts/run_tests.sh` lance les tests du modèle (JUnit 6) et affiche la couverture
-(JaCoCo, rapport dans `model/build/reports/jacoco/test/html/index.html`). Les tests des entrées
-manette sont dans `core` (`./gradlew core:test`). La Javadoc se génère avec `./gradlew javadoc`.
+`./scripts/run_tests.sh` lance tous les tests (JUnit 6) : les règles du jeu dans `model`, les
+entrées manette et l'aide à la visée dans `core`. Il affiche ensuite la couverture du modèle
+(JaCoCo, rapport dans `model/build/reports/jacoco/test/html/index.html`). Le hook versionné
+`.githooks/pre-push` lance ce script avant chaque push et bloque le push si un test échoue
+(activation : `git config core.hooksPath .githooks`). La Javadoc se génère avec `./gradlew javadoc`.
 
 ## 5. Régénérer les diagrammes
 

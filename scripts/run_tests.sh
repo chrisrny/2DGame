@@ -1,14 +1,16 @@
 #!/bin/sh
 
+# Lance tous les tests (modules model et core) et affiche la couverture du modèle.
 # Usage : ./scripts/run_tests.sh
+# Appelé aussi avant chaque push par le hook .githooks/pre-push.
 
 set -e
 
 
 cd "$(dirname "$0")/.."
 
-echo "==> Tests du modèle (JUnit 6) + rapport de couverture (JaCoCo)"
-./gradlew --console=plain model:test
+echo "==> Tous les tests (model + core, JUnit 6) + rapport de couverture (JaCoCo)"
+./gradlew --console=plain test
 
 REPORT="model/build/reports/jacoco/test/jacocoTestReport.xml"
 if [ ! -f "$REPORT" ]; then
@@ -25,6 +27,6 @@ coverage() {
 
 echo ""
 echo "==> Tous les tests passent."
-echo "    Couverture des lignes   : $(coverage LINE)"
-echo "    Couverture des branches : $(coverage BRANCH)"
-echo "    Rapport détaillé        : model/build/reports/jacoco/test/html/index.html"
+echo "    Couverture du modèle, lignes   : $(coverage LINE)"
+echo "    Couverture du modèle, branches : $(coverage BRANCH)"
+echo "    Rapport détaillé               : model/build/reports/jacoco/test/html/index.html"
