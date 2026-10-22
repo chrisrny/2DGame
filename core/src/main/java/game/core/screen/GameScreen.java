@@ -17,6 +17,7 @@ import game.core.hud.DamageNumbers;
 import game.core.hud.Hud;
 import game.core.hud.LevelUpOverlay;
 import game.core.hud.Minimap;
+import game.core.hud.RunTimer;
 import game.core.hud.StageBanner;
 import game.core.input.CombinedInput;
 import game.core.input.Gamepad;
@@ -80,6 +81,7 @@ public class GameScreen extends ScreenAdapter {
     private final LevelUpOverlay levelUp;
     private final StageBanner stageBanner = new StageBanner(WORLD_WIDTH, WORLD_HEIGHT);
     private final BossBar bossBar = new BossBar(WORLD_WIDTH, WORLD_HEIGHT);
+    private final RunTimer runTimer = new RunTimer(WORLD_WIDTH, WORLD_HEIGHT);
     private final Minimap minimap;
     private final GameAudio audio;
     private final DamageNumbers damageNumbers;
@@ -132,6 +134,7 @@ public class GameScreen extends ScreenAdapter {
         levelUp.resize(width, height);
         stageBanner.resize(width, height);
         bossBar.resize(width, height);
+        runTimer.resize(width, height);
         minimap.resize(width, height);
     }
 
@@ -239,6 +242,7 @@ public class GameScreen extends ScreenAdapter {
         stageBanner.draw(run);
         minimap.draw(run, new Vec2(camera.position.x, camera.position.y));
         bossBar.draw(run);
+        runTimer.draw(run);
         if (run.isChoosingRelic()) {
             levelUp.draw(run.pendingChoice());
         }
@@ -301,6 +305,7 @@ public class GameScreen extends ScreenAdapter {
         damageNumbers.dispose();
         stageBanner.dispose();
         bossBar.dispose();
+        runTimer.dispose();
         minimap.dispose();
         audio.dispose();
     }
