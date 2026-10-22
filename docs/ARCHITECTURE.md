@@ -124,7 +124,7 @@ jamais de la vue.
 
 ## 4. Tests
 
-`./scripts/run_tests.sh` lance les tests du modèle (JUnit 5) et affiche la couverture
+`./scripts/run_tests.sh` lance les tests du modèle (JUnit 6) et affiche la couverture
 (JaCoCo, rapport dans `model/build/reports/jacoco/test/html/index.html`). Les tests des entrées
 manette sont dans `core` (`./gradlew core:test`). La Javadoc se génère avec `./gradlew javadoc`.
 
