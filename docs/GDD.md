@@ -111,10 +111,12 @@ Les dégâts de contact ne se répètent pas plus d'une fois toutes les 0,6 s pa
 - **Phase 1 (plus de 50 % des PV)** : poursuit le joueur pendant 1 s, puis alterne :
   - **Frappe au sol** : un cercle de 60 px apparaît sous le joueur et se remplit pendant
     **0,8 s**, puis inflige 20 dégâts dans la zone ;
-  - **Charge** : comme le Chargeur (annonce, charge à 400 px/s, 20 dégâts, étourdi après).
+  - **Charge** : comme le Chargeur (annonce 0,6 s, charge à 400 px/s, 20 dégâts, étourdi après),
+    mais il **anticipe** : il vise là où le joueur va être (à 70 %), pas là où il est. S'écarter
+    en ligne droite ne suffit pas, il faut changer de direction ou esquiver.
 - **Phase 2 (50 % des PV et moins)** : mêmes attaques, plus rapides et plus larges (pause
-  0,6 s, cercle de 72 px annoncé 0,7 s, charge à 470 px/s). **Chaque frappe libère 8 braises
-  en cercle** (6 dégâts chacune).
+  0,6 s, cercle de 72 px annoncé 0,7 s, charge annoncée 0,45 s à 470 px/s et anticipée à 100 %).
+  **Chaque frappe libère 8 braises en cercle** (6 dégâts chacune).
 
 ## 5. Reliques
 

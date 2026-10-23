@@ -15,7 +15,9 @@ import game.model.world.World;
  *   <li>pauses plus courtes ({@link #PAUSE_DURATION}) : moins de temps pour souffler ;</li>
  *   <li>frappe plus large ({@link #SLAM_RADIUS}) et annoncée un peu moins longtemps
  *       ({@link #SLAM_WIND_UP}) ;</li>
- *   <li>charge plus rapide ({@link #CHARGE_SPEED}) ;</li>
+ *   <li>charge plus rapide ({@link #CHARGE_SPEED}), annoncée moins longtemps
+ *       ({@link #CHARGE_WIND_UP}) et qui anticipe complètement le déplacement du joueur
+ *       ({@link #CHARGE_LEAD}) ;</li>
  *   <li>chaque frappe projette un anneau de {@link #EMBER_COUNT} braises depuis le point
  *       d'impact : il faut sortir du cercle, puis passer entre les braises.</li>
  * </ul>
@@ -36,6 +38,12 @@ public final class BossSecondPhase extends BossFirstPhase {
 
     /** Vitesse de la charge, en unités par seconde. */
     public static final float CHARGE_SPEED = 470f;
+
+    /** Durée de l'annonce de la charge, en secondes. */
+    public static final float CHARGE_WIND_UP = 0.45f;
+
+    /** Part de l'anticipation de la charge : il vise là où sera le joueur s'il garde sa vitesse. */
+    public static final float CHARGE_LEAD = 1f;
 
     /** Nombre de braises projetées par chaque frappe. */
     public static final int EMBER_COUNT = 8;
@@ -70,6 +78,16 @@ public final class BossSecondPhase extends BossFirstPhase {
     @Override
     protected float chargeSpeed() {
         return CHARGE_SPEED;
+    }
+
+    @Override
+    protected float chargeWindUp() {
+        return CHARGE_WIND_UP;
+    }
+
+    @Override
+    protected float chargeLead() {
+        return CHARGE_LEAD;
     }
 
     @Override

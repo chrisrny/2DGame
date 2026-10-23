@@ -54,6 +54,7 @@ public final class SceneRenderer implements Disposable {
     private final EnemySprites enemies = new EnemySprites();
     private final PlayerSprite player = new PlayerSprite();
     private final SlashEffect slash = new SlashEffect();
+    private final AimIndicator aim = new AimIndicator();
     private final BossSprite boss = new BossSprite();
     private final BossEffects bossEffects;
     private final SkillEffects skills = new SkillEffects();
@@ -216,7 +217,8 @@ public final class SceneRenderer implements Disposable {
 
     /**
      * Pose la nuit et ses lumières sur la scène, puis ce qui doit rester vif : fumée, lueurs des
-     * projectiles et du boss, onde de choc, braises. À appeler juste après {@link #drawObjects}.
+     * projectiles et du boss, onde de choc, braises, flèche de visée. À appeler juste après
+     * {@link #drawObjects}.
      *
      * @param camera   la caméra du monde
      * @param viewport la vue de l'écran de jeu
@@ -232,6 +234,7 @@ public final class SceneRenderer implements Disposable {
         ambient.drawSmoke(batch, lighting.smoke());
         drawGlows(world, hero);
         ambient.drawEmbers(batch, white);
+        aim.draw(batch, hero, smoothing.of(hero, hero.position()));
         batch.end();
     }
 
@@ -360,6 +363,7 @@ public final class SceneRenderer implements Disposable {
         skills.dispose();
         lighting.dispose();
         slash.dispose();
+        aim.dispose();
         puffs.dispose();
     }
 }
