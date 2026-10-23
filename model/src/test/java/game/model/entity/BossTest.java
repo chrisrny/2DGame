@@ -205,4 +205,32 @@ class BossTest {
         assertEquals(Boss.MAX_HP - 10, boss.hp());
         assertTrue(!boss.isStunned(), "l'Onde de choc ne fige pas le boss");
     }
+
+    @Test
+    void laChargeAnticipeLeJoueurQuiSEcarte() {
+        avancerJusquAUneAnnonce();
+        avancerPendantLAnnonceSansDegats();
+        avancerJusquAUneAnnonce();
+
+        // Pendant l'annonce de la charge, le joueur s'écarte vers le haut à sa vitesse de marche.
+        Vec2 vitesse = new Vec2(0f, 120f);
+        for (int i = 0; i < PAS_MAX && annonce().isPresent(); i++) {
+            joueur.position = joueur.position.add(vitesse.scale(FixedStep.DT));
+            monde.setPlayerPosition(joueur.position);
+            boss.update(monde, FixedStep.DT);
+        }
+
+        Vec2 avant = boss.position();
+        boss.update(monde, FixedStep.DT);
+        Vec2 direction = boss.position().sub(avant).normalized();
+
+        // Il vise 70 % du chemin vers là où sera le joueur quand la charge l'atteindra.
+        float trajet = avant.distanceTo(joueur.position) / BossFirstPhase.CHARGE_SPEED;
+        Vec2 visee = joueur.position.add(vitesse.scale(BossFirstPhase.CHARGE_LEAD * trajet));
+        Vec2 attendue = visee.sub(avant).normalized();
+        assertEquals(attendue.x(), direction.x(), 0.02f);
+        assertEquals(attendue.y(), direction.y(), 0.02f);
+        Vec2 versLeJoueur = joueur.position.sub(avant).normalized();
+        assertTrue(direction.y() > versLeJoueur.y() + 0.1f, "il fonce devant le joueur, pas sur lui");
+    }
 }

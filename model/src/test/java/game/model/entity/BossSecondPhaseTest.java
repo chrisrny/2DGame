@@ -3,6 +3,7 @@ package game.model.entity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import game.model.ai.BossFirstPhase;
 import game.model.ai.BossSecondPhase;
 import game.model.combat.Hit;
 import game.model.combat.Projectile;
@@ -69,5 +70,23 @@ class BossSecondPhaseTest {
         // Elles partent dans toutes les directions : leur somme est nulle.
         Vec2 somme = monde.projectiles().stream().map(Projectile::velocity).reduce(Vec2.ZERO, Vec2::add);
         assertTrue(somme.length() < 0.01f, somme.toString());
+    }
+
+    @Test
+    void laChargeEstAnnonceeMoinsLongtemps() {
+        // D'abord la frappe, puis la charge.
+        avancerJusquAUneAnnonce();
+        while (boss.currentAttackTelegraph().isPresent()) {
+            boss.update(monde, FixedStep.DT);
+        }
+        avancerJusquAUneAnnonce();
+        int pas = 0;
+        while (boss.currentAttackTelegraph().isPresent() && pas < PAS_MAX) {
+            boss.update(monde, FixedStep.DT);
+            pas++;
+        }
+
+        assertEquals(BossSecondPhase.CHARGE_WIND_UP, pas * FixedStep.DT, FixedStep.DT);
+        assertTrue(BossSecondPhase.CHARGE_WIND_UP < BossFirstPhase.CHARGE_WIND_UP);
     }
 }

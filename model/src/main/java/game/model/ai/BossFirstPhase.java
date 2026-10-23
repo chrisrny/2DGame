@@ -19,13 +19,16 @@ import java.util.Optional;
  *       le joueur et reste {@link #SLAM_WIND_UP} secondes, sans bouger ; puis tout ce qui est
  *       dedans prend {@link #SLAM_DAMAGE} dégâts. Le joueur qui sort du cercle à temps n'a rien ;</li>
  *   <li><b>charge</b> : la logique du Chargeur ({@link ChargerBehavior}) à
- *       {@link #CHARGE_SPEED}, plus vite que lui : approche, annonce, charge, étourdissement.</li>
+ *       {@link #CHARGE_SPEED}, plus vite que lui : approche, annonce, charge, étourdissement.
+ *       Contrairement au Chargeur, il anticipe le déplacement du joueur
+ *       ({@link #CHARGE_LEAD}) : s'écarter en ligne droite ne suffit pas.</li>
  * </ul>
  * <p>Entre deux attaques, le boss marche vers le joueur pendant {@link #PAUSE_DURATION} seconde.</p>
  *
  * <p>Le cycle des attaques est fixé ici ; ses réglages passent par des méthodes que la phase 2
  * redéfinit ({@link BossSecondPhase}, pattern Template Method) : durée de la pause, taille et
- * annonce de la frappe, vitesse de la charge, et ce qui suit une frappe.</p>
+ * annonce de la frappe, vitesse, annonce et anticipation de la charge, et ce qui suit une
+ * frappe.</p>
  */
 public class BossFirstPhase implements BossPhase {
 
@@ -40,6 +43,15 @@ public class BossFirstPhase implements BossPhase {
 
     /** Vitesse de la charge du boss, en unités par seconde : plus rapide que celle du Chargeur. */
     public static final float CHARGE_SPEED = 400f;
+
+    /** Durée de l'annonce de la charge, en secondes : la même que celle du Chargeur. */
+    public static final float CHARGE_WIND_UP = ChargerBehavior.WIND_UP_DURATION;
+
+    /**
+     * Part de l'anticipation de la charge : il vise à 70 % du chemin entre le joueur et là où il
+     * sera. Il laisse une marge à celui qui s'écarte vite.
+     */
+    public static final float CHARGE_LEAD = 0.7f;
 
     /** Pause entre deux attaques, en secondes : le moment de souffler et de contre-attaquer. */
     public static final float PAUSE_DURATION = 1f;
@@ -89,7 +101,7 @@ public class BossFirstPhase implements BossPhase {
             slamZone = new Circle(world.playerPosition(), slamRadius());
             enter(Step.SLAM);
         } else {
-            charge = new ChargerBehavior(chargeSpeed());
+            charge = new ChargerBehavior(chargeSpeed(), chargeWindUp(), chargeLead());
             enter(Step.CHARGE);
         }
         slamNext = !slamNext;
@@ -126,6 +138,16 @@ public class BossFirstPhase implements BossPhase {
         return CHARGE_SPEED;
     }
 
+    /** @return la durée de l'annonce de la charge, en secondes */
+    protected float chargeWindUp() {
+        return CHARGE_WIND_UP;
+    }
+
+    /** @return la part de l'anticipation de la charge, de 0 à 1 */
+    protected float chargeLead() {
+        return CHARGE_LEAD;
+    }
+
     /**
      * Ce qui suit une frappe au sol. En phase 1, rien.
      *
@@ -152,7 +174,7 @@ public class BossFirstPhase implements BossPhase {
         }
         if (step == Step.CHARGE && charge.isWindingUp()) {
             // L'annonce de la charge est le boss lui-même, qui se remplit de rouge.
-            float progress = Math.min(1f, charge.phaseTime() / ChargerBehavior.WIND_UP_DURATION);
+            float progress = Math.min(1f, charge.phaseTime() / charge.windUpDuration());
             return Optional.of(new Telegraph(boss.hitbox(), progress));
         }
         return Optional.empty();

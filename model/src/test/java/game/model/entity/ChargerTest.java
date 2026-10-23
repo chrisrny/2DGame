@@ -137,4 +137,23 @@ class ChargerTest {
         avancer(chargeur, 0.2f);
         assertFalse(chargeur.isStunned());
     }
+
+    @Test
+    void leChargeurViseLeJoueurLaOuIlEstSansAnticiper() {
+        Charger chargeur = chargeurAvecJoueurA(100f);
+        // Le joueur s'écarte vers le haut pendant l'annonce : seul le boss anticipe.
+        Vec2 vitesse = new Vec2(0f, 120f);
+        for (int i = 0; i < 600 && chargeur.phase() != Phase.CHARGE; i++) {
+            monde.setPlayerPosition(monde.playerPosition().add(vitesse.scale(FixedStep.DT)));
+            chargeur.update(monde, FixedStep.DT);
+        }
+        assertEquals(Phase.CHARGE, chargeur.phase());
+
+        Vec2 avant = chargeur.position();
+        chargeur.update(monde, FixedStep.DT);
+        Vec2 direction = chargeur.position().sub(avant).normalized();
+        Vec2 versLeJoueur = monde.playerPosition().sub(avant).normalized();
+        assertEquals(versLeJoueur.x(), direction.x(), 0.001f);
+        assertEquals(versLeJoueur.y(), direction.y(), 0.001f);
+    }
 }
