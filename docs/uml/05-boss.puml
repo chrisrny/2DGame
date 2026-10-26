@@ -1,6 +1,6 @@
 @startuml 05-boss
 !include style.iuml
-title Le boss — patterns State et Template Method
+title Le boss — State, Template Method et composition
 
 class Boss <<focus>> {
   + {static} MAX_HP = 800
@@ -36,10 +36,30 @@ class ChargerBehavior {
   + act(self, world, dt)
 }
 
+class BossSummons {
+  + {static} INTERVAL = 7 s
+  + {static} COUNT = 3
+  + {static} MAX_ALIVE = 6
+  + update(boss, world, dt)
+  + telegraphs() : List<Telegraph>
+  + alive() : int
+}
+
+class EnemyFactory {
+  + {static} create(type, position, multiplier) : Enemy
+}
+
+interface World <<interface>> {
+  + spawnEnemy(enemy)
+}
+
 Boss *-right- "1" BossPhase : phase >
 BossPhase <|.. BossFirstPhase
 BossFirstPhase <|-- BossSecondPhase
 BossFirstPhase o-- "0..1" ChargerBehavior : charge\n(réutilisée)
+Boss *-down- "1" BossSummons : summons >
+BossSummons ..> EnemyFactory : crée les Rôdeurs
+BossSummons ..> World : spawnEnemy()
 
 note top of Boss
   <b>State</b>
@@ -55,6 +75,14 @@ note right of BossSecondPhase
   seule fois dans BossFirstPhase.
   La phase 2 ne change que les réglages
   et ajoute les braises après la frappe.
+end note
+note left of BossSummons
+  <b>Composition</b>
+  Les invocations ne dépendent pas
+  de la phase : le boss garde un seul
+  BossSummons du début à la fin.
+  Changer de phase ne remet ni le
+  minuteur ni le compte à zéro.
 end note
 !include legende.iuml
 @enduml

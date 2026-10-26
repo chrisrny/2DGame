@@ -56,7 +56,7 @@ public interface World {
 
     /**
      * Fait apparaître un ennemi en cours de partie, en dehors des vagues : les Rôdeurs que le
-     * boss invoque en phase 2.
+     * boss invoque pendant tout son combat.
      *
      * <p>Par défaut, refusé : un monde qui n'a pas de liste d'ennemis (un faux monde de test)
      * ne sait pas en ajouter. {@link GameMap} l'ajoute à ses ennemis.</p>

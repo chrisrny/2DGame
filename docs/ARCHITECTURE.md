@@ -14,7 +14,7 @@ Dix diagrammes courts, chacun pour une seule idée. Sources PlantUML (`.puml`) e
 | 02 | [Modules](uml/02-modules.png) | Paquetages | Les 3 modules et la séparation modèle / vue |
 | 03 | [Boucle de jeu](uml/03-boucle-de-jeu.png) | Séquence | Ce qui se passe à chaque image |
 | 04 | [Ennemis et IA](uml/04-ennemis-ia.png) | Classes | Strategy, Factory |
-| 05 | [Boss](uml/05-boss.png) | Classes | State, Template Method |
+| 05 | [Boss](uml/05-boss.png) | Classes | State, Template Method, composition |
 | 06 | [Joueur](uml/06-joueur.png) | Classes | State, Template Method |
 | 07 | [États du joueur](uml/07-etats-joueur.png) | États-transitions | Quand le joueur change d'état |
 | 08 | [Reliques](uml/08-reliques.png) | Classes | Factory, méthodes « crochets » |
@@ -69,7 +69,9 @@ chaque nouvel état. Les transitions sont sur le diagramme d'états :
 ![États du joueur](uml/07-etats-joueur.png)
 
 Même principe pour le boss : à 50 % de ses PV, `Boss` remplace son `BossFirstPhase` par un
-`BossSecondPhase`.
+`BossSecondPhase`. Ses invocations, elles, ne dépendent pas de la phase : elles vivent dans un
+objet à part, `BossSummons`, que le boss garde du début à la fin du combat (composition). Changer
+de phase ne remet donc ni le minuteur ni le compte des Rôdeurs à zéro.
 
 ![Boss](uml/05-boss.png)
 
