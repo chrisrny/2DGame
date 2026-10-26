@@ -62,6 +62,6 @@ M8 -[hidden]right- M9
 note bottom of M
   <b>Séparation modèle / vue garantie par le build</b> : le module model
   ne déclare aucune dépendance vers libGDX, un « import com.badlogic »
-  n'y compile pas. Il se teste donc sans fenêtre (334 tests JUnit).
+  n'y compile pas. Il se teste donc sans fenêtre (347 tests JUnit).
 end note
 @enduml
