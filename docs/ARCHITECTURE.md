@@ -1,7 +1,7 @@
 # Architecture technique — Kagaribi
 
 Organisation interne du jeu et design patterns utilisés. Le contenu du jeu (règles, ennemis,
-reliques) est décrit dans le [GDD](GDD.md).
+reliques) est décrit dans le [GDD](GDD.docx).
 
 ## Diagrammes UML
 

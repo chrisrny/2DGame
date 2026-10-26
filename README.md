@@ -5,7 +5,7 @@ Un héros chibi traverse un quartier japonais en flammes, sur une grande carte :
 vagues d'ennemis, une relique à choisir (1 parmi 3) à chaque niveau gagné, puis l'Oni du quartier, un
 boss en deux phases. Jouable au clavier et à la souris ou à la manette.
 
-Documentation : [GDD](docs/GDD.md) · [Architecture et design patterns](docs/ARCHITECTURE.md) ·
+Documentation : [GDD](docs/GDD.docx) ([v0 de départ](docs/GDD-v0.docx), [évolution v0 → jeu livré](docs/GDD-evolution.docx)) · [Architecture et design patterns](docs/ARCHITECTURE.md) ·
 [Diagrammes UML](docs/uml/)
 
 ## Prérequis
