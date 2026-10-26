@@ -124,7 +124,20 @@ Le modèle publie des `GameEvent` (`EntityHit`, `EntityDied`, `StageCleared`…)
 dans le modèle, le son, les chiffres de dégâts et la fumée dans la vue. Le modèle ne dépend
 jamais de la vue.
 
-## 4. Tests
+## 4. Notions orientées objet : où les trouver
+
+| Notion | Dans le code |
+|---|---|
+| **Interfaces** (un contrat, sans état) | [`World`](../model/src/main/java/game/model/world/World.java), [`Damageable`](../model/src/main/java/game/model/entity/Damageable.java), [`PlayerState`](../model/src/main/java/game/model/player/state/PlayerState.java), [`EnemyBehavior`](../model/src/main/java/game/model/ai/EnemyBehavior.java), [`BossPhase`](../model/src/main/java/game/model/ai/BossPhase.java), [`Relic`](../model/src/main/java/game/model/relic/Relic.java), [`InputSource`](../core/src/main/java/game/core/input/InputSource.java), et [`GameEvent`](../model/src/main/java/game/model/event/GameEvent.java), interface scellée : seuls ses 5 records peuvent l'implémenter |
+| **Classes abstraites** (un état et un comportement communs) | [`Enemy`](../model/src/main/java/game/model/entity/Enemy.java) (PV, recul, collisions), [`Skill`](../model/src/main/java/game/model/skill/Skill.java) (recharge), [`AbstractRelic`](../model/src/main/java/game/model/relic/AbstractRelic.java) (nom, description), [`Gamepad`](../core/src/main/java/game/core/input/Gamepad.java) (zone morte, appuis), [`MenuScreen`](../core/src/main/java/game/core/screen/MenuScreen.java) et [`EndScreen`](../core/src/main/java/game/core/screen/EndScreen.java) (écrans) |
+| **Héritage** | `Prowler`, `Archer`, `Charger` et `Boss` héritent d'`Enemy` ; trois niveaux dans notre propre code : `VictoryScreen` → `EndScreen` → `MenuScreen` ; `Relic` → `AbstractRelic` → `SharpenedBlade` |
+| **Polymorphisme** | `Player` appelle `state.act()` sans savoir dans quel état il est ; `Enemy` appelle `behavior.act()` sans savoir quel ennemi il est |
+| **Redéfinition** | `Shockwave` et `BladeFan` redéfinissent `activate()` de `Skill` ; `BossSecondPhase` redéfinit les réglages de `BossFirstPhase` |
+| **Surcharge** | [`Gamepad.justPressed(Button)`](../core/src/main/java/game/core/input/Gamepad.java) et `justPressed(Direction)` ; trois constructeurs de [`Projectile`](../model/src/main/java/game/model/combat/Projectile.java) |
+| **Encapsulation** | Aucun attribut public modifiable dans le projet : l'état ne change que par une méthode qui applique une règle (par exemple `Player.receive(Hit)` vérifie l'invincibilité) |
+| **Objets immuables** | 12 records, dont `Vec2`, `Hit`, `PlayerIntent`, `PlayerStats` et `Wave` : un vecteur ou un coup partagé ne peut pas être modifié par erreur |
+
+## 5. Tests
 
 `./scripts/run_tests.sh` lance tous les tests (JUnit 6) : les règles du jeu dans `model`, les
 entrées manette et l'aide à la visée dans `core`. Il affiche ensuite la couverture du modèle
@@ -132,7 +145,7 @@ entrées manette et l'aide à la visée dans `core`. Il affiche ensuite la couve
 `.githooks/pre-push` lance ce script avant chaque push et bloque le push si un test échoue
 (activation : `git config core.hooksPath .githooks`). La Javadoc se génère avec `./gradlew javadoc`.
 
-## 5. Régénérer les diagrammes
+## 6. Régénérer les diagrammes
 
 Depuis `docs/uml/` (PlantUML et Graphviz installés, police Inter) :
 
