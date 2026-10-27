@@ -7,13 +7,7 @@ import game.model.entity.Enemy;
 import game.model.entity.Prowler;
 import java.util.Objects;
 
-/**
- * Fabrique d'ennemis (pattern Factory) : crée le bon ennemi à partir de son type.
- *
- * <p>Les vagues ne décrivent que des types ({@link EnemyType}) : c'est le seul endroit du
- * modèle qui sait quelle classe correspond à quel type. Ajouter un ennemi revient à ajouter
- * un type et une ligne ici.</p>
- */
+/** Fabrique d'ennemis (pattern Factory) : crée le bon ennemi à partir de son type. */
 public final class EnemyFactory {
 
     private EnemyFactory() {
@@ -22,11 +16,12 @@ public final class EnemyFactory {
     /**
      * Crée un ennemi.
      *
-     * @param type       le type d'ennemi
-     * @param position   sa position d'apparition
-     * @param multiplier multiplicateur de ses points de vie et de ses dégâts (1 aux valeurs de référence)
+     * @param type le type d'ennemi
+     * @param position sa position d'apparition
+     * @param multiplier multiplicateur de ses points de vie et de ses dégâts (1 aux valeurs de
+     *     référence)
      * @return le nouvel ennemi
-     * @throws NullPointerException     si le type ou la position est {@code null}
+     * @throws NullPointerException si le type ou la position est {@code null}
      * @throws IllegalArgumentException si le multiplicateur n'est pas strictement positif
      */
     public static Enemy create(EnemyType type, Vec2 position, float multiplier) {

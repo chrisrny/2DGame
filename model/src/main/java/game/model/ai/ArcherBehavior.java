@@ -6,17 +6,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Enemy;
 import game.model.world.World;
 
-/**
- * Comportement de l'Archer : garder ses distances et tirer.
- *
- * <p>Il reste entre {@link #MIN_DISTANCE} et {@link #MAX_DISTANCE} du joueur : il recule
- * s'il est trop près, avance s'il est trop loin, et reste sur place entre les deux.
- * Quand le joueur est à portée, il tire un projectile vers lui toutes les
- * {@link #FIRE_INTERVAL} secondes.</p>
- *
- * <p>Il ne tire jamais à travers un mur : sans ligne de vue sur le joueur, il le poursuit en
- * contournant les obstacles jusqu'à le voir.</p>
- */
+/** Comportement de l'Archer : garder ses distances et tirer. */
 public final class ArcherBehavior implements EnemyBehavior {
 
     /** En dessous de cette distance au joueur, l'Archer recule. */

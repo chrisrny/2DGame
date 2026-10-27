@@ -5,22 +5,7 @@ import game.model.commun.Vec2;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Les maps du jeu, décrites en code.
- *
- * <p>La map de la démo fait 1920x1080, soit 3x3 écrans. De la roche taille ses coins et ses
- * bords pour que le contour jouable soit irrégulier. Chaque zone a ses obstacles, le centre
- * reste dégagé pour le joueur et les points d'apparition sont répartis sur le pourtour.</p>
- *
- * <p>Le centre sert aussi d'arène au boss ({@link #BOSS_ARENA}) : entre les passages et les
- * couloirs, il n'a que les quatre petits piliers du départ, assez pour se mettre à l'abri d'une
- * charge sans gêner l'esquive.</p>
- *
- * <p>Comme le quartier des plaisirs qu'elle représente, la map est bordée à l'ouest et à l'est
- * par un canal ({@link #CANALS}), qu'un pont permet de traverser ({@link #BRIDGES}). Deux torii
- * marquent les portes nord et sud du centre ({@link #TORII}). Pour les règles, canaux et piliers
- * sont des murs comme les autres ; ces listes servent à la vue, qui les habille.</p>
- */
+/** Les maps du jeu, décrites en code. */
 public final class MapLayouts {
 
     /** Épaisseur du mur qui entoure la map. */

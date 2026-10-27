@@ -15,16 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Les renforts du boss : il invoque {@link #COUNT} Rôdeurs toutes les {@link #INTERVAL}
- * secondes, pendant tout le combat, jamais plus de {@link #MAX_ALIVE} en vie en même temps.
- *
- * <p>Chaque arrivée est annoncée au sol {@link #WIND_UP} seconde avant ({@link #telegraphs()}),
- * puis les Rôdeurs apparaissent exactement là où l'annonce était dessinée. Ils sont créés par
- * {@link EnemyFactory}, avec le multiplicateur du boss.</p>
- *
- * <p>Les invocations ne dépendent pas de la phase du boss : le boss garde un seul
- * {@code BossSummons} du début à la fin (composition), qui avance en même temps que sa phase
- * d'attaque. Changer de phase ne remet donc ni le minuteur ni le compte des Rôdeurs à zéro.</p>
+ * Les renforts du boss : il invoque {@link #COUNT} Rôdeurs toutes les {@link #INTERVAL} secondes,
+ * pendant tout le combat, jamais plus de {@link #MAX_ALIVE} en vie en même temps.
  */
 public final class BossSummons {
 
@@ -52,8 +44,8 @@ public final class BossSummons {
     /** Rayon du cercle d'annonce dessiné à l'endroit d'une arrivée. */
     public static final float MARK_RADIUS = 12f;
 
-    // Places essayées autour du boss, en degrés par rapport à la direction du joueur : d'abord
-    // sur ses flancs (les Rôdeurs prennent le joueur en tenaille), en dernier vers le joueur.
+    // Places essayées autour du boss, en degrés par rapport à la direction du joueur : d'abord sur
+    // ses flancs (les Rôdeurs prennent le joueur en tenaille), en dernier vers le joueur.
     private static final int[] ANGLES = {90, -90, 135, -135, 45, -45, 180, 0};
 
     // Même tolérance que pour les autres minuteurs décomptés pas à pas en float.
@@ -66,12 +58,12 @@ public final class BossSummons {
 
     /**
      * Fait avancer les invocations d'un pas : une annonce en cours se termine par l'arrivée des
-     * Rôdeurs ; à chaque intervalle, une nouvelle annonce commence s'il reste de la place sous
-     * le maximum.
+     * Rôdeurs ; à chaque intervalle, une nouvelle annonce commence s'il reste de la place sous le
+     * maximum.
      *
-     * @param boss  le boss qui invoque
+     * @param boss le boss qui invoque
      * @param world le monde, pour le joueur, les murs et l'apparition des Rôdeurs
-     * @param dt    durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     public void update(Boss boss, World world, float dt) {
         summoned.removeIf(enemy -> !enemy.isAlive());
@@ -98,9 +90,7 @@ public final class BossSummons {
         }
     }
 
-    // Les places libres autour du boss, dans l'ordre de ANGLES. Sans hasard : à position égale,
-    // les Rôdeurs arrivent toujours au même endroit. Peut en rendre moins que demandé si le boss
-    // est coincé contre des murs.
+    // Les places libres autour du boss, dans l'ordre de ANGLES.
     private static List<Circle> zones(Boss boss, World world, int count) {
         Vec2 center = boss.position();
         Vec2 toPlayer = world.playerPosition().sub(center).normalized();
@@ -117,8 +107,8 @@ public final class BossSummons {
         return zones;
     }
 
-    // Une place est libre si le Rôdeur y tient (dans l'arène, hors des murs), si le boss la
-    // rejoint sans mur entre eux, si elle n'est pas sur le joueur ni sur un autre Rôdeur annoncé.
+    // Une place est libre si le Rôdeur y tient (dans l'arène, hors des murs), si le boss la rejoint
+    // sans mur entre eux, si elle n'est pas sur le joueur ni sur un autre Rôdeur annoncé.
     private static boolean isFree(Circle zone, Vec2 from, World world, List<Circle> taken) {
         Vec2 point = zone.center();
         float r = zone.radius();
@@ -133,10 +123,8 @@ public final class BossSummons {
     }
 
     /**
-     * Les arrivées de Rôdeurs en cours d'annonce : un cercle par Rôdeur, qui se remplit
-     * pendant {@link #WIND_UP}.
-     *
-     * @return une annonce par Rôdeur à venir, vide hors invocation
+     * Les arrivées de Rôdeurs en cours d'annonce : un cercle par Rôdeur, qui se remplit pendant
+     * {@link #WIND_UP}.
      */
     public List<Telegraph> telegraphs() {
         float progress = Math.min(1f, windUp / WIND_UP);

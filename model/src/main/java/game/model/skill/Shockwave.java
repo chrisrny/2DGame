@@ -10,11 +10,7 @@ import game.model.world.World;
 
 /**
  * Onde de choc : frappe tous les ennemis autour du joueur, les repousse vers l'extérieur et les
- * étourdit un court instant. C'est le sort de dégagement : il fait le vide quand on est encerclé.
- *
- * <p>Comme l'attaque, c'est la cible qui décide si elle encaisse le coup, et chaque coup accepté
- * publie un {@link GameEvent.EntityHit}. Chaque cible touchée prévient les reliques
- * ({@link Player#registerHit()}) : le Croc vampire soigne aussi sur l'onde.</p>
+ * étourdit un court instant.
  */
 public final class Shockwave extends Skill {
 

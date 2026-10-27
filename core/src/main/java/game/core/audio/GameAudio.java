@@ -25,23 +25,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
-/**
- * Le son de la partie : effets et musique ({@code assets/sfx}, {@code assets/music}). Tous les sons
- * sont synthétisés pour le jeu (koto, shamisen, taiko, gong, souffle, feu), aucun n'est emprunté.
- *
- * <p>Deux sources, comme le reste de la vue :</p>
- * <ul>
- *   <li><b>les événements du modèle</b> (pattern Observer, via l'{@link EventBus}) : coups portés
- *   et reçus, critiques, morts ;</li>
- *   <li><b>les changements d'état</b>, comparés d'une image à l'autre : début d'une attaque, d'une
- *   esquive, d'une compétence, élan et charge de la roue, coups du boss, montée de niveau, nouvel
- *   étage, fin de partie (la musique s'éteint).</li>
- * </ul>
- *
- * <p>Un même son ne repart pas avant un court délai : dix ennemis touchés d'un coup ne font pas
- * dix fois plus de bruit. Chaque son varie un peu en hauteur pour ne pas lasser. La musique passe
- * en fondu de l'ambiance du quartier au combat contre l'Oni.</p>
- */
+/** Le son de la partie : effets et musique ({@code assets/sfx}, {@code assets/music}). */
 public final class GameAudio implements Disposable {
 
     /** Les effets, avec leur volume. */
@@ -145,7 +129,7 @@ public final class GameAudio implements Disposable {
      * Compare la partie à l'image précédente pour jouer les sons de ce qui commence, et règle la
      * musique. À appeler une fois par image.
      *
-     * @param run   la partie
+     * @param run la partie
      * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Run run, float delta) {

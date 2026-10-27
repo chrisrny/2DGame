@@ -22,20 +22,8 @@ import java.util.Optional;
 
 /**
  * Interface en jeu, en haut à gauche, dans le style du quartier (laque noire, or, vermillon) :
- * portrait du héros dans un médaillon, barre de vie, barre d'expérience et sceau du niveau,
- * jauge d'esquive, les deux compétences avec leur recharge, et les reliques déjà prises.
- *
- * <ul>
- *   <li><b>Barre de vie</b> : quand le héros perd des points de vie, la partie perdue reste un
- *   instant en clair puis fond : on voit ce que le coup a coûté.</li>
- *   <li><b>Compétences</b> : la recharge assombrit la case comme une aiguille qui tourne, avec
- *   les secondes restantes ; la case s'illumine quand la compétence est de nouveau prête.</li>
- *   <li><b>Danger</b> : un voile rouge bat sur les bords de l'écran quand la vie est basse, et
- *   l'écran rougit un instant à chaque coup reçu.</li>
- * </ul>
- *
- * <p>Le HUD a sa propre caméra, fixe, avec les mêmes unités logiques que le jeu (640x360 dans
- * un {@link FitViewport}). Il lit le joueur, il ne le modifie jamais.</p>
+ * portrait du héros dans un médaillon, barre de vie, barre d'expérience et sceau du niveau, jauge
+ * d'esquive, les deux compétences avec leur recharge, et les reliques déjà prises.
  */
 public final class Hud implements Disposable {
 
@@ -87,7 +75,7 @@ public final class Hud implements Disposable {
     /**
      * Crée le HUD.
      *
-     * @param width  largeur de l'écran logique, en unités
+     * @param width largeur de l'écran logique, en unités
      * @param height hauteur de l'écran logique, en unités
      */
     public Hud(float width, float height) {
@@ -101,7 +89,7 @@ public final class Hud implements Disposable {
     /**
      * Adapte le HUD à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {
@@ -111,7 +99,7 @@ public final class Hud implements Disposable {
     /**
      * Dessine le HUD. À appeler après le monde, pour qu'il soit au-dessus.
      *
-     * @param player     le joueur dont on affiche l'état
+     * @param player le joueur dont on affiche l'état
      * @param experience l'expérience et le niveau du joueur
      */
     public void draw(Player player, Experience experience) {
@@ -367,7 +355,8 @@ public final class Hud implements Disposable {
      * Avancement de la recharge de l'esquive.
      *
      * @param player le joueur
-     * @return 0 juste après une esquive, puis de plus en plus près de 1 ; 1 quand l'esquive est prête
+     * @return 0 juste après une esquive, puis de plus en plus près de 1 ; 1 quand l'esquive est
+     *     prête
      */
     static float dodgeReadyRatio(Player player) {
         float cooldown = player.stats().dodgeCooldown();

@@ -28,20 +28,8 @@ import java.util.Random;
 import java.util.function.Function;
 
 /**
- * Les effets des sorts du héros ({@code assets/sprites/skill_fx.png}) : c'est ce qui rend l'Onde
- * de choc et l'Éventail de lames spectaculaires.
- *
- * <ul>
- *   <li><b>Onde de choc</b> : arrêt sur image, éclair blanc, sceau magique et fissures au sol,
- *   double anneau d'énergie, gerbe d'étincelles, grand éclat de lumière et secousse ;</li>
- *   <li><b>Éventail</b> : éclat au départ, lames spectrales avec traînée et images rémanentes,
- *   chacune portant sa lumière, entaille en croix et étincelles à chaque ennemi traversé ;</li>
- *   <li><b>étourdissement</b> : des étoiles tournent au-dessus des ennemis figés.</li>
- * </ul>
- *
- * <p>Purement visuel : rien ici ne touche le modèle. Les sorts sont repérés comme dans le reste
- * de la vue, en lisant le temps écoulé depuis leur dernière utilisation ; les coups des lames, en
- * lisant le nombre de cibles déjà touchées par chaque projectile.</p>
+ * Les effets des sorts du héros ({@code assets/sprites/skill_fx.png}) : c'est ce qui rend l'Onde de
+ * choc et l'Éventail de lames spectaculaires.
  */
 public final class SkillEffects implements Disposable {
 
@@ -172,10 +160,10 @@ public final class SkillEffects implements Disposable {
      * Repère les sorts qui viennent de partir et les coups des lames, puis fait vieillir les
      * effets. À appeler une fois par image tant que la partie avance.
      *
-     * @param run    la partie
-     * @param hero   la position du héros à l'écran (lissée)
+     * @param run la partie
+     * @param hero la position du héros à l'écran (lissée)
      * @param smooth donne la position lissée d'un projectile
-     * @param delta  temps écoulé depuis l'image précédente, en secondes
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Run run, Vec2 hero, Function<Projectile, Vec2> smooth, float delta) {
         clock += delta;
@@ -254,8 +242,8 @@ public final class SkillEffects implements Disposable {
                 continue;
             }
             Trail trail = entry.getValue();
-            // Disparue avant la fin de sa course sans avoir épuisé ses cibles : elle a heurté un mur
-            // ou touché sa dernière cible entre deux images.
+            // Disparue avant la fin de sa course sans avoir épuisé ses cibles : elle a heurté un
+            // mur ou touché sa dernière cible entre deux images.
             if (trail.last != null && trail.lifetime > 0.03f) {
                 if (entry.getKey().hits() > trail.hits) {
                     bladeHit(trail.last, trail.angle);
@@ -320,20 +308,14 @@ public final class SkillEffects implements Disposable {
     }
 
     /**
-     * Arrêt sur image : pendant ce court instant après l'Onde de choc, l'écran de jeu ne fait
-     * pas avancer le modèle. Le coup « pèse » ; les effets, eux, continuent.
-     *
-     * @return {@code true} tant que l'arrêt sur image dure
+     * Arrêt sur image : pendant ce court instant après l'Onde de choc, l'écran de jeu ne fait pas
+     * avancer le modèle. Le coup « pèse » ; les effets, eux, continuent.
      */
     public boolean frozen() {
         return hitstop > 0f;
     }
 
-    /**
-     * Décalage de caméra du tremblement en cours.
-     *
-     * @return le décalage à ajouter à la caméra, en unités
-     */
+    /** Décalage de caméra du tremblement en cours. */
     public Vec2 shakeOffset() {
         if (shakeLeft <= 0f) {
             return Vec2.ZERO;
@@ -388,8 +370,7 @@ public final class SkillEffects implements Disposable {
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    // Sceau et fissures. Dessinés une fois au sol, sous la nuit, puis une seconde fois plus
-    // légèrement par-dessus : la magie éclaire au lieu d'être assombrie par la nuit.
+    // Sceau et fissures.
     private void drawDecals(SpriteBatch batch, float strength) {
         for (Wave wave : waves) {
             float x = wave.center.x();
@@ -411,9 +392,9 @@ public final class SkillEffects implements Disposable {
     /**
      * Dessine une lame de l'Éventail, à sa place dans le tri par profondeur.
      *
-     * @param batch      le pinceau d'images
+     * @param batch le pinceau d'images
      * @param projectile la lame
-     * @param position   sa position lissée
+     * @param position sa position lissée
      */
     public void drawBlade(SpriteBatch batch, Projectile projectile, Vec2 position) {
         Vec2 v = projectile.velocity();
@@ -427,8 +408,8 @@ public final class SkillEffects implements Disposable {
      * Dessine tout ce qui brille par-dessus la nuit : éclairs, anneaux, traînées, entailles,
      * étincelles, étoiles des étourdis. Le mélange additif doit déjà être réglé.
      *
-     * @param batch     le pinceau d'images
-     * @param enemies   les ennemis, pour les étoiles des étourdis
+     * @param batch le pinceau d'images
+     * @param enemies les ennemis, pour les étoiles des étourdis
      * @param smoothPos donne la position lissée d'un ennemi
      */
     public void drawGlows(SpriteBatch batch, List<Enemy> enemies, Function<Enemy, Vec2> smoothPos) {

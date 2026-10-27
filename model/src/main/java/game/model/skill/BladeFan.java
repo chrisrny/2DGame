@@ -5,20 +5,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.world.World;
 
-/**
- * Éventail de lames : lance {@link #BLADE_COUNT} lames en cône vers la souris.
- *
- * <p>Les lames partent toutes du même point, régulièrement réparties sur {@link #SPREAD_DEGREES}
- * degrés, la lame du milieu pile dans l'axe de la visée. Collé à un ennemi, le cône est encore
- * étroit et plusieurs lames le touchent : c'est un gros coup à bout portant. De loin, le cône
- * s'ouvre et chaque cible n'en reçoit plus qu'une. Chaque lame traverse {@link #PIERCE} ennemis :
- * une file d'ennemis est fauchée d'un coup.</p>
- *
- * <p>Chaque lame est un {@link Projectile} ordinaire, le même que les flèches des archers : il
- * avance, s'arrête contre les murs, survole l'eau, touche une cible de l'autre faction et publie le
- * coup. Comme l'Onde de choc, chaque coup de lame prévient les reliques
- * ({@link Player#registerHit()}) : le Croc vampire soigne aussi sur les lames.</p>
- */
+/** Éventail de lames : lance {@link #BLADE_COUNT} lames en cône vers la souris. */
 public final class BladeFan extends Skill {
 
     /** Nombre de lames lancées à chaque utilisation. */

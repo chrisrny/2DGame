@@ -13,21 +13,7 @@ import game.model.event.EventBus;
 import game.model.event.GameEvent;
 import java.util.Objects;
 
-/**
- * Chiffres de dégâts qui s'élèvent au-dessus des cibles touchées puis s'effacent.
- *
- * <p>Deux patterns :</p>
- * <ul>
- *   <li><b>Observer</b> : les chiffres s'abonnent au bus du modèle et réagissent à chaque
- *   {@link GameEvent.EntityHit}. Le modèle publie le coup sans savoir que la vue l'affiche.</li>
- *   <li><b>Object Pool</b> : les {@link FloatingNumber} sont pris dans une réserve et y retournent
- *   quand ils disparaissent, au lieu d'être créés à chaque coup puis jetés. Pendant un combat,
- *   ça évite de donner du travail au ramasse-miettes, qui peut causer des micro-saccades.</li>
- * </ul>
- *
- * <p>Les chiffres vivent dans le monde (ils suivent la caméra du jeu) et avancent avec le temps
- * réel de l'image : c'est purement visuel, le modèle ne les connaît pas.</p>
- */
+/** Chiffres de dégâts qui s'élèvent au-dessus des cibles touchées puis s'effacent. */
 public final class DamageNumbers implements Disposable {
 
     /** Durée d'affichage d'un chiffre, en secondes. */

@@ -12,13 +12,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.entity.Boss;
 import game.model.world.Run;
 
-/**
- * Barre de vie du boss, en haut au centre : son nom, puis une barre laquée à cornes d'oni.
- *
- * <p>Comme la barre du héros, la vie perdue reste un instant en clair puis fond. Un repère
- * marque le seuil de la phase 2 ({@link Boss#SECOND_PHASE_THRESHOLD}) ; une fois passé, la barre
- * brûle et bat.</p>
- */
+/** Barre de vie du boss, en haut au centre : son nom, puis une barre laquée à cornes d'oni. */
 public final class BossBar implements Disposable {
 
     /** Nom du boss affiché au-dessus de sa barre. */
@@ -46,7 +40,7 @@ public final class BossBar implements Disposable {
     /**
      * Crée la barre du boss.
      *
-     * @param width  largeur de l'écran logique, en unités
+     * @param width largeur de l'écran logique, en unités
      * @param height hauteur de l'écran logique, en unités
      */
     public BossBar(float width, float height) {
@@ -56,7 +50,7 @@ public final class BossBar implements Disposable {
     /**
      * Adapte la barre à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {

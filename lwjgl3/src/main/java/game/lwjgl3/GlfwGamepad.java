@@ -31,15 +31,6 @@ import org.lwjgl.glfw.GLFWGamepadState;
 
 /**
  * La vraie manette, lue avec GLFW, la bibliothèque de fenêtre qu'utilise déjà libGDX sur desktop.
- *
- * <p>GLFW reconnaît les manettes courantes (Xbox, PlayStation, Switch Pro…) et les présente
- * toutes avec la même disposition, celle d'une manette Xbox. On prend la première manette
- * branchée ; si elle est débranchée en cours de partie, on passe à la suivante, ou à aucune.
- * Aucune bibliothèque en plus : GLFW est déjà embarqué par le lanceur.</p>
- *
- * <p>Seule la lecture brute est ici ; la zone morte et les appuis sont gérés par {@link Gamepad}.
- * GLFW ne se lit que depuis le thread principal : c'est le cas, la manette est lue à chaque image
- * par le jeu.</p>
  */
 final class GlfwGamepad extends Gamepad {
 

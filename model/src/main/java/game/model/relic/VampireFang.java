@@ -3,9 +3,7 @@ package game.model.relic;
 import game.model.entity.Player;
 
 /**
- * Croc vampire : chaque cible touchée soigne le joueur, sans dépasser ses points de vie
- * maximum. Les sorts comptent aussi : chaque ennemi pris dans l'Onde de choc, chaque coup de lame
- * de l'Éventail. Ne change aucune statistique.
+ * Croc vampire : chaque cible touchée soigne le joueur, sans dépasser ses points de vie maximum.
  */
 public final class VampireFang extends AbstractRelic {
 

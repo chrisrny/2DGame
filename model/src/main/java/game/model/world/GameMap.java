@@ -26,19 +26,8 @@ import java.util.Optional;
 import java.util.Random;
 
 /**
- * La map de jeu : elle contient le joueur, les ennemis et les projectiles, et c'est par elle
- * qu'ils interagissent.
- *
- * <p>À chaque pas : le joueur bouge, puis les ennemis vivants, qui sont ensuite écartés pour ne
- * jamais se chevaucher, puis les projectiles (y compris
- * ceux tirés pendant ce pas), puis les ennemis au contact frappent le joueur, puis les morts
- * sont retirés en publiant {@code EntityDied}, et les projectiles disparus sont retirés.
- * Enfin, si un stage est en cours, la vague suivante apparaît quand il le faut.</p>
- *
- * <p>Vagues : quand plus aucun ennemi n'est vivant, la map attend le {@code delayBefore} de la
- * vague suivante, puis la fait apparaître sur des points d'apparition tirés au hasard, jamais
- * à moins de {@link #MIN_SPAWN_DISTANCE} du joueur. Quand le joueur a tué assez d'ennemis,
- * elle publie {@code StageCleared} une seule fois et n'envoie plus de vague.</p>
+ * La map de jeu : elle contient le joueur, les ennemis et les projectiles, et c'est par elle qu'ils
+ * interagissent.
  */
 public final class GameMap implements World {
 
@@ -48,17 +37,10 @@ public final class GameMap implements World {
     /** Délai minimum entre deux coups de contact d'un même ennemi, en secondes. */
     public static final float CONTACT_COOLDOWN = 0.6f;
 
-    /**
-     * Marge gardée entre un ennemi et les murs quand il contourne un obstacle. Sans elle, il vise
-     * des points qui frôlent les murs, et un arrondi de calcul suffit à le bloquer contre un coin.
-     */
+    /** Marge gardée entre un ennemi et les murs quand il contourne un obstacle. */
     public static final float PATH_MARGIN = 2f;
 
-    /**
-     * Nombre maximum de passes de séparation par pas de jeu. On s'arrête dès que plus aucun
-     * ennemi n'en chevauche un autre : quelques passes suffisent d'habitude, la limite ne sert
-     * que dans une foule très dense (mesuré : moins de 1,2 ms par pas avec 26 ennemis serrés).
-     */
+    /** Nombre maximum de passes de séparation par pas de jeu. */
     public static final int SEPARATION_PASSES = 50;
 
     /** En dessous de cette distance au joueur, l'ennemi va droit sur lui sans chercher de chemin. */
@@ -70,7 +52,7 @@ public final class GameMap implements World {
     /**
      * Distance au joueur où apparaissent les ennemis d'une vague : juste hors de l'écran (sa
      * demi-diagonale fait 367 unités), pour qu'ils arrivent vite au combat sans surgir sous ses
-     * yeux. Sans place libre à cette distance, on reprend les points d'apparition fixes.
+     * yeux.
      */
     public static final float WAVE_SPAWN_MIN = 380f;
     public static final float WAVE_SPAWN_MAX = 560f;
@@ -96,7 +78,7 @@ public final class GameMap implements World {
     private final Map<Enemy, Float> contactCooldowns = new IdentityHashMap<>();
     private final Random random;
     // Une grille de navigation par taille d'ennemi (rayon + marge, arrondi à l'unité) : un grand
-    // ennemi ne passe pas partout où passe un petit. Créées à la première demande.
+    // ennemi ne passe pas partout où passe un petit.
     private final Map<Integer, NavGrid> navGrids = new HashMap<>();
     private StageConfig stage;
     private int wavesSpawned;
@@ -147,7 +129,7 @@ public final class GameMap implements World {
      * Fait avancer la map d'un pas de jeu.
      *
      * @param intent ce que le joueur veut faire pendant ce pas
-     * @param dt     durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     public void update(PlayerIntent intent, float dt) {
         player.update(intent, this, dt);
@@ -164,8 +146,7 @@ public final class GameMap implements World {
     }
 
     // Les ennemis ne se chevauchent jamais : sans ça, une vague qui poursuit le joueur finit
-    // empilée en un seul rond. Écarter A de B peut pousser B dans C : on refait donc plusieurs
-    // passes, jusqu'à ce que plus personne ne se chevauche (ou SEPARATION_PASSES au plus).
+    // empilée en un seul rond.
     private void separateEnemies() {
         List<Enemy> alive = enemies.stream().filter(Enemy::isAlive).toList();
         for (int pass = 0; pass < SEPARATION_PASSES; pass++) {
@@ -182,7 +163,7 @@ public final class GameMap implements World {
     }
 
     // Écarte deux ennemis qui se chevauchent : chacun recule d'une part du chevauchement, le plus
-    // léger plus que le plus lourd. Si l'un est bloqué par un mur, l'autre recule du reste.
+    // léger plus que le plus lourd.
     private boolean separate(Enemy a, Enemy b, int i, int j) {
         float minDistance = a.hitbox().radius() + b.hitbox().radius();
         Vec2 delta = b.position().sub(a.position());
@@ -191,8 +172,8 @@ public final class GameMap implements World {
         if (overlap <= 0f) {
             return false;
         }
-        // Deux ennemis exactement au même endroit (même point d'apparition) n'ont pas de
-        // direction : on en choisit une qui dépend de la paire, pour rester reproductible.
+        // Deux ennemis exactement au même endroit (même point d'apparition) n'ont pas de direction
+        // : on en choisit une qui dépend de la paire, pour rester reproductible.
         Vec2 normal = distance > 0f ? delta.scale(1f / distance) : fallbackDirection(i, j);
         float shareA = mass(b) / (mass(a) + mass(b));
 
@@ -206,8 +187,7 @@ public final class GameMap implements World {
     }
 
     // La poussée d'un appel ne dépasse pas le rayon : Collisions.move suppose qu'un déplacement
-    // reste plus petit que le rayon, sinon un ennemi pourrait traverser un mur fin. Les passes
-    // suivantes finissent le travail si besoin.
+    // reste plus petit que le rayon, sinon un ennemi pourrait traverser un mur fin.
     private Vec2 pushEnemy(Enemy enemy, Vec2 push) {
         float max = enemy.hitbox().radius();
         Vec2 limited = push.length() > max ? push.normalized().scale(max) : push;
@@ -228,8 +208,8 @@ public final class GameMap implements World {
         return new Vec2((float) Math.cos(angle), (float) Math.sin(angle));
     }
 
-    // On parcourt une copie : une mise à jour peut ajouter un projectile (spawnProjectile)
-    // sans casser le parcours. Les projectiles disparus sont retirés à la fin du pas.
+    // On parcourt une copie : une mise à jour peut ajouter un projectile (spawnProjectile) sans
+    // casser le parcours.
     private void updateProjectiles(float dt) {
         for (Projectile projectile : List.copyOf(projectiles)) {
             projectile.update(this, dt);
@@ -237,10 +217,8 @@ public final class GameMap implements World {
         projectiles.removeIf(projectile -> !projectile.isAlive());
     }
 
-    // Un ennemi au contact ne frappe qu'une fois par CONTACT_COOLDOWN, sinon il viderait les PV
-    // du joueur en quelques pas. Un ennemi sans dégâts de contact en ce moment (le Chargeur hors
-    // de sa charge) ne frappe pas : un coup à 0 mettrait quand même le joueur en état touché.
-    // Un ennemi étourdi ne frappe pas non plus.
+    // Un ennemi au contact ne frappe qu'une fois par CONTACT_COOLDOWN, sinon il viderait les PV du
+    // joueur en quelques pas.
     private void applyContactDamage(float dt) {
         for (Enemy enemy : enemies) {
             float cooldown = Math.max(0f, contactCooldowns.getOrDefault(enemy, 0f) - dt);
@@ -292,8 +270,6 @@ public final class GameMap implements World {
     }
 
     // Tout est tiré avec le Random de la partie : même graine, mêmes apparitions.
-    // Les types sont parcourus dans l'ordre de l'enum, car l'ordre d'un Map.copyOf change
-    // d'une exécution à l'autre et casserait la reproductibilité.
     private void spawn(Wave wave) {
         List<Vec2> fallback = spawnPointsAwayFromPlayer();
         Collections.shuffle(fallback, random);
@@ -310,9 +286,9 @@ public final class GameMap implements World {
     }
 
     /**
-     * Cherche une place pour un ennemi de vague : hors de l'écran mais près du joueur (entre
-     * {@link #WAVE_SPAWN_MIN} et {@link #WAVE_SPAWN_MAX}), du côté d'où arrive la vague, sur une
-     * case libre d'où l'on peut rejoindre le joueur (pas dans une maison ni dans un canal).
+     * Cherche une place pour un ennemi de vague : hors de l'écran mais près du joueur (entre {@link
+     * #WAVE_SPAWN_MIN} et {@link #WAVE_SPAWN_MAX}), du côté d'où arrive la vague, sur une case
+     * libre d'où l'on peut rejoindre le joueur (pas dans une maison ni dans un canal).
      */
     private Optional<Vec2> nearSpawnPoint(double side) {
         Vec2 center = player.position();
@@ -336,11 +312,8 @@ public final class GameMap implements World {
     }
 
     /**
-     * Tire au hasard un point d'apparition à au moins {@link #MIN_SPAWN_DISTANCE} du joueur,
-     * pour un ennemi qui n'arrive pas avec une vague, comme le boss.
-     *
-     * @return un point d'apparition éloigné du joueur
-     * @throws IllegalStateException si tous les points sont trop près du joueur
+     * Tire au hasard un point d'apparition à au moins {@link #MIN_SPAWN_DISTANCE} du joueur, pour
+     * un ennemi qui n'arrive pas avec une vague, comme le boss.
      */
     public Vec2 randomSpawnPoint() {
         List<Vec2> points = spawnPointsAwayFromPlayer();
@@ -349,10 +322,7 @@ public final class GameMap implements World {
 
     /**
      * Le point d'apparition du boss : celui de l'arène du boss le plus loin du joueur, pour lui
-     * laisser le temps de le voir arriver. Sans point dans l'arène, un point au hasard loin du
-     * joueur ({@link #randomSpawnPoint()}).
-     *
-     * @return le point où faire apparaître le boss
+     * laisser le temps de le voir arriver.
      */
     public Vec2 bossSpawnPoint() {
         return layout.spawnPoints().stream()
@@ -418,15 +388,15 @@ public final class GameMap implements World {
     }
 
     /**
-     * Va tout droit vers le joueur si rien ne gêne ; sinon, suit la grille de navigation
-     * pour contourner les murs.
+     * Va tout droit vers le joueur si rien ne gêne ; sinon, suit la grille de navigation pour
+     * contourner les murs.
      */
     @Override
     public Vec2 pathTowardPlayer(Vec2 from, float radius) {
         Vec2 target = player.position();
         float body = radius + PATH_MARGIN;
-        // Tout près du joueur, même collé à un mur, on fonce sur lui : le glissement le long
-        // des murs suffit, et un détour l'empêcherait de le toucher.
+        // Tout près du joueur, même collé à un mur, on fonce sur lui : le glissement le long des
+        // murs suffit, et un détour l'empêcherait de le toucher.
         if (from.distanceTo(target) <= DIRECT_CHASE_DISTANCE
                 || Collisions.pathIsClear(from, target, body, layout.walls())) {
             return target;

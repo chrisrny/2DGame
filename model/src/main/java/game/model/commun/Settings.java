@@ -5,10 +5,6 @@ import java.util.Objects;
 /**
  * Les réglages du joueur, modifiables à tout moment depuis l'écran des options, même en pleine
  * partie.
- *
- * <p>Un seul objet est partagé par le jeu et la partie en cours : un réglage changé est donc lu
- * tout de suite, sans relancer. Les chiffres de dégâts s'affichent ou disparaissent à l'image
- * suivante ; la difficulté, elle, est lue au début de chaque stage.</p>
  */
 public final class Settings {
 

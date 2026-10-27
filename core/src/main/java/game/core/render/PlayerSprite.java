@@ -14,26 +14,7 @@ import java.util.Deque;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * Dessine le joueur avec sa feuille de sprites animée ({@code assets/sprites/hero.png}).
- *
- * <p>Le héros est toujours dessiné de 3/4, comme dans les jeux d'action en « quarter-view » :
- * il se retourne seulement vers la gauche ou la droite selon la visée. La direction exacte du
- * coup est montrée à part, par {@link SlashEffect}.</p>
- *
- * <ul>
- *   <li><b>L'état du joueur</b> ({@link PlayerStateKind}, pattern State dans le modèle) choisit
- *   l'animation. Le temps de l'animation repart de zéro à chaque changement d'état. Les durées
- *   d'attaque et de coup reçu valent celles du modèle ({@link Player#ATTACK_DURATION},
- *   {@link Player#HURT_DURATION}) : l'animation finit pile quand l'état change.</li>
- *   <li><b>Le sens</b> suit la visée, avec une zone morte : quand on vise presque à la
- *   verticale, il garde son sens au lieu de clignoter.</li>
- *   <li><b>Pendant l'esquive</b>, deux images fantômes suivent le joueur.</li>
- * </ul>
- *
- * <p>La feuille est une grille de cases de {@link #CELL} pixels, une animation par ligne :
- * repos, course, attaque, esquive, coup reçu, lancer, mort.</p>
- */
+/** Dessine le joueur avec sa feuille de sprites animée ({@code assets/sprites/hero.png}). */
 public final class PlayerSprite implements Disposable {
 
     /** Taille d'une case de la feuille, en pixels (et en unités du monde). */
@@ -51,8 +32,8 @@ public final class PlayerSprite implements Disposable {
     /** Opacité des images fantômes, de la plus ancienne à la plus récente. */
     private static final float[] GHOST_ALPHAS = {0.18f, 0.35f};
 
-    // Dans une case, le corps est centré sur la colonne 24 et les pieds touchent la ligne 46
-    // (en partant du haut) : il reste 1 pixel vide sous les pieds.
+    // Dans une case, le corps est centré sur la colonne 24 et les pieds touchent la ligne 46 (en
+    // partant du haut) : il reste 1 pixel vide sous les pieds.
     private static final float BODY_CENTER_X = 24f;
     private static final float EMPTY_BELOW_FEET = 1f;
 
@@ -104,11 +85,11 @@ public final class PlayerSprite implements Disposable {
     }
 
     /**
-     * Fait avancer l'animation, choisit le sens et note les images fantômes de l'esquive.
-     * À appeler une fois par image tant que la partie avance.
+     * Fait avancer l'animation, choisit le sens et note les images fantômes de l'esquive. À appeler
+     * une fois par image tant que la partie avance.
      *
      * @param player le joueur
-     * @param delta  temps écoulé depuis l'image précédente, en secondes
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Player player, float delta) {
         PlayerStateKind kind = player.stateKind();
@@ -138,13 +119,13 @@ public final class PlayerSprite implements Disposable {
     }
 
     /**
-     * Dessine le joueur, et ses images fantômes s'il esquive. Le {@link SpriteBatch} doit déjà
-     * être ouvert.
+     * Dessine le joueur, et ses images fantômes s'il esquive. Le {@link SpriteBatch} doit déjà être
+     * ouvert.
      *
-     * @param batch    le pinceau d'images, réglé sur la caméra du monde
-     * @param player   le joueur à dessiner
+     * @param batch le pinceau d'images, réglé sur la caméra du monde
+     * @param player le joueur à dessiner
      * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
-     * @param alpha    opacité, de 0 à 1 (pour le clignotement d'invincibilité)
+     * @param alpha opacité, de 0 à 1 (pour le clignotement d'invincibilité)
      */
     public void draw(SpriteBatch batch, Player player, Vec2 position, float alpha) {
         int i = 0;

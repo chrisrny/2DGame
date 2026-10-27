@@ -1,4 +1,2 @@
-/**
- * Comportements des ennemis (pattern Strategy).
- */
+/** Comportements des ennemis (pattern Strategy). */
 package game.model.ai;

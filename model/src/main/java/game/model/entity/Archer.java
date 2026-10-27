@@ -34,7 +34,7 @@ public final class Archer extends Enemy {
     /**
      * Crée un Archer renforcé : le multiplicateur s'applique aussi aux dégâts de ses tirs.
      *
-     * @param position   position d'apparition
+     * @param position position d'apparition
      * @param multiplier multiplicateur des points de vie et des dégâts
      */
     public Archer(Vec2 position, float multiplier) {

@@ -15,18 +15,6 @@ import java.util.List;
 /**
  * La nuit et ses lumières : un calque d'obscurité troué de taches de lumière chaudes, posé sur la
  * scène ({@code assets/sprites/light.png}).
- *
- * <p>Deux temps à chaque image :</p>
- * <ol>
- *   <li>dans une image hors écran ({@link FrameBuffer}) de la taille de la vue, on remplit de la
- *   couleur de la nuit, puis on <b>ajoute</b> chaque lumière (lanternes, fenêtres, feux, héros,
- *   projectiles…) ;</li>
- *   <li>on pose cette image sur la scène en <b>multipliant</b> les couleurs, par deux : là où il
- *   fait nuit la scène s'assombrit, là où une lumière est forte elle s'éclaire un peu plus.</li>
- * </ol>
- *
- * <p>À dessiner après les murs et les personnages, et avant ce qui doit rester vif (lueurs,
- * braises, annonces d'attaque, chiffres, HUD).</p>
  */
 public final class LightingRenderer implements Disposable {
 
@@ -77,11 +65,11 @@ public final class LightingRenderer implements Disposable {
     /**
      * Construit le calque de lumière et le pose sur la scène déjà dessinée.
      *
-     * @param batch    le pinceau d'images (fermé à l'appel, refermé au retour)
-     * @param camera   la caméra du monde
+     * @param batch le pinceau d'images (fermé à l'appel, refermé au retour)
+     * @param camera la caméra du monde
      * @param viewport la vue de l'écran de jeu, remise en place après l'image hors écran
-     * @param lights   les lumières, en unités du monde (celles hors de la vue sont ignorées)
-     * @param time     temps écoulé, en secondes, pour le vacillement
+     * @param lights les lumières, en unités du monde (celles hors de la vue sont ignorées)
+     * @param time temps écoulé, en secondes, pour le vacillement
      */
     public void apply(SpriteBatch batch, OrthographicCamera camera, Viewport viewport, List<Light> lights, float time) {
         float left = camera.position.x - viewW / 2f;

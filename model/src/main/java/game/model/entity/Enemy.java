@@ -9,13 +9,7 @@ import game.model.commun.Vec2;
 import game.model.world.World;
 import java.util.Objects;
 
-/**
- * Base commune de tous les ennemis et du boss.
- *
- * <p>Un ennemi délègue ses décisions à un {@link EnemyBehavior} (pattern Strategy) :
- * poursuivre, garder ses distances, charger. Ses déplacements passent par
- * {@link Collisions#move} : il glisse le long des murs, mais traverse les autres ennemis.</p>
- */
+/** Base commune de tous les ennemis et du boss. */
 public abstract class Enemy implements Damageable {
 
     /** Durée d'amortissement du recul, en secondes : la même que pour le joueur. */
@@ -36,12 +30,12 @@ public abstract class Enemy implements Damageable {
     /**
      * Crée un ennemi aux valeurs de référence (multiplicateur 1).
      *
-     * @param position      position de départ
-     * @param maxHp         points de vie maximum
-     * @param radius        rayon de la zone de collision
-     * @param speed         vitesse de déplacement, en unités par seconde
+     * @param position position de départ
+     * @param maxHp points de vie maximum
+     * @param radius rayon de la zone de collision
+     * @param speed vitesse de déplacement, en unités par seconde
      * @param contactDamage dégâts infligés au joueur qui le touche
-     * @param behavior      comportement propre à cet ennemi (une instance par ennemi)
+     * @param behavior comportement propre à cet ennemi (une instance par ennemi)
      */
     protected Enemy(Vec2 position, int maxHp, float radius, float speed, int contactDamage, EnemyBehavior behavior) {
         this(position, maxHp, radius, speed, contactDamage, behavior, 1f);
@@ -49,16 +43,15 @@ public abstract class Enemy implements Damageable {
 
     /**
      * Crée un ennemi renforcé (ou affaibli) par un multiplicateur, celui du stage et de la
-     * difficulté. Le multiplicateur s'applique aux points de vie et à tous les dégâts, pas à
-     * la vitesse ni à la taille.
+     * difficulté.
      *
-     * @param position      position de départ
-     * @param maxHp         points de vie maximum de référence
-     * @param radius        rayon de la zone de collision
-     * @param speed         vitesse de déplacement, en unités par seconde
+     * @param position position de départ
+     * @param maxHp points de vie maximum de référence
+     * @param radius rayon de la zone de collision
+     * @param speed vitesse de déplacement, en unités par seconde
      * @param contactDamage dégâts de contact de référence
-     * @param behavior      comportement propre à cet ennemi (une instance par ennemi)
-     * @param multiplier    multiplicateur des points de vie et des dégâts, strictement positif
+     * @param behavior comportement propre à cet ennemi (une instance par ennemi)
+     * @param multiplier multiplicateur des points de vie et des dégâts, strictement positif
      * @throws IllegalArgumentException si le multiplicateur n'est pas strictement positif
      */
     protected Enemy(Vec2 position, int maxHp, float radius, float speed, int contactDamage, EnemyBehavior behavior,
@@ -81,7 +74,7 @@ public abstract class Enemy implements Damageable {
      * s'il est étourdi, il reste sur place ; sinon, son comportement décide de ce qu'il fait.
      *
      * @param world le monde où il évolue
-     * @param dt    durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     public void update(World world, float dt) {
         boolean stunned = stunLeft > 0f;
@@ -99,8 +92,8 @@ public abstract class Enemy implements Damageable {
      * Avance vers une cible à sa vitesse, en glissant le long des murs, sans la dépasser.
      *
      * @param target la position visée
-     * @param world  le monde, pour ses murs
-     * @param dt     durée du pas, en secondes
+     * @param world le monde, pour ses murs
+     * @param dt durée du pas, en secondes
      */
     public void moveToward(Vec2 target, World world, float dt) {
         float step = Math.min(speed * dt, position.distanceTo(target));
@@ -109,11 +102,11 @@ public abstract class Enemy implements Damageable {
     }
 
     /**
-     * Poursuit le joueur : va droit sur lui si rien ne gêne, sinon contourne les murs en suivant
-     * le chemin donné par le monde ({@link World#pathTowardPlayer}).
+     * Poursuit le joueur : va droit sur lui si rien ne gêne, sinon contourne les murs en suivant le
+     * chemin donné par le monde ({@link World#pathTowardPlayer}).
      *
      * @param world le monde où il évolue
-     * @param dt    durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     public void chase(World world, float dt) {
         moveToward(world.pathTowardPlayer(position, radius), world, dt);
@@ -134,10 +127,8 @@ public abstract class Enemy implements Damageable {
     }
 
     /**
-     * Applique un coup : ignore le tir ami et les coups reçus une fois mort, puis retire les
-     * points de vie. Le recul du coup est une vitesse, en unités par seconde, amortie
-     * jusqu'à zéro en {@link #KNOCKBACK_DURATION}. Un coup qui étourdit fige l'ennemi : un
-     * nouvel étourdissement ne raccourcit jamais celui en cours.
+     * Applique un coup : ignore le tir ami et les coups reçus une fois mort, puis retire les points
+     * de vie.
      *
      * @param hit le coup reçu
      * @return {@code true} si le coup a été appliqué
@@ -156,11 +147,7 @@ public abstract class Enemy implements Damageable {
         return true;
     }
 
-    /**
-     * Un ennemi étourdi ne bouge plus, n'attaque plus et ne blesse pas au contact.
-     *
-     * @return {@code true} tant que l'ennemi est étourdi
-     */
+    /** Un ennemi étourdi ne bouge plus, n'attaque plus et ne blesse pas au contact. */
     public boolean isStunned() {
         return stunLeft > 0f;
     }
@@ -177,11 +164,8 @@ public abstract class Enemy implements Damageable {
     }
 
     /**
-     * Résistance de l'ennemi quand deux ennemis qui se chevauchent sont écartés : celui qui
-     * résiste le plus recule le moins. Vaut 1 par défaut ; un Chargeur en pleine charge résiste
-     * beaucoup plus, il bouscule les autres et reste presque sur sa ligne.
-     *
-     * @return un facteur strictement positif, 1 pour un ennemi ordinaire
+     * Résistance de l'ennemi quand deux ennemis qui se chevauchent sont écartés : celui qui résiste
+     * le plus recule le moins.
      */
     public float pushResistance() {
         return 1f;

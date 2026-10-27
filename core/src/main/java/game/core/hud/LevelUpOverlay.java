@@ -23,12 +23,6 @@ import java.util.function.BooleanSupplier;
 /**
  * Écran de montée de niveau, par-dessus le jeu figé : un voile sombre, un titre sur un coup de
  * pinceau, et une carte laquée par relique proposée (icône dans un médaillon, nom, effet).
- *
- * <p>Les cartes entrent l'une après l'autre en montant. Celle sous la souris s'élève et
- * s'illumine. Le joueur choisit avec les touches 1, 2, 3 (rangée du haut ou pavé numérique), en
- * cliquant sur une carte, ou à la manette : la croix ou le stick passe d'une carte à l'autre et A
- * valide. L'écran ne fait que lire le choix : c'est la partie
- * ({@code Run.chooseRelic}) qui donne la relique.</p>
  */
 public final class LevelUpOverlay implements Disposable {
 
@@ -66,11 +60,11 @@ public final class LevelUpOverlay implements Disposable {
     /**
      * Crée l'écran de montée de niveau.
      *
-     * @param width    largeur de l'écran logique, en unités
-     * @param height   hauteur de l'écran logique, en unités
-     * @param pad      la manette
+     * @param width largeur de l'écran logique, en unités
+     * @param height hauteur de l'écran logique, en unités
+     * @param pad la manette
      * @param usingPad {@code true} quand le joueur joue à la manette : la carte choisie suit alors
-     *                 la croix, et non la souris
+     *     la croix, et non la souris
      */
     public LevelUpOverlay(float width, float height, Gamepad pad, BooleanSupplier usingPad) {
         this.viewport = new FitViewport(width, height, camera);
@@ -81,7 +75,7 @@ public final class LevelUpOverlay implements Disposable {
     /**
      * Adapte l'écran à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {

@@ -7,12 +7,8 @@ import game.model.world.World;
 import java.util.Objects;
 
 /**
- * Le joueur vient d'être touché : il est repoussé et ne contrôle plus rien pendant
- * {@link Player#HURT_DURATION}.
- *
- * <p>Le recul est une vitesse qui baisse jusqu'à zéro en {@link Player#HURT_KNOCKBACK_DURATION},
- * comme pour les ennemis : le joueur glisse en arrière au lieu d'être téléporté. Les intentions
- * de bouger, d'attaquer ou d'esquiver sont ignorées tant que l'état dure.</p>
+ * Le joueur vient d'être touché : il est repoussé et ne contrôle plus rien pendant {@link
+ * Player#HURT_DURATION}.
  */
 public final class HurtState implements PlayerState {
 

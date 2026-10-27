@@ -26,19 +26,12 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Dessine la scène en fausse 3D (vue 3/4, façon SNES) : sol, ombres, murs et personnages triés
- * par profondeur, puis lueurs.
- *
- * <p><b>Tri par profondeur</b> : chaque élément a une profondeur, le y de ses pieds (le bas
- * de l'emprise pour un mur). On dessine du plus haut à l'écran au plus bas : ce qui est plus
- * bas passe devant. Le joueur disparaît donc derrière un mur quand il est au nord de lui.</p>
- *
- * <p>Tout se lit dans le modèle à chaque image ; la vue ne décide d'aucune règle.</p>
+ * Dessine la scène en fausse 3D (vue 3/4, façon SNES) : sol, ombres, murs et personnages triés par
+ * profondeur, puis lueurs.
  */
 public final class SceneRenderer implements Disposable {
 
-    // Dans fx.png : ombre (0), lueur (16), flèche (32), pixel blanc (62, 0). Les lames du joueur
-    // sont dans skill_fx.png (voir SkillEffects).
+    // Dans fx.png : ombre (0), lueur (16), flèche (32), pixel blanc (62, 0).
     private static final int FX_SHADOW = 0;
     private static final int FX_GLOW = 16;
     private static final int FX_ARROW = 32;
@@ -73,8 +66,8 @@ public final class SceneRenderer implements Disposable {
      * Charge les sprites de la scène.
      *
      * @param events le bus de la partie, pour les nuages de mort
-     * @param viewW  largeur de la vue, en unités du monde
-     * @param viewH  hauteur de la vue, en unités du monde
+     * @param viewW largeur de la vue, en unités du monde
+     * @param viewH hauteur de la vue, en unités du monde
      */
     public SceneRenderer(EventBus events, float viewW, float viewH) {
         this.viewW = viewW;
@@ -120,7 +113,7 @@ public final class SceneRenderer implements Disposable {
     /**
      * Fait avancer les animations. À appeler une fois par image tant que la partie avance.
      *
-     * @param run   la partie
+     * @param run la partie
      * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Run run, float delta) {
@@ -148,9 +141,9 @@ public final class SceneRenderer implements Disposable {
      * Dessine le sol et l'ombre des murs : tout ce qui est sous les personnages.
      *
      * @param camera la caméra du monde
-     * @param run    la partie
-     * @param viewW  largeur visible, en unités
-     * @param viewH  hauteur visible, en unités
+     * @param run la partie
+     * @param viewW largeur visible, en unités
+     * @param viewH hauteur visible, en unités
      */
     public void drawGround(OrthographicCamera camera, Run run, float viewW, float viewH) {
         batch.setProjectionMatrix(camera.combined);
@@ -165,8 +158,8 @@ public final class SceneRenderer implements Disposable {
      * Dessine les ombres, les murs et les personnages triés par profondeur. La nuit, les lueurs et
      * les braises viennent ensuite, avec {@link #drawLight}.
      *
-     * @param camera      la caméra du monde
-     * @param run         la partie
+     * @param camera la caméra du monde
+     * @param run la partie
      * @param playerAlpha opacité du joueur (clignotement d'invincibilité)
      */
     public void drawObjects(OrthographicCamera camera, Run run, float playerAlpha) {
@@ -217,12 +210,11 @@ public final class SceneRenderer implements Disposable {
 
     /**
      * Pose la nuit et ses lumières sur la scène, puis ce qui doit rester vif : fumée, lueurs des
-     * projectiles et du boss, onde de choc, braises, flèche de visée. À appeler juste après
-     * {@link #drawObjects}.
+     * projectiles et du boss, onde de choc, braises, flèche de visée.
      *
-     * @param camera   la caméra du monde
+     * @param camera la caméra du monde
      * @param viewport la vue de l'écran de jeu
-     * @param run      la partie
+     * @param run la partie
      */
     public void drawLight(OrthographicCamera camera, Viewport viewport, Run run) {
         GameMap world = run.map();
@@ -327,10 +319,8 @@ public final class SceneRenderer implements Disposable {
     }
 
     /**
-     * Décalage de caméra du tremblement d'écran en cours (coup de massue du boss, passage de
-     * phase, mort du boss, sorts du héros).
-     *
-     * @return le décalage à ajouter à la position de la caméra, en unités
+     * Décalage de caméra du tremblement d'écran en cours (coup de massue du boss, passage de phase,
+     * mort du boss, sorts du héros).
      */
     public Vec2 cameraShake() {
         return bossEffects.shakeOffset().add(skills.shakeOffset());
@@ -339,8 +329,6 @@ public final class SceneRenderer implements Disposable {
     /**
      * Arrêt sur image après un gros coup (Onde de choc) : l'écran de jeu ne fait pas avancer le
      * modèle tant qu'il dure.
-     *
-     * @return {@code true} pendant l'arrêt sur image
      */
     public boolean frozen() {
         return skills.frozen();

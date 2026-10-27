@@ -8,21 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/**
- * Entrées manette, façon « twin-stick ».
- *
- * <ul>
- *   <li>Déplacement : stick gauche (analogique : à moitié penché, on avance moins vite) ou croix.</li>
- *   <li>Visée : stick droit. Sans stick droit, on vise là où l'on marche ; immobile, on garde la
- *   dernière visée. Une {@link AimAssist aide à la visée} ramène le tir sur un ennemi proche.</li>
- *   <li>Attaque : X (□) ou gâchette droite. Esquive : A (✕) ou gâchette gauche.</li>
- *   <li>Onde de choc : RB (R1) ou Y (△). Éventail : LB (L1) ou B (○).</li>
- * </ul>
- *
- * <p>Le bouton qui valide un menu (A) est aussi celui de l'esquive : pour ne pas esquiver en
- * lançant la partie ou en choisissant une relique, les boutons d'action sont ignorés tant qu'ils
- * n'ont pas tous été relâchés une fois ({@link #ignoreUntilReleased()}).</p>
- */
+/** Entrées manette, façon « twin-stick ». */
 public final class GamepadInput implements InputSource {
 
     /** En dessous, le stick droit est considéré au repos pour la visée. */
@@ -40,7 +26,7 @@ public final class GamepadInput implements InputSource {
     /**
      * Crée les entrées manette.
      *
-     * @param pad     la manette
+     * @param pad la manette
      * @param targets donne les positions des ennemis, pour l'aide à la visée
      */
     public GamepadInput(Gamepad pad, Supplier<List<Vec2>> targets) {

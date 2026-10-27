@@ -7,10 +7,6 @@ import java.util.Objects;
 /**
  * Aide à la visée pour la manette : un stick est moins précis qu'une souris, alors une visée qui
  * passe près d'un ennemi est ramenée sur lui.
- *
- * <p>Seuls comptent les ennemis assez proches ({@link #RANGE}) et dans un cône étroit autour de la
- * visée ({@link #CONE_DEGREES}) : on corrige un écart, on ne vise pas à la place du joueur. Entre
- * plusieurs candidats, le plus aligné l'emporte, le plus proche à égalité.</p>
  */
 public final class AimAssist {
 
@@ -28,11 +24,11 @@ public final class AimAssist {
     /**
      * Corrige une direction de visée vers l'ennemi le mieux placé, s'il y en a un.
      *
-     * @param aim     la visée du joueur, non nulle
-     * @param from    la position du joueur
+     * @param aim la visée du joueur, non nulle
+     * @param from la position du joueur
      * @param targets les positions des ennemis
      * @return la direction vers l'ennemi retenu, normalisée, ou {@code aim} normalisée si aucun
-     *         ennemi n'est dans le cône
+     *     ennemi n'est dans le cône
      */
     public static Vec2 adjust(Vec2 aim, Vec2 from, List<Vec2> targets) {
         Objects.requireNonNull(aim, "aim");

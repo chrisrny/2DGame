@@ -30,18 +30,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * A helper object for game startup, featuring three utilities related to LWJGL3 on various operating systems.
- * <p>
- * The utilities are as follows:
- * <ul>
- *  <li> Windows: Prevents a common crash related to LWJGL3's extraction of shared library files.</li>
- *  <li> macOS: Spawns a child JVM process with {@code -XstartOnFirstThread} in the JVM args (if it was not already).
- *  This is required for LWJGL3 to work on macOS.</li>
- *  <li> Linux (NVIDIA GPUs only): Spawns a child JVM process with the {@code __GL_THREADED_OPTIMIZATIONS}
- *  {@link System#getenv(String) Environment Variable} set to {@code 0} (if it was not already). This is required for
- *  LWJGL3 to work on Linux with NVIDIA GPUs.</li>
- * </ul>
- * <a href="https://jvm-gaming.org/t/starting-jvm-on-mac-with-xstartonfirstthread-programmatically/57547">Based on this java-gaming.org post by kappa</a>
+ * A helper object for game startup, featuring three utilities related to LWJGL3 on various
+ * operating systems.
+ *
  * @author damios
  */
 public class StartupHelper {
@@ -50,10 +41,7 @@ public class StartupHelper {
 
 	private static final String JVM_RESTARTED_ARG = "jvmIsRestarted";
 
-	/**
-	 * Must only be called on Linux. Check OS first (or use short-circuit evaluation)!
-	 * @return whether NVIDIA drivers are present on Linux.
-	 */
+	/** Must only be called on Linux. Check OS first (or use short-circuit evaluation)! */
 	public static boolean isLinuxNvidia() {
 		String[] drivers = new File("/proc/driver").list(
 			(dir, path) -> path.toUpperCase(Locale.ROOT).contains("NVIDIA")
@@ -62,43 +50,15 @@ public class StartupHelper {
 		return drivers.length > 0;
 	}
 
-	/**
-	 * Applies the utilities as described by {@link StartupHelper}'s Javadoc.
-	 * <p>
-	 * All {@link System#getenv() Environment Variables} are copied to the child JVM process (if it is spawned), as
-	 * specified by {@link ProcessBuilder#environment()}; the same applies for
-	 * {@link System#getProperties() System Properties}.
-	 * <p>
-	 * <b>Usage:</b>
-	 * <pre><code>
-	 * public static void main(String[] args) {
-	 * 	 if (StartupHelper.startNewJvmIfRequired()) return;
-	 * 	 // ... The rest of main() goes here, as normal.
-	 * }
-	 * </code></pre>
-	 * @return whether a child JVM process was spawned or not.
-	 */
+	/** Applies the utilities as described by {@link StartupHelper}'s Javadoc. */
 	public static boolean startNewJvmIfRequired() {
 		return startNewJvmIfRequired(true);
 	}
 
 	/**
 	 * Applies the utilities as described by {@link StartupHelper}'s Javadoc.
-	 * <p>
-	 * All {@link System#getenv() Environment Variables} are copied to the child JVM process (if it is spawned), as
-	 * specified by {@link ProcessBuilder#environment()}; the same applies for
-	 * {@link System#getProperties() System Properties}.
-	 * <p>
-	 * <b>Usage:</b>
-	 * <pre><code>
-	 * public static void main(String[] args) {
-	 *   // The parameter on the next line could instead be false if you don't want to inherit IO.
-	 * 	 if (StartupHelper.startNewJvmIfRequired(true)) return;
-	 * 	 // ... The rest of main() goes here, as normal.
-	 * }
-	 * </code></pre>
-	 * @param inheritIO whether I/O should be inherited in the child JVM process. Please note that enabling this will
-	 *                  block the thread until the child JVM process stops executing.
+	 *
+	 * @param inheritIO whether I/O should be inherited in the child JVM process.
 	 * @return whether a child JVM process was spawned or not.
 	 */
 	public static boolean startNewJvmIfRequired(boolean inheritIO) {
@@ -106,11 +66,6 @@ public class StartupHelper {
 		if (osName.contains("mac")) return startNewJvm0(/*isMac =*/ true, inheritIO);
 		if (osName.contains("windows")) {
 			// Here, we are trying to work around an issue with how LWJGL3 loads its extracted .dll files.
-			// By default, LWJGL3 extracts to the directory specified by "java.io.tmpdir": usually, the user's home.
-			// If the user's name has non-ASCII (or some non-alphanumeric) characters in it, that would fail.
-			// By extracting to the relevant "ProgramData" folder, which is usually "C:\ProgramData", we avoid this.
-			// We also temporarily change the "user.name" property to one without any chars that would be invalid.
-			// We revert our changes immediately after loading LWJGL3 natives.
 			String programData = System.getenv("ProgramData");
 			if (programData == null) programData = "C:\\Temp"; // if ProgramData isn't set, try some fallback.
 			String prevTmpDir = System.getProperty("java.io.tmpdir", programData);
@@ -134,14 +89,9 @@ public class StartupHelper {
 
 	/**
 	 * Spawns a child JVM process if on macOS, or on Linux with NVIDIA drivers.
-	 * <p>
-	 * All {@link System#getenv() Environment Variables} are copied to the child JVM process (if it is spawned), as
-	 * specified by {@link ProcessBuilder#environment()}; the same applies for
-	 * {@link System#getProperties() System Properties}.
-	 * @param isMac whether the current OS is macOS. If this is `false` then the current OS is assumed to be Linux (and
-	 *             an immediate check for NVIDIA drivers is performed).
-	 * @param inheritIO whether I/O should be inherited in the child JVM process. Please note that enabling this will
-	 *                 block the thread until the child JVM process stops executing.
+	 *
+	 * @param isMac whether the current OS is macOS.
+	 * @param inheritIO whether I/O should be inherited in the child JVM process.
 	 * @return whether a child JVM process was spawned or not.
 	 */
 	public static boolean startNewJvm0(boolean isMac, boolean inheritIO) {
@@ -166,7 +116,6 @@ public class StartupHelper {
 		}
 
 		// Check whether this JVM process is a child JVM process already.
-		// This state shouldn't usually be reachable, but this stops us from endlessly spawning new child JVM processes.
 		if ("true".equals(System.getProperty(JVM_RESTARTED_ARG))) {
 			System.err.println(CHILD_LOOP_ERR_MSG);
 			return false;
@@ -176,8 +125,8 @@ public class StartupHelper {
 		List<String> jvmArgs = new ArrayList<>();
 		// The following line is used assuming you target Java 8, the minimum for LWJGL3.
 		String javaExecPath = System.getProperty("java.home") + "/bin/java";
-		// If targeting Java 9 or higher, you could use the following instead of the above line:
-		//String javaExecPath = ProcessHandle.current().info().command().orElseThrow()
+		// If targeting Java 9 or higher, you could use the following instead of the above line: String
+		// javaExecPath = ProcessHandle.current().info().command().orElseThrow()
 		if (!(new File(javaExecPath).exists())) {
 			System.err.println(getJreErrMsg(isMac));
 			return false;

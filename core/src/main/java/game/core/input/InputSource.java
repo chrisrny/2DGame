@@ -4,11 +4,8 @@ import game.model.commun.PlayerIntent;
 import game.model.commun.Vec2;
 
 /**
- * Une source d'entrées (clavier et souris, manette) qui produit l'intention du joueur
- * à chaque image (pattern Command).
- *
- * <p>Le modèle ne connaît que {@link PlayerIntent} : on peut changer de source, ou en
- * ajouter une, sans toucher à une seule ligne du modèle.</p>
+ * Une source d'entrées (clavier et souris, manette) qui produit l'intention du joueur à chaque
+ * image (pattern Command).
  */
 public interface InputSource {
 

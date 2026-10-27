@@ -6,9 +6,6 @@ import game.model.commun.Vec2;
 /**
  * Le Chargeur : il annonce sa charge, fonce en ligne droite, puis reste étourdi.
  *
- * <p>Il ne blesse au contact que pendant sa charge. Le reste du temps, le toucher est sans
- * danger : étourdi, il est fait pour être puni.</p>
- *
  * @see ChargerBehavior
  */
 public final class Charger extends Enemy {
@@ -39,15 +36,15 @@ public final class Charger extends Enemy {
     /**
      * Crée un Chargeur renforcé.
      *
-     * @param position   position d'apparition
+     * @param position position d'apparition
      * @param multiplier multiplicateur des points de vie et des dégâts
      */
     public Charger(Vec2 position, float multiplier) {
         this(position, multiplier, new ChargerBehavior());
     }
 
-    // Constructeur privé : il permet de garder une référence au comportement passé à Enemy,
-    // pour que la vue et les dégâts de contact puissent connaître la phase du Chargeur.
+    // Constructeur privé : il permet de garder une référence au comportement passé à Enemy, pour
+    // que la vue et les dégâts de contact puissent connaître la phase du Chargeur.
     private Charger(Vec2 position, float multiplier, ChargerBehavior behavior) {
         super(position, MAX_HP, RADIUS, SPEED, CHARGE_DAMAGE, behavior, multiplier);
         this.behavior = behavior;
@@ -97,9 +94,7 @@ public final class Charger extends Enemy {
     public static final float CHARGE_PUSH_RESISTANCE = 25f;
 
     /**
-     * En pleine charge, le Chargeur bouscule les autres ennemis et n'est presque pas dévié. Il
-     * n'est pas totalement indéplaçable : un ennemi coincé entre deux Chargeurs doit pouvoir
-     * s'en sortir, sinon ils se chevaucheraient.
+     * En pleine charge, le Chargeur bouscule les autres ennemis et n'est presque pas dévié.
      *
      * @return {@link #CHARGE_PUSH_RESISTANCE} pendant la charge, 1 sinon
      */

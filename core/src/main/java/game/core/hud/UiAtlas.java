@@ -16,12 +16,8 @@ import game.model.relic.SharpenedBlade;
 import game.model.relic.VampireFang;
 
 /**
- * Les images de l'interface ({@code assets/sprites/ui.png}) : laque noire, or et vermillon,
- * comme le quartier. Cadres, barres, cases de compétence, icônes des compétences et des
- * reliques, carte de relique, ruban d'encre, et le voile ({@code vignette.png}).
- *
- * <p>Une seule texture pour tout le HUD : les éléments qui partagent un {@link SpriteBatch} se
- * dessinent d'un coup, sans changer de texture.</p>
+ * Les images de l'interface ({@code assets/sprites/ui.png}) : laque noire, or et vermillon, comme
+ * le quartier.
  */
 public final class UiAtlas implements Disposable {
 
@@ -141,11 +137,11 @@ public final class UiAtlas implements Disposable {
      * Dessine un cadre en trois morceaux (embout, milieu étiré, embout) sur une largeur donnée.
      *
      * @param batch le pinceau, ouvert
-     * @param left  embout gauche
-     * @param mid   colonne du milieu, étirée
+     * @param left embout gauche
+     * @param mid colonne du milieu, étirée
      * @param right embout droit
-     * @param x     bord gauche
-     * @param y     bas
+     * @param x bord gauche
+     * @param y bas
      * @param width largeur totale
      */
     static void three(SpriteBatch batch, TextureRegion left, TextureRegion mid, TextureRegion right,

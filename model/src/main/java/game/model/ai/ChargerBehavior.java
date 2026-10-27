@@ -4,25 +4,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Enemy;
 import game.model.world.World;
 
-/**
- * Comportement du Chargeur : il prévient, charge en ligne droite, puis reste vulnérable.
- *
- * <p>Il passe en boucle par quatre phases, chacune avec son minuteur :</p>
- * <ol>
- *   <li>{@link Phase#APPROACH} : il marche vers le joueur à la vitesse de l'ennemi (60 u/s), en
- *       contournant les murs, jusqu'à être à moins de {@link #TRIGGER_DISTANCE} avec la voie
- *       libre jusqu'au joueur (il ne charge jamais dans un mur qu'il voit) ;</li>
- *   <li>{@link Phase#WIND_UP} : il reste immobile {@link #WIND_UP_DURATION} secondes. La vue
- *       le fait clignoter : sans annonce visible, la charge serait injuste ;</li>
- *   <li>{@link Phase#CHARGE} : il fonce à sa vitesse de charge ({@link #CHARGE_SPEED} pour le
- *       Chargeur, plus pour le boss) dans une direction figée au début de la charge, pendant
- *       {@link #CHARGE_MAX_DURATION} secondes au plus. Il s'arrête plus tôt s'il heurte un mur.
- *       Le Chargeur vise le joueur là où il est ; le boss anticipe son déplacement
- *       (voir {@link #ChargerBehavior(float, float, float)}) ;</li>
- *   <li>{@link Phase#STUNNED} : il reste étourdi {@link #STUN_DURATION} seconde, sans bouger
- *       ni blesser : c'est le moment de le frapper.</li>
- * </ol>
- */
+/** Comportement du Chargeur : il prévient, charge en ligne droite, puis reste vulnérable. */
 public final class ChargerBehavior implements EnemyBehavior {
 
     /** Les phases du Chargeur, dans l'ordre où elles s'enchaînent. */
@@ -53,14 +35,13 @@ public final class ChargerBehavior implements EnemyBehavior {
     public static final float STUN_DURATION = 1f;
 
     // Tolérance sur les minuteurs : 36 pas de 1/60 s font 0,6 s à un arrondi de float près.
-    // Sans elle, une phase pourrait durer un pas de trop selon l'arrondi.
     private static final float EPSILON = 1e-4f;
 
     // En dessous de cette part du déplacement voulu, on considère que la charge a heurté un mur.
     private static final float BLOCKED_RATIO = 0.99f;
 
-    // Temps de lissage de la vitesse du joueur, en secondes : un seul pas brusque (esquive,
-    // recul) ne fausse pas la visée.
+    // Temps de lissage de la vitesse du joueur, en secondes : un seul pas brusque (esquive, recul)
+    // ne fausse pas la visée.
     private static final float VELOCITY_SMOOTHING = 0.1f;
 
     private final float chargeSpeed;
@@ -78,8 +59,8 @@ public final class ChargerBehavior implements EnemyBehavior {
     }
 
     /**
-     * Crée un comportement de charge plus rapide ou plus lent : le boss réutilise ainsi la
-     * logique du Chargeur avec sa propre vitesse.
+     * Crée un comportement de charge plus rapide ou plus lent : le boss réutilise ainsi la logique
+     * du Chargeur avec sa propre vitesse.
      *
      * @param chargeSpeed vitesse de la charge, en unités par seconde
      */
@@ -91,14 +72,10 @@ public final class ChargerBehavior implements EnemyBehavior {
      * Crée un comportement de charge entièrement réglé : le boss s'en sert pour une charge plus
      * rapide, annoncée moins longtemps, et qui anticipe le déplacement du joueur.
      *
-     * <p>Avec l'anticipation, il ne fonce pas là où est le joueur, mais là où il sera s'il garde
-     * sa vitesse le temps que la charge arrive. Marcher en ligne droite sur le côté ne suffit
-     * plus : il faut changer de direction ou esquiver au bon moment.</p>
-     *
-     * @param chargeSpeed    vitesse de la charge, en unités par seconde
+     * @param chargeSpeed vitesse de la charge, en unités par seconde
      * @param windUpDuration durée de l'annonce, en secondes
-     * @param lead           part de l'anticipation : 0, il fonce là où est le joueur ; 1, là où
-     *                       il sera s'il garde sa vitesse
+     * @param lead part de l'anticipation : 0, il fonce là où est le joueur ; 1, là où il sera s'il
+     *     garde sa vitesse
      */
     public ChargerBehavior(float chargeSpeed, float windUpDuration, float lead) {
         this.chargeSpeed = chargeSpeed;

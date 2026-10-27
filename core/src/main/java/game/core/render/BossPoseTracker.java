@@ -7,17 +7,7 @@ import game.model.entity.Boss;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * Déduit la pose du boss à chaque image, à partir de ce que le modèle montre déjà.
- *
- * <p>Le modèle ne dit pas « le boss lève sa massue » : la vue le lit dans ses signes extérieurs.
- * Une annonce plus large que le boss, c'est le coup de massue qui se prépare ; une annonce sur le
- * boss lui-même, c'est l'élan de la charge ; des dégâts au contact, c'est la charge. Les poses qui
- * suivent un geste (impact, étourdissement, sursaut) durent un temps fixe, gardé ici.</p>
- *
- * <p>Cette classe ne dessine rien et ne dépend pas de libGDX : {@link BossSprite} lui demande
- * quoi afficher.</p>
- */
+/** Déduit la pose du boss à chaque image, à partir de ce que le modèle montre déjà. */
 public final class BossPoseTracker {
 
     /** Ce que fait le boss à l'écran. */
@@ -55,11 +45,7 @@ public final class BossPoseTracker {
     /** Déplacement minimal entre deux images pour considérer qu'il marche, en unités. */
     private static final float MOVE_EPSILON = 0.05f;
 
-    /**
-     * Temps pendant lequel il reste « en marche » après son dernier mouvement, en secondes. À plus
-     * de 60 images par seconde, certaines images arrivent sans pas du modèle : sans ce délai, la
-     * marche serait coupée une image sur deux.
-     */
+    /** Temps pendant lequel il reste « en marche » après son dernier mouvement, en secondes. */
     private static final float WALK_GRACE = 0.12f;
 
     private Pose pose = Pose.IDLE;
@@ -81,11 +67,12 @@ public final class BossPoseTracker {
     private boolean phaseChangedNow;
 
     /**
-     * Lit l'état du boss et choisit sa pose. À appeler une fois par image tant que la partie avance.
+     * Lit l'état du boss et choisit sa pose. À appeler une fois par image tant que la partie
+     * avance.
      *
-     * @param boss   le boss
+     * @param boss le boss
      * @param player la position du joueur, vers qui il se tourne
-     * @param delta  temps écoulé depuis l'image précédente, en secondes
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Boss boss, Vec2 player, float delta) {
         Objects.requireNonNull(boss, "boss");

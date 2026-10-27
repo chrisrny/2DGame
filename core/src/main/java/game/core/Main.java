@@ -18,25 +18,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 
-/**
- * Classe principale du jeu côté libGDX : elle passe d'un écran à l'autre (pattern State).
- *
- * <p>Chaque écran est un état : titre, partie, pause, options, victoire, défaite. Il décide
- * lui-même vers quel écran aller, et le demande à {@code Main}. Les écrans mis de côté le temps
- * d'en afficher un autre par-dessus (la partie derrière la pause, la pause derrière les options)
- * sont gardés dans une pile :</p>
- * <ul>
- *   <li>{@link #push(Screen)} affiche un écran par-dessus le courant, qui est gardé ;</li>
- *   <li>{@link #pop()} ferme l'écran courant, le libère et revient au précédent ;</li>
- *   <li>{@link #replaceAll(Screen)} affiche un écran et libère tous les autres.</li>
- * </ul>
- * <p>Un écran quitté est donc toujours libéré ({@code dispose}) : il n'y a pas de fuite.</p>
- *
- * <p>{@code Main} garde aussi les réglages du joueur ({@link #settings()}), partagés par l'écran
- * des options et la partie en cours, le temps que le jeu est ouvert, et la manette
- * ({@link #gamepad()}) : il la lit une fois par image et retient si le joueur joue à la manette ou
- * au clavier ({@link #usingGamepad()}), pour que les écrans affichent les bons boutons.</p>
- */
+/** Classe principale du jeu côté libGDX : elle passe d'un écran à l'autre (pattern State). */
 public class Main extends Game {
 
     private final Deque<Screen> suspended = new ArrayDeque<>();
@@ -69,8 +51,8 @@ public class Main extends Game {
         super.render();
     }
 
-    // Le joueur joue à la manette dès qu'il s'en sert, au clavier dès qu'il touche le clavier ou
-    // la souris : on suit la dernière source utilisée.
+    // Le joueur joue à la manette dès qu'il s'en sert, au clavier dès qu'il touche le clavier ou la
+    // souris : on suit la dernière source utilisée.
     private void trackDevice() {
         if (!gamepad.connected()) {
             usingGamepad = false;
@@ -85,8 +67,6 @@ public class Main extends Game {
     /**
      * La musique des menus, gardée d'un écran à l'autre. Chargée à la première demande : il faut
      * que le son de libGDX soit prêt.
-     *
-     * @return la musique des menus
      */
     public MenuMusic menuMusic() {
         if (menuMusic == null) {

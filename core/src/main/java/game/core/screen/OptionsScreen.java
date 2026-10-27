@@ -4,16 +4,7 @@ import game.core.Main;
 import game.model.commun.Difficulty;
 import game.model.commun.Settings;
 
-/**
- * Écran des options, ouvert depuis le titre (O) ou la pause.
- *
- * <p>Il modifie directement les réglages partagés du jeu ({@link Main#settings()}) : en revenant
- * à la partie, les chiffres de dégâts sont tout de suite affichés ou masqués, sans relancer. La
- * difficulté s'applique à partir du stage suivant.</p>
- *
- * <p>On choisit une ligne avec les flèches (ou Z / S, la croix, le stick), on la règle avec gauche /
- * droite (ou Q / D) ou Entrée (A). Échap (B) revient à l'écran d'où on l'a ouvert.</p>
- */
+/** Écran des options, ouvert depuis le titre (O) ou la pause. */
 public final class OptionsScreen extends MenuScreen {
 
     private static final int DAMAGE_NUMBERS = 0;
@@ -57,8 +48,8 @@ public final class OptionsScreen extends MenuScreen {
         return false;
     }
 
-    // Règle la ligne choisie : bascule les chiffres de dégâts, ou passe à la difficulté
-    // suivante (step = 1) ou précédente (step = -1), en boucle.
+    // Règle la ligne choisie : bascule les chiffres de dégâts, ou passe à la difficulté suivante
+    // (step = 1) ou précédente (step = -1), en boucle.
     private void change(int step) {
         if (selected == DAMAGE_NUMBERS) {
             settings.setShowDamageNumbers(!settings.showDamageNumbers());

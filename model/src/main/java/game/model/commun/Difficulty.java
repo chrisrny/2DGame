@@ -1,8 +1,6 @@
 package game.model.commun;
 
-/**
- * Niveau de difficulté. Il multiplie les points de vie et les dégâts des ennemis.
- */
+/** Niveau de difficulté. Il multiplie les points de vie et les dégâts des ennemis. */
 public enum Difficulty {
     /** Ennemis à 75 %. */
     EASY(0.75f),
@@ -17,11 +15,7 @@ public enum Difficulty {
         this.enemyMultiplier = enemyMultiplier;
     }
 
-    /**
-     * Multiplicateur appliqué aux points de vie et aux dégâts des ennemis.
-     *
-     * @return le multiplicateur (1 en difficulté normale)
-     */
+    /** Multiplicateur appliqué aux points de vie et aux dégâts des ennemis. */
     public float enemyMultiplier() {
         return enemyMultiplier;
     }

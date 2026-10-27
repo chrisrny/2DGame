@@ -3,12 +3,7 @@ package game.model.world;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Les stages du jeu, décrits en code.
- *
- * <p>Une partie enchaîne trois stages sur la même map : le stage 1 pour apprendre, le stage 2
- * plus dur, et le stage 3 pour le boss. Les valeurs seront revues pendant l'équilibrage (P2-X1).</p>
- */
+/** Les stages du jeu, décrits en code. */
 public final class Stages {
 
     /** Multiplicateur des ennemis du stage 2. */
@@ -17,17 +12,7 @@ public final class Stages {
     private Stages() {
     }
 
-    /**
-     * Les trois stages de la démo :
-     * <ul>
-     *   <li>stage 1 : des Rôdeurs, puis des Rôdeurs et des Archers ;</li>
-     *   <li>stage 2 : des vagues plus nombreuses, avec des Chargeurs, ennemis renforcés à 130 % ;</li>
-     *   <li>stage 3 : le boss seul. Il n'a pas de vague : c'est la partie qui le fait apparaître
-     *       (P1-B7, puis le vrai boss en P2-B1).</li>
-     * </ul>
-     *
-     * @return les stages, dans l'ordre
-     */
+    /** Les trois stages de la démo. */
     public static List<StageConfig> demo() {
         StageConfig stage1 = new StageConfig(1, List.of(
                 wave(1.5f, 4, 0, 0),

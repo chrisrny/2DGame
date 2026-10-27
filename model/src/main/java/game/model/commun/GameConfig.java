@@ -5,13 +5,9 @@ import java.util.Objects;
 /**
  * Réglages d'une partie : la graine du hasard, la difficulté et les statistiques de départ.
  *
- * <p>Tout tirage aléatoire du modèle passe par un {@code java.util.Random} créé avec
- * {@link #seed()}, jamais par {@code Math.random()} : la même graine rejoue exactement
- * la même partie, ce qui rend les tests reproductibles.</p>
- *
- * @param seed       graine du hasard
+ * @param seed graine du hasard
  * @param difficulty niveau de difficulté
- * @param player     statistiques de départ du joueur
+ * @param player statistiques de départ du joueur
  */
 public record GameConfig(long seed, Difficulty difficulty, PlayerStats player) {
 
@@ -36,10 +32,8 @@ public record GameConfig(long seed, Difficulty difficulty, PlayerStats player) {
     }
 
     /**
-     * Configuration par défaut avec une graine différente à chaque appel : à utiliser
-     * pour lancer une vraie partie.
-     *
-     * @return une configuration en difficulté normale
+     * Configuration par défaut avec une graine différente à chaque appel : à utiliser pour lancer
+     * une vraie partie.
      */
     public static GameConfig defaults() {
         return defaults(System.nanoTime());

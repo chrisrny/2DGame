@@ -1,8 +1,6 @@
 package game.model.world;
 
-/**
- * Les types d'ennemis qui peuvent apparaître dans une vague.
- */
+/** Les types d'ennemis qui peuvent apparaître dans une vague. */
 public enum EnemyType {
     /** Le Rôdeur : fonce vers le joueur. */
     PROWLER,

@@ -7,24 +7,12 @@ import game.model.world.Run;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/**
- * Lissage des déplacements entre deux pas du modèle (interpolation).
- *
- * <p>Le modèle avance par pas fixes de 1/60 s, mais l'écran peut afficher plus d'images que ça
- * (120 par seconde sur un écran ProMotion) : certaines images arrivent sans nouveau pas, d'autres
- * après deux. Dessiné tel quel, le monde avance par à-coups irréguliers. On garde donc la position
- * de chaque entité juste avant le dernier pas, et on dessine entre cette position et l'actuelle,
- * selon le temps déjà écoulé vers le pas suivant.</p>
- *
- * <p>Purement visuel : les règles et les collisions utilisent toujours les vraies positions du
- * modèle. Le dessin a au plus un pas de retard (1/60 s), ce qui ne se voit pas.</p>
- */
+/** Lissage des déplacements entre deux pas du modèle (interpolation). */
 public final class MotionSmoothing {
 
     /**
      * Au-delà de ce saut entre deux pas, en unités, on n'interpole pas : c'est une téléportation
-     * (nouvel étage, objet réutilisé par un pool), pas un déplacement. Le plus rapide du jeu, la
-     * charge du boss, fait moins de 7 unités par pas.
+     * (nouvel étage, objet réutilisé par un pool), pas un déplacement.
      */
     private static final float MAX_STEP_DISTANCE = 40f;
 
@@ -59,7 +47,7 @@ public final class MotionSmoothing {
     /**
      * Position à dessiner pour une entité.
      *
-     * @param entity  l'entité (le joueur, un ennemi, un projectile)
+     * @param entity l'entité (le joueur, un ennemi, un projectile)
      * @param current sa position actuelle dans le modèle
      * @return la position lissée entre le pas précédent et l'actuel
      */

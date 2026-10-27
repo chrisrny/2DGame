@@ -5,15 +5,8 @@ import game.model.entity.Player;
 import game.model.world.World;
 
 /**
- * Un état du joueur (pattern State) : repos, déplacement, mort, puis attaque, esquive et
- * coup reçu dans les cartes suivantes.
- *
- * <p>À chaque pas de jeu, le joueur demande d'abord à son état courant quel est l'état suivant
- * ({@link #next}), puis fait agir cet état ({@link #act}). Décider avant d'agir permet qu'un
- * appui soit pris en compte dès le pas où il arrive.</p>
- *
- * <p>Chaque entrée dans un état crée un nouvel objet : les états temporisés (attaque, esquive)
- * gardent ainsi leur propre chronomètre.</p>
+ * Un état du joueur (pattern State) : repos, déplacement, mort, puis attaque, esquive et coup reçu
+ * dans les cartes suivantes.
  */
 public interface PlayerState {
 
@@ -31,16 +24,14 @@ public interface PlayerState {
      *
      * @param player le joueur
      * @param intent ce que le joueur veut faire pendant ce pas
-     * @param world  la salle où se trouve le joueur
-     * @param dt     durée du pas, en secondes
+     * @param world la salle où se trouve le joueur
+     * @param dt durée du pas, en secondes
      */
     void act(Player player, PlayerIntent intent, World world, float dt);
 
     /**
-     * Indique si le joueur ignore les coups dans cet état. C'est le joueur qui décide
-     * si un coup s'applique (contrat {@code Damageable}) : il demande à son état.
-     *
-     * @return {@code true} si les coups sont ignorés ; {@code false} par défaut
+     * Indique si le joueur ignore les coups dans cet état. C'est le joueur qui décide si un coup
+     * s'applique (contrat {@code Damageable}) : il demande à son état.
      */
     default boolean invulnerable() {
         return false;

@@ -4,15 +4,8 @@ import game.model.commun.PlayerStats;
 import java.util.Objects;
 
 /**
- * Base commune des reliques : elle garde le nom et la description, pour que chaque relique
- * n'ait plus qu'à décrire son effet.
- *
- * <p>Par défaut, une relique ne change aucune statistique ; celles qui en changent
- * redéfinissent {@link #apply(PlayerStats)}.</p>
- *
- * <p>Le nom et la description sont affichés avec la police par défaut de libGDX, qui ne
- * contient que les caractères latins courants : on écrit « Coeur » et « Oeil » plutôt
- * qu'avec la ligature, et un tiret simple plutôt que le signe moins.</p>
+ * Base commune des reliques : elle garde le nom et la description, pour que chaque relique n'ait
+ * plus qu'à décrire son effet.
  */
 public abstract class AbstractRelic implements Relic {
 
@@ -22,7 +15,7 @@ public abstract class AbstractRelic implements Relic {
     /**
      * Crée une relique.
      *
-     * @param name        nom affiché au joueur
+     * @param name nom affiché au joueur
      * @param description description courte de l'effet
      */
     protected AbstractRelic(String name, String description) {

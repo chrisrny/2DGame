@@ -5,18 +5,7 @@ import game.model.event.EventBus;
 import game.model.event.GameEvent;
 import java.util.Objects;
 
-/**
- * Expérience et niveau du joueur (pattern Observer).
- *
- * <p>L'expérience s'abonne au bus d'événements et gagne 1 point à chaque ennemi tué
- * ({@link GameEvent.EntityDied} de faction {@link Faction#ENEMY}) ; la mort du joueur ou d'un
- * allié ne rapporte rien. Personne n'appelle l'expérience directement quand un ennemi meurt :
- * la map publie l'événement sans savoir qui l'écoute.</p>
- *
- * <p>Passer du niveau {@code n} au niveau {@code n + 1} demande {@code 5 + 3 × (n − 1)} points :
- * 5, puis 8, puis 11… Les niveaux gagnés sont mis en file : chacun donnera droit à un choix
- * d'amélioration, l'un après l'autre.</p>
- */
+/** Expérience et niveau du joueur (pattern Observer). */
 public final class Experience {
 
     /** Points nécessaires pour passer du niveau 1 au niveau 2. */
@@ -73,8 +62,6 @@ public final class Experience {
 
     /**
      * Retire un niveau gagné de la file, quand le choix d'amélioration correspondant est proposé.
-     *
-     * @return {@code true} si un niveau gagné attendait son choix
      */
     public boolean consumeLevelUp() {
         if (pendingLevelUps == 0) {

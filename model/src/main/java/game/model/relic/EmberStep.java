@@ -14,13 +14,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Pas de braise : chaque esquive laisse derrière le joueur une traînée de feu qui brûle les
- * ennemis qui s'y trouvent.
- *
- * <p>Pendant l'esquive, la relique pose {@link #ZONE_COUNT} zones à la position du joueur,
- * régulièrement espacées dans le temps : la traînée suit donc le vrai trajet, même si un mur
- * coupe l'esquive. Toutes les {@link #TICK} secondes, chaque ennemi présent dans au moins une
- * zone reçoit {@link #DAMAGE_PER_TICK} dégâts, une seule fois même si les zones se chevauchent.</p>
+ * Pas de braise : chaque esquive laisse derrière le joueur une traînée de feu qui brûle les ennemis
+ * qui s'y trouvent.
  */
 public final class EmberStep extends AbstractRelic {
 

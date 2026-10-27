@@ -4,9 +4,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import game.core.Main;
 
-/**
- * Point d'entrée desktop : crée la fenêtre et lance le jeu.
- */
+/** Point d'entrée desktop : crée la fenêtre et lance le jeu. */
 public final class Lwjgl3Launcher {
 
     private Lwjgl3Launcher() {

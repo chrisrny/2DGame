@@ -11,11 +11,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Annonces des attaques du boss et de ses invocations, dessinées en formes par-dessus la scène :
- * la zone en rouge transparent, et un disque plus vif qui grandit avec l'avancement donné par le
+ * Annonces des attaques du boss et de ses invocations, dessinées en formes par-dessus la scène : la
+ * zone en rouge transparent, et un disque plus vif qui grandit avec l'avancement donné par le
  * modèle, jusqu'à la remplir quand le coup part (ou quand le Rôdeur invoqué arrive).
- *
- * <p>La map, les ennemis et les projectiles sont dessinés en sprites par {@link SceneRenderer}.</p>
  */
 public final class WorldRenderer {
 
@@ -26,7 +24,7 @@ public final class WorldRenderer {
      * Dessine les annonces d'attaque en cours. Ouvre et ferme lui-même le {@link ShapeRenderer}.
      *
      * @param shapes le pinceau de formes, réglé sur la caméra du monde
-     * @param map    la map, qui contient le boss
+     * @param map la map, qui contient le boss
      */
     public void drawTelegraphs(ShapeRenderer shapes, GameMap map) {
         List<Telegraph> telegraphs = map.enemies().stream()

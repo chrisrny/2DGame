@@ -25,12 +25,6 @@ import java.util.Objects;
 /**
  * Mini-carte, en haut à droite sous la plaque de l'étage : toute la map en petit, le héros, les
  * ennemis et la partie de la map visible à l'écran.
- *
- * <p>Le décor (maisons, murs, canaux, ponts, torii) ne bouge pas : il est dessiné une seule fois,
- * à la création, dans une texture. À chaque image, il ne reste qu'à poser des points par-dessus.
- * Elle se masque et se réaffiche avec M au clavier, Back à la manette.</p>
- *
- * <p>Purement visuel : la mini-carte lit le modèle et ne décide de rien.</p>
  */
 public final class Minimap implements Disposable {
 
@@ -59,8 +53,8 @@ public final class Minimap implements Disposable {
     /**
      * Prépare la mini-carte d'une map.
      *
-     * @param map    la map de la partie
-     * @param width  largeur de l'écran logique, en unités
+     * @param map la map de la partie
+     * @param width largeur de l'écran logique, en unités
      * @param height hauteur de l'écran logique, en unités
      */
     public Minimap(GameMap map, float width, float height) {
@@ -125,7 +119,7 @@ public final class Minimap implements Disposable {
     /**
      * Adapte la mini-carte à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {
@@ -135,7 +129,7 @@ public final class Minimap implements Disposable {
     /**
      * Dessine la mini-carte.
      *
-     * @param run    la partie
+     * @param run la partie
      * @param camera le centre de la caméra du jeu, pour le cadre de ce qui est visible
      */
     public void draw(Run run, Vec2 camera) {

@@ -17,25 +17,8 @@ import java.util.Random;
 
 /**
  * Dessine le décor du quartier des plaisirs en flammes, en fausse 3D (vue 3/4) : dalles de pierre,
- * maisons de thé, murs de clôture, lanternes de pierre, feux et traces de brûlure
- * ({@code assets/sprites/floor.png} et {@code assets/sprites/tiles.png}).
- *
- * <p>La forme de la map ne change pas : chaque mur du modèle garde son emprise de collision, et la
- * vue l'habille selon sa forme. Un petit carré devient une lanterne de pierre, un mur fin (24
- * unités ou moins, dont les bordures sud, est et ouest) un mur de clôture coiffé de tuiles, et le
- * reste (gros blocs, bordure nord) une maison à façade haute, à claire-voie et guirlande de
- * lanternes rouges.</p>
- *
- * <p>À l'écran, le dessus d'un mur est remonté de la hauteur de sa façade : il paraît avoir un
- * volume. Le tri par profondeur ({@link SceneRenderer}) fait le reste. Quand le héros passe
- * derrière un mur qui le cacherait, ce mur devient transparent.</p>
- *
- * <p>Quelques obstacles ont un rôle nommé dans {@link MapLayouts} : les canaux (de l'eau, au
- * niveau du sol, enjambée par des ponts) et les piliers des torii (un portique vermillon, dont le
- * linteau passe au-dessus des personnages).</p>
- *
- * <p>Les feux, lanternes et fenêtres sont aussi des sources de lumière pour
- * {@link LightingRenderer} ({@link #lights()}).</p>
+ * maisons de thé, murs de clôture, lanternes de pierre, feux et traces de brûlure ({@code
+ * assets/sprites/floor.png} et {@code assets/sprites/tiles.png}).
  */
 public final class MapRenderer implements Disposable {
 
@@ -327,16 +310,16 @@ public final class MapRenderer implements Disposable {
     // ------------------------------------------------------------------ sol
 
     /**
-     * Dessine le sol visible, les traces de brûlure, l'ombre des murs et les feux de débris.
-     * Le {@link SpriteBatch} doit déjà être ouvert.
+     * Dessine le sol visible, les traces de brûlure, l'ombre des murs et les feux de débris. Le
+     * {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch  le pinceau d'images
-     * @param arena  les limites de la map
-     * @param walls  les murs
+     * @param batch le pinceau d'images
+     * @param arena les limites de la map
+     * @param walls les murs
      * @param camera la caméra du monde, pour ne dessiner que ce qui est à l'écran
-     * @param viewW  largeur visible, en unités
-     * @param viewH  hauteur visible, en unités
-     * @param time   temps écoulé, en secondes, pour animer les flammes
+     * @param viewW largeur visible, en unités
+     * @param viewH hauteur visible, en unités
+     * @param time temps écoulé, en secondes, pour animer les flammes
      */
     public void drawGround(SpriteBatch batch, Rect arena, List<Rect> walls, OrthographicCamera camera,
             float viewW, float viewH, float time) {
@@ -418,9 +401,9 @@ public final class MapRenderer implements Disposable {
      * Dessine un mur habillé selon sa forme. Le {@link SpriteBatch} doit déjà être ouvert.
      *
      * @param batch le pinceau d'images
-     * @param wall  l'emprise du mur dans le modèle
-     * @param hero  la position (lissée) du héros : un mur qui le cache devient transparent
-     * @param time  temps écoulé, en secondes, pour animer les flammes des toits
+     * @param wall l'emprise du mur dans le modèle
+     * @param hero la position (lissée) du héros : un mur qui le cache devient transparent
+     * @param time temps écoulé, en secondes, pour animer les flammes des toits
      */
     public void drawWall(SpriteBatch batch, Rect wall, Vec2 hero, float time) {
         Kind kind = kinds.getOrDefault(wall, Kind.HOUSE);
@@ -505,7 +488,7 @@ public final class MapRenderer implements Disposable {
     }
 
     // Le pilier gauche dessine tout le portique (ses deux piliers et le linteau) : le linteau passe
-    // ainsi toujours par-dessus les piliers. Le pilier droit ne dessine rien.
+    // ainsi toujours par-dessus les piliers.
     private void drawTorii(SpriteBatch batch, Rect wall) {
         Rect partner = toriiPairs.get(wall);
         if (partner == null) {

@@ -4,13 +4,7 @@ import game.model.entity.Player;
 import game.model.world.World;
 
 /**
- * Écho : une attaque sur {@link #EVERY} frappe une deuxième fois, {@link #DELAY} seconde
- * plus tard.
- *
- * <p>Le deuxième coup passe par {@link Player#echoStrike(World)} : il frappe la zone d'attaque
- * du moment avec son propre tirage de critique et déclenche les reliques de coup (le Croc
- * vampire soigne aussi), mais il ne relance pas la recharge et ne compte pas comme une
- * attaque. Il n'a pas lieu si le joueur est mort entre-temps.</p>
+ * Écho : une attaque sur {@link #EVERY} frappe une deuxième fois, {@link #DELAY} seconde plus tard.
  */
 public final class Echo extends AbstractRelic {
 

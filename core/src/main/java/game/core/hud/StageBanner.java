@@ -12,9 +12,6 @@ import game.model.world.Run;
 /**
  * L'étage en cours : une plaque laquée en haut à droite (numéro de l'étage, ennemis vaincus et
  * jauge), et au début de chaque étage son annonce sur un coup de pinceau à l'encre, avec son nom.
- *
- * <p>L'annonce suit le compte à rebours du modèle ({@link Run#stageIntroLeft()}) : elle entre en
- * glissant, reste, puis s'efface.</p>
  */
 public final class StageBanner implements Disposable {
 
@@ -38,7 +35,7 @@ public final class StageBanner implements Disposable {
     /**
      * Crée le bandeau d'étage.
      *
-     * @param width  largeur de l'écran logique, en unités
+     * @param width largeur de l'écran logique, en unités
      * @param height hauteur de l'écran logique, en unités
      */
     public StageBanner(float width, float height) {
@@ -48,7 +45,7 @@ public final class StageBanner implements Disposable {
     /**
      * Adapte le bandeau à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {

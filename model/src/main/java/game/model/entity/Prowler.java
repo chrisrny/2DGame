@@ -3,9 +3,7 @@ package game.model.entity;
 import game.model.ai.ProwlerBehavior;
 import game.model.commun.Vec2;
 
-/**
- * Le Rôdeur : l'ennemi de base, qui fonce sur le joueur et le frappe au contact.
- */
+/** Le Rôdeur : l'ennemi de base, qui fonce sur le joueur et le frappe au contact. */
 public final class Prowler extends Enemy {
 
     /** Points de vie maximum. */
@@ -32,7 +30,7 @@ public final class Prowler extends Enemy {
     /**
      * Crée un Rôdeur renforcé.
      *
-     * @param position   position d'apparition
+     * @param position position d'apparition
      * @param multiplier multiplicateur des points de vie et des dégâts
      */
     public Prowler(Vec2 position, float multiplier) {

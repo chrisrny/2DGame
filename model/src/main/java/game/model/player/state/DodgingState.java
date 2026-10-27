@@ -8,9 +8,9 @@ import game.model.world.World;
 import java.util.Objects;
 
 /**
- * Le joueur esquive : il file en ligne droite dans une direction figée au départ,
- * sur {@link PlayerStats#dodgeDistance()} en {@link PlayerStats#dodgeDuration()},
- * et ne peut pas être touché pendant tout ce temps.
+ * Le joueur esquive : il file en ligne droite dans une direction figée au départ, sur {@link
+ * PlayerStats#dodgeDistance()} en {@link PlayerStats#dodgeDuration()}, et ne peut pas être touché
+ * pendant tout ce temps.
  */
 public final class DodgingState implements PlayerState {
 

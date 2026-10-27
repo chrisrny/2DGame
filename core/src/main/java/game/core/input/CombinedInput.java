@@ -5,13 +5,7 @@ import game.model.commun.Vec2;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
-/**
- * Le clavier et la manette en même temps : on peut passer de l'un à l'autre sans rien régler.
- *
- * <p>Les boutons des deux sources s'additionnent. Le déplacement vient du clavier s'il est
- * utilisé, sinon de la manette. La visée vient de la source utilisée en dernier : sinon la souris,
- * immobile sur le bureau, viserait à la place du stick.</p>
- */
+/** Le clavier et la manette en même temps : on peut passer de l'un à l'autre sans rien régler. */
 public final class CombinedInput implements InputSource {
 
     private final InputSource keyboard;
@@ -21,8 +15,8 @@ public final class CombinedInput implements InputSource {
     /**
      * Combine deux sources.
      *
-     * @param keyboard     le clavier et la souris
-     * @param gamepad      la manette
+     * @param keyboard le clavier et la souris
+     * @param gamepad la manette
      * @param usingGamepad {@code true} quand la manette est la dernière source utilisée
      */
     public CombinedInput(InputSource keyboard, InputSource gamepad, BooleanSupplier usingGamepad) {

@@ -14,11 +14,8 @@ import java.util.Random;
 
 /**
  * Effets autour du boss : onde de choc et fissures de lave quand la massue frappe, gerbes de
- * braises au passage en phase 2 et à la mort, tremblement de l'écran
- * ({@code assets/sprites/boss_fx.png}).
- *
- * <p>Purement visuel : rien ici ne touche le modèle. Les fissures sont dessinées au sol, sous les
- * personnages ; l'onde et les braises en lumière additive, par-dessus.</p>
+ * braises au passage en phase 2 et à la mort, tremblement de l'écran ({@code
+ * assets/sprites/boss_fx.png}).
  */
 public final class BossEffects implements Disposable {
 
@@ -182,11 +179,7 @@ public final class BossEffects implements Disposable {
         embers.removeIf(ember -> ember.life <= 0f);
     }
 
-    /**
-     * Décalage de caméra du tremblement en cours, qui s'affaiblit jusqu'à zéro.
-     *
-     * @return le décalage à ajouter à la caméra, en unités
-     */
+    /** Décalage de caméra du tremblement en cours, qui s'affaiblit jusqu'à zéro. */
     public Vec2 shakeOffset() {
         if (shakeLeft <= 0f) {
             return Vec2.ZERO;

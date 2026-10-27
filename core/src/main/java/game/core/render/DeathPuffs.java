@@ -14,13 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Nuages de fumée et de braises à la mort d'un ennemi.
- *
- * <p>Pattern Observer, comme les chiffres de dégâts : la vue s'abonne au bus du modèle et réagit
- * à chaque {@link GameEvent.EntityDied}. Le modèle retire l'ennemi mort sans savoir qu'une
- * animation le remplace à l'écran.</p>
- */
+/** Nuages de fumée et de braises à la mort d'un ennemi. */
 public final class DeathPuffs implements Disposable {
 
     /** Durée d'une frame de fumée, en secondes. */
@@ -86,7 +80,7 @@ public final class DeathPuffs implements Disposable {
      * Dessine un nuage. Le {@link SpriteBatch} doit déjà être ouvert.
      *
      * @param batch le pinceau d'images
-     * @param puff  le nuage
+     * @param puff le nuage
      */
     public void draw(SpriteBatch batch, Puff puff) {
         batch.draw(animation.getKeyFrame(puff.time), puff.position.x() - CELL / 2f, puff.position.y() - 10f);

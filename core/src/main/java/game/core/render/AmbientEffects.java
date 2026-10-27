@@ -60,11 +60,11 @@ public final class AmbientEffects {
     /**
      * Fait vivre braises et fumée autour de la vue.
      *
-     * @param center     le centre de la vue
-     * @param viewW      largeur de la vue, en unités
-     * @param viewH      hauteur de la vue, en unités
-     * @param fireSpots  les endroits qui brûlent
-     * @param delta      temps écoulé depuis l'image précédente, en secondes
+     * @param center le centre de la vue
+     * @param viewW largeur de la vue, en unités
+     * @param viewH hauteur de la vue, en unités
+     * @param fireSpots les endroits qui brûlent
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Vec2 center, float viewW, float viewH, List<Vec2> fireSpots, float delta) {
         float x0 = center.x() - viewW / 2f - MARGIN;
@@ -122,7 +122,7 @@ public final class AmbientEffects {
      * Dessine la fumée, en mélange normal. Le {@link SpriteBatch} doit déjà être ouvert.
      *
      * @param batch le pinceau d'images
-     * @param puff  la bouffée de fumée douce
+     * @param puff la bouffée de fumée douce
      */
     public void drawSmoke(SpriteBatch batch, TextureRegion puff) {
         for (Particle p : smoke) {

@@ -7,10 +7,6 @@ import com.badlogic.gdx.utils.Disposable;
 /**
  * La musique des menus (« feu de veille ») : écran titre, options ouvertes depuis le titre, et
  * écrans de fin, après le jingle de victoire ou de défaite.
- *
- * <p>Elle est gardée par le jeu ({@code Main}) d'un écran à l'autre : passer du titre aux options
- * ne la relance pas. Elle monte et descend en fondu ; la partie la coupe en arrivant, et sa propre
- * musique ({@link GameAudio}) prend le relais.</p>
  */
 public final class MenuMusic implements Disposable {
 

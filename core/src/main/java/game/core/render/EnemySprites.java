@@ -22,16 +22,7 @@ import java.util.Set;
 
 /**
  * Dessine les yōkai ordinaires avec leurs feuilles de sprites animées : l'oni bleu (Rôdeur), la
- * lanterne hantée (Archer) et la roue de feu (Chargeur). Le boss a sa propre classe,
- * {@link BossSprite}.
- *
- * <p>Comme le héros, ils sont dessinés de 3/4 et se retournent seulement vers la gauche ou la
- * droite, vers le joueur (la roue, pendant sa charge, regarde là où elle fonce).</p>
- *
- * <p>Le modèle ne dit pas si un ennemi marche, griffe ou crache : la vue le déduit en comparant
- * chaque image à la précédente (la position a bougé, les points de vie ont baissé, un projectile
- * ennemi vient d'apparaître devant une lanterne, un oni est au contact du joueur). Ces petits
- * états de vue sont gardés ici, par ennemi, et oubliés quand l'ennemi disparaît.</p>
+ * lanterne hantée (Archer) et la roue de feu (Chargeur).
  */
 public final class EnemySprites implements Disposable {
 
@@ -47,8 +38,6 @@ public final class EnemySprites implements Disposable {
     private static final float MOVE_EPSILON = 0.05f;
     /**
      * Temps pendant lequel un ennemi reste « en marche » après son dernier mouvement, en secondes.
-     * À plus de 60 images par seconde, certaines images arrivent sans pas du modèle : sans ce
-     * délai, l'animation alternerait course et repos une image sur deux.
      */
     private static final float WALK_GRACE = 0.12f;
     /** Écart horizontal minimal avec le joueur pour se retourner, en unités. */
@@ -60,9 +49,9 @@ public final class EnemySprites implements Disposable {
     /** Distance maximale entre une lanterne et un projectile neuf pour dire qu'elle l'a craché. */
     private static final float SPIT_DETECT = 20f;
     /**
-     * Décalage de l'ombre de la lanterne sous sa position, en unités : la lanterne est dessinée
-     * la bouche à hauteur de son centre (les braises sortent bien de sa bouche), et son ombre
-     * descend d'autant pour qu'elle paraisse flotter.
+     * Décalage de l'ombre de la lanterne sous sa position, en unités : la lanterne est dessinée la
+     * bouche à hauteur de son centre (les braises sortent bien de sa bouche), et son ombre descend
+     * d'autant pour qu'elle paraisse flotter.
      */
     public static final float LANTERN_SHADOW_DROP = 8f;
     /** Petit relèvement de la lanterne pour que sa bouche tombe sur son centre, en unités. */
@@ -79,13 +68,7 @@ public final class EnemySprites implements Disposable {
         private float actionLeft;
     }
 
-    /**
-     * Les animations d'un type d'ennemi.
-     *
-     * @param cell       taille d'une case, en pixels
-     * @param emptyBelow lignes vides sous les pieds (ou sous le bas de la lanterne), en pixels
-     * @param lift       relèvement de l'image au-dessus de sa position normale, en unités
-     */
+    /** Les animations d'un type d'ennemi. */
     private record Sheet(int cell, float emptyBelow, float lift, Animation<TextureRegion> idle,
             Animation<TextureRegion> move, Animation<TextureRegion> action, TextureRegion hurt) {
     }
@@ -146,13 +129,12 @@ public final class EnemySprites implements Disposable {
 
     /**
      * Met à jour ce que la vue sait de chaque ennemi : s'il marche, s'il vient d'être touché, s'il
-     * griffe ou crache, de quel côté il regarde. À appeler une fois par image tant que la partie
-     * avance.
+     * griffe ou crache, de quel côté il regarde.
      *
-     * @param enemies     les ennemis encore en vie
+     * @param enemies les ennemis encore en vie
      * @param projectiles les projectiles en vol, pour voir quelle lanterne vient de cracher
-     * @param player      la position du joueur
-     * @param delta       temps écoulé depuis l'image précédente, en secondes
+     * @param player la position du joueur
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(List<Enemy> enemies, List<Projectile> projectiles, Vec2 player, float delta) {
         Set<Enemy> alive = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -220,8 +202,8 @@ public final class EnemySprites implements Disposable {
     /**
      * Dessine un ennemi. Le {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch    le pinceau d'images
-     * @param enemy    l'ennemi
+     * @param batch le pinceau d'images
+     * @param enemy l'ennemi
      * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
      */
     public void draw(SpriteBatch batch, Enemy enemy, Vec2 position) {

@@ -10,20 +10,6 @@ import game.model.world.World;
 /**
  * Phase 2 du boss, à partir de la moitié de ses points de vie : le même cycle que la phase 1
  * ({@link BossFirstPhase}), en plus dangereux.
- *
- * <ul>
- *   <li>pauses plus courtes ({@link #PAUSE_DURATION}) : moins de temps pour souffler ;</li>
- *   <li>frappe plus large ({@link #SLAM_RADIUS}) et annoncée un peu moins longtemps
- *       ({@link #SLAM_WIND_UP}) ;</li>
- *   <li>charge plus rapide ({@link #CHARGE_SPEED}), annoncée moins longtemps
- *       ({@link #CHARGE_WIND_UP}) et qui anticipe complètement le déplacement du joueur
- *       ({@link #CHARGE_LEAD}) ;</li>
- *   <li>chaque frappe projette un anneau de {@link #EMBER_COUNT} braises depuis le point
- *       d'impact : il faut sortir du cercle, puis passer entre les braises.</li>
- * </ul>
- *
- * <p>Seuls les réglages changent : le cycle lui-même reste celui de la phase 1 (pattern
- * Template Method).</p>
  */
 public final class BossSecondPhase extends BossFirstPhase {
 

@@ -3,12 +3,6 @@ package game.model.commun;
 /**
  * Vecteur 2D immuable : une position, une vitesse ou une direction dans le monde du jeu.
  *
- * <p>Repère du modèle : 1 unité = 1 pixel de l'écran logique 640x360, origine en bas à gauche,
- * y vers le haut. Chaque opération renvoie un nouveau {@code Vec2} : un vecteur partagé entre
- * plusieurs objets ne peut donc jamais être modifié par erreur.</p>
- *
- * <p>Le modèle n'utilise pas le {@code Vector2} de libGDX, pour rester en Java pur.</p>
- *
  * @param x composante horizontale
  * @param y composante verticale
  */
@@ -19,9 +13,6 @@ public record Vec2(float x, float y) {
 
     /**
      * Direction normalisée à partir de deux axes, comme ceux du clavier.
-     *
-     * <p>Par exemple {@code fromAxes(1, 1)} (haut + droite) donne une direction de longueur 1 :
-     * on ne va pas plus vite en diagonale.</p>
      *
      * @param x -1 (gauche), 0 ou 1 (droite)
      * @param y -1 (bas), 0 ou 1 (haut)
@@ -61,11 +52,7 @@ public record Vec2(float x, float y) {
         return new Vec2(x * factor, y * factor);
     }
 
-    /**
-     * Longueur (norme) du vecteur.
-     *
-     * @return la longueur, toujours positive ou nulle
-     */
+    /** Longueur (norme) du vecteur. */
     public float length() {
         return (float) Math.sqrt(x * x + y * y);
     }
@@ -81,9 +68,7 @@ public record Vec2(float x, float y) {
     }
 
     /**
-     * Produit scalaire. Sert notamment à mesurer l'angle entre deux directions :
-     * pour deux directions normalisées, il vaut 1 si elles sont identiques, 0 si elles
-     * sont perpendiculaires et -1 si elles sont opposées.
+     * Produit scalaire.
      *
      * @param other l'autre vecteur
      * @return le produit scalaire
@@ -92,14 +77,7 @@ public record Vec2(float x, float y) {
         return x * other.x + y * other.y;
     }
 
-    /**
-     * Le même vecteur ramené à une longueur de 1.
-     *
-     * <p>Le vecteur nul n'a pas de direction : le diviser par sa longueur donnerait
-     * {@code NaN}, qui se propagerait partout. On renvoie donc {@link #ZERO} dans ce cas.</p>
-     *
-     * @return la direction de longueur 1, ou {@link #ZERO} pour le vecteur nul
-     */
+    /** Le même vecteur ramené à une longueur de 1. */
     public Vec2 normalized() {
         float length = length();
         if (length == 0f) {
@@ -109,8 +87,8 @@ public record Vec2(float x, float y) {
     }
 
     /**
-     * Le même vecteur tourné d'un angle, dans le sens inverse des aiguilles d'une montre
-     * (y vers le haut). Sa longueur ne change pas.
+     * Le même vecteur tourné d'un angle, dans le sens inverse des aiguilles d'une montre (y vers le
+     * haut). Sa longueur ne change pas.
      *
      * @param radians l'angle de rotation, en radians
      * @return le vecteur tourné

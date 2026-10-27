@@ -4,14 +4,7 @@ import game.model.entity.Player;
 import game.model.world.World;
 import java.util.Objects;
 
-/**
- * Une compétence active du joueur, avec son temps de recharge.
- *
- * <p>Pattern Template Method : {@link #tryActivate(Player, World)} fixe les étapes (vérifier la
- * recharge, produire l'effet, relancer la recharge) et chaque compétence ne fournit que son
- * effet, dans {@link #activate(Player, World)}. Une compétence ne peut donc pas oublier sa
- * recharge : ce n'est pas elle qui la gère.</p>
- */
+/** Une compétence active du joueur, avec son temps de recharge. */
 public abstract class Skill {
 
     private final String name;
@@ -22,7 +15,7 @@ public abstract class Skill {
     /**
      * Crée une compétence prête à l'emploi.
      *
-     * @param name     nom affiché au joueur
+     * @param name nom affiché au joueur
      * @param cooldown temps de recharge, en secondes, strictement positif
      */
     protected Skill(String name, float cooldown) {
@@ -34,11 +27,11 @@ public abstract class Skill {
     }
 
     /**
-     * Essaie d'utiliser la compétence : refusée tant que la recharge n'est pas finie, sinon
-     * l'effet se produit et la recharge repart.
+     * Essaie d'utiliser la compétence : refusée tant que la recharge n'est pas finie, sinon l'effet
+     * se produit et la recharge repart.
      *
      * @param player le joueur qui utilise la compétence
-     * @param world  le monde où se produit l'effet
+     * @param world le monde où se produit l'effet
      * @return {@code true} si la compétence a été utilisée
      */
     public final boolean tryActivate(Player player, World world) {
@@ -57,7 +50,7 @@ public abstract class Skill {
      * L'effet propre à la compétence. Appelé seulement quand elle est rechargée.
      *
      * @param player le joueur qui utilise la compétence
-     * @param world  le monde où se produit l'effet
+     * @param world le monde où se produit l'effet
      */
     protected abstract void activate(Player player, World world);
 

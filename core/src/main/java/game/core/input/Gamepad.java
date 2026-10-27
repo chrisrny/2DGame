@@ -6,15 +6,6 @@ import java.util.Objects;
 /**
  * Une manette, vue par le jeu : boutons, sticks, gâchettes, avec la mise en forme commune à toutes
  * les manettes (zone morte, appuis, directions pour les menus).
- *
- * <p>Pattern Template Method : {@link #update()} fixe les étapes (lire l'état brut, garder l'état
- * précédent, appliquer la zone morte, repérer les appuis) ; une sous-classe ne fournit que la
- * lecture brute du matériel ({@link #readConnected()}, {@link #readButton}, {@link #readAxis}).
- * Le module {@code core} ne dépend donc d'aucune bibliothèque de manette : c'est le lanceur
- * ({@code lwjgl3}) qui branche la vraie manette. Les noms suivent la disposition Xbox ; sur une
- * manette PlayStation, A = ✕, B = ○, X = □, Y = △.</p>
- *
- * <p>Comme le clavier, la manette est lue par interrogation, une fois par image.</p>
  */
 public abstract class Gamepad {
 
@@ -39,9 +30,8 @@ public abstract class Gamepad {
     /** Une gâchette compte comme enfoncée au-delà de ce seuil. */
     public static final float TRIGGER_THRESHOLD = 0.4f;
 
-    // Hystérésis du stick pour les menus : il faut le pousser franchement pour aller d'une ligne
-    // à l'autre, et le relâcher nettement pour recommencer. Sinon un stick tenu à mi-course
-    // ferait défiler le menu à chaque petite vibration.
+    // Hystérésis du stick pour les menus : il faut le pousser franchement pour aller d'une ligne à
+    // l'autre, et le relâcher nettement pour recommencer.
     private static final float MENU_ON = 0.6f;
     private static final float MENU_OFF = 0.35f;
 
@@ -76,9 +66,7 @@ public abstract class Gamepad {
     private boolean connected;
     private boolean active;
 
-    /**
-     * Lit la manette. À appeler une fois par image, avant que les écrans ne la consultent.
-     */
+    /** Lit la manette. À appeler une fois par image, avant que les écrans ne la consultent. */
     public final void update() {
         System.arraycopy(held, 0, before, 0, held.length);
         System.arraycopy(direction, 0, directionBefore, 0, direction.length);
@@ -143,7 +131,7 @@ public abstract class Gamepad {
     /**
      * @param dir la direction
      * @return {@code true} seulement à l'image où la croix ou le stick gauche vient d'être poussé
-     *         dans cette direction
+     *     dans cette direction
      */
     public boolean justPressed(Direction dir) {
         int i = Objects.requireNonNull(dir, "dir").ordinal();
@@ -167,8 +155,8 @@ public abstract class Gamepad {
     }
 
     /**
-     * Un stick, avec une zone morte ronde : au repos il vaut zéro, et la course restante est
-     * étalée de 0 à 1, pour qu'un stick à peine sorti de la zone morte avance doucement.
+     * Un stick, avec une zone morte ronde : au repos il vaut zéro, et la course restante est étalée
+     * de 0 à 1, pour qu'un stick à peine sorti de la zone morte avance doucement.
      *
      * @param left {@code true} pour le stick gauche, {@code false} pour le droit
      * @return la direction du stick, de longueur 0 à 1 (y vers le haut)
@@ -197,8 +185,6 @@ public abstract class Gamepad {
     /**
      * Indique si la manette vient de servir : un bouton enfoncé, un stick ou une gâchette poussé.
      * Sert à savoir si le joueur joue à la manette ou au clavier.
-     *
-     * @return {@code true} si la manette a servi à cette image
      */
     public boolean active() {
         return active;
@@ -216,7 +202,7 @@ public abstract class Gamepad {
     /**
      * @param axis l'axe
      * @return sa valeur brute en ce moment : -1 à 1 pour les sticks (y vers le haut), 0 à 1 pour
-     *         les gâchettes
+     *     les gâchettes
      */
     protected abstract float readAxis(Axis axis);
 }

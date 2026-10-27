@@ -2,12 +2,7 @@ package game.core.hud;
 
 import com.badlogic.gdx.utils.Pool;
 
-/**
- * Un chiffre de dégâts qui flotte au-dessus d'une cible touchée.
- *
- * <p>Les chiffres sont réutilisés (pattern Object Pool) : quand un chiffre a fini de s'afficher,
- * il retourne dans la réserve et {@link #reset()} le remet à zéro pour le prochain coup.</p>
- */
+/** Un chiffre de dégâts qui flotte au-dessus d'une cible touchée. */
 final class FloatingNumber implements Pool.Poolable {
 
     float x;
@@ -20,9 +15,9 @@ final class FloatingNumber implements Pool.Poolable {
     /**
      * Prépare le chiffre pour un nouveau coup.
      *
-     * @param x        position horizontale de départ, dans le monde
-     * @param y        position verticale de départ, dans le monde
-     * @param damage   dégâts infligés
+     * @param x position horizontale de départ, dans le monde
+     * @param y position verticale de départ, dans le monde
+     * @param damage dégâts infligés
      * @param critical {@code true} pour un coup critique
      * @param onPlayer {@code true} si c'est le joueur qui a été touché
      */

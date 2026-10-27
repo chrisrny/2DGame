@@ -36,21 +36,7 @@ import game.model.world.Run;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Écran de partie.
- *
- * <p>À chaque image, il fait trois choses dans cet ordre : lire les entrées, faire avancer
- * le modèle à pas fixe, dessiner. L'écran ne décide jamais des règles : il transmet
- * l'intention du joueur au modèle et dessine ce que le modèle contient.</p>
- *
- * <p>Échap (Start à la manette) ouvre la pause, F9 et F10 gagnent ou perdent tout de suite (triche de démo pour la
- * soutenance). Quand la partie est finie, l'écran laisse {@link #END_DELAY}
- * secondes pour voir ce qui s'est passé, puis passe à l'écran de victoire ou de défaite.</p>
- *
- * <p>Le jeu est dessiné dans un monde logique de 640x360. Le {@link FitViewport} l'agrandit
- * à la taille de la fenêtre en gardant le format 16:9, avec des bandes noires si la fenêtre
- * n'a pas les bonnes proportions.</p>
- */
+/** Écran de partie. */
 public class GameScreen extends ScreenAdapter {
 
     /** Largeur du monde logique, en unités (= pixels de l'écran logique). */
@@ -92,7 +78,7 @@ public class GameScreen extends ScreenAdapter {
      * Crée l'écran de partie.
      *
      * @param main le jeu, pour ouvrir la pause et l'écran de fin
-     * @param run  la partie à jouer
+     * @param run la partie à jouer
      */
     public GameScreen(Main main, Run run) {
         this.main = main;
@@ -151,8 +137,7 @@ public class GameScreen extends ScreenAdapter {
             minimap.toggle();
         }
 
-        // Triche de démo : F9 gagne, F10 perd tout de suite. C'est le modèle qui décide ; l'écran
-        // de fin arrive ensuite après END_DELAY, comme pour une vraie fin de partie.
+        // Triche de démo : F9 gagne, F10 perd tout de suite.
         if (Gdx.input.isKeyJustPressed(Keys.F9)) {
             run.forceWin();
         }
@@ -164,7 +149,6 @@ public class GameScreen extends ScreenAdapter {
         audio.update(run, delta);
 
         // Montée de niveau : la partie est figée tant que le joueur n'a pas choisi sa relique.
-        // On ne fait pas avancer l'horloge, pour ne pas rattraper ce temps d'un coup ensuite.
         if (run.isChoosingRelic()) {
             int choice = levelUp.readChoice(run.pendingChoice().size());
             if (choice >= 0) {
@@ -176,22 +160,20 @@ public class GameScreen extends ScreenAdapter {
             return;
         }
 
-        // 1. Entrées : lues une fois par image, puis données à chaque pas de modèle.
-        // La visée part de la position du joueur.
+        // 1.
         PlayerIntent intent = input.poll(run.player().position());
 
-        // 2. Modèle : 0, 1 ou plusieurs pas de durée fixe selon le temps écoulé.
-        // Arrêt sur image après l'Onde de choc : le modèle attend un instant, le coup « pèse ».
+        // 2.
         int steps = scene.frozen() ? 0 : clock.advance(delta);
         for (int i = 0; i < steps; i++) {
             // Positions avant le pas : la vue dessine entre elles et les nouvelles (interpolation),
-            // pour que le mouvement reste fluide quand l'écran affiche plus de 60 images par seconde.
+            // pour que le mouvement reste fluide quand l'écran affiche plus de 60 images par
+            // seconde.
             scene.beforeStep(run);
             run.update(intent, FixedStep.DT);
         }
         scene.setStepProgress(clock.pending() / FixedStep.DT);
         // Les chiffres de dégâts avancent avec le temps réel : c'est purement visuel.
-        // Ils sont figés pendant le choix de relique, comme le reste (retour plus haut).
         damageNumbers.update(delta);
         scene.update(run, delta);
 
@@ -248,9 +230,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    /**
-     * Centre la caméra sur le joueur, sans jamais montrer l'extérieur de la map.
-     */
+    /** Centre la caméra sur le joueur, sans jamais montrer l'extérieur de la map. */
     private void followPlayer() {
         Rect arena = run.map().arena();
         Vec2 target = scene.playerOnScreen(run);
@@ -262,10 +242,7 @@ public class GameScreen extends ScreenAdapter {
         camera.update();
     }
 
-    /**
-     * Zones de feu des reliques (Pas de braise) : des anneaux rouge orangé. On dessine des
-     * contours et non des disques pleins, pour ne pas cacher les ennemis qui brûlent dedans.
-     */
+    /** Zones de feu des reliques (Pas de braise) : des anneaux rouge orangé. */
     private void drawFireZones() {
         List<Circle> zones = run.player().fireZones();
         if (zones.isEmpty()) {
@@ -281,12 +258,8 @@ public class GameScreen extends ScreenAdapter {
     }
 
     /**
-     * Clignotement pendant l'invincibilité après un coup : le joueur est caché une période
-     * sur deux. La période est calculée à partir du temps d'invincibilité restant, donnée
-     * par le modèle : la vue ne garde aucun minuteur à elle.
-     *
-     * @param player le joueur à dessiner
-     * @return {@code true} si le joueur doit être dessiné estompé à cette image
+     * Clignotement pendant l'invincibilité après un coup : le joueur est caché une période sur
+     * deux.
      */
     private static boolean blinkHidden(Player player) {
         float left = player.invulnerableLeft();

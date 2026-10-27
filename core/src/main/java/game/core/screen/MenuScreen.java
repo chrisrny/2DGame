@@ -23,15 +23,7 @@ import game.core.input.Gamepad.Direction;
 import java.util.Objects;
 import java.util.Random;
 
-/**
- * Base commune des écrans de menu : titre, pause, options, victoire, défaite.
- *
- * <p>Chaque image : l'écran lit les touches, puis dessine son fond et son contenu. Si la lecture
- * des touches a fait changer d'écran, il ne dessine rien : il vient peut-être d'être libéré.
- * Le texte est écrit avec la police du jeu ({@link Fonts}) dans les mêmes unités logiques que le jeu
- * (640x360) ; l'écran possède sa police, son pinceau et son batch, et les libère dans
- * {@link #dispose()}.</p>
- */
+/** Base commune des écrans de menu : titre, pause, options, victoire, défaite. */
 public abstract class MenuScreen extends ScreenAdapter {
 
     /** Largeur de l'écran logique, en unités. */
@@ -123,7 +115,8 @@ public abstract class MenuScreen extends ScreenAdapter {
     /**
      * Lit les touches de l'image et réagit.
      *
-     * @return {@code true} si l'écran a demandé un changement d'écran : il ne doit plus rien dessiner
+     * @return {@code true} si l'écran a demandé un changement d'écran : il ne doit plus rien
+     *     dessiner
      */
     protected abstract boolean handleInput();
 
@@ -166,8 +159,8 @@ public abstract class MenuScreen extends ScreenAdapter {
     /**
      * Écrit une ligne de texte centrée horizontalement.
      *
-     * @param text  le texte
-     * @param y     hauteur du haut du texte, en unités
+     * @param text le texte
+     * @param y hauteur du haut du texte, en unités
      * @param scale échelle de la police
      * @param color couleur du texte
      */
@@ -247,7 +240,7 @@ public abstract class MenuScreen extends ScreenAdapter {
      * Choisit le texte d'aide selon la source utilisée en dernier.
      *
      * @param keyboard le texte pour le clavier
-     * @param gamepad  le texte pour la manette
+     * @param gamepad le texte pour la manette
      * @return celui qui correspond à ce que le joueur a en main
      */
     protected String hint(String keyboard, String gamepad) {

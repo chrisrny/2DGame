@@ -1,4 +1,2 @@
-/**
- * Résolution du combat : coups, dégâts, recul, collisions.
- */
+/** Résolution du combat : coups, dégâts, recul, collisions. */
 package game.model.combat;

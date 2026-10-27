@@ -5,20 +5,15 @@ import game.model.entity.Boss;
 import game.model.world.World;
 import java.util.Optional;
 
-/**
- * Une phase du boss (pattern State) : ce qu'il fait tant qu'il est dans cette phase.
- *
- * <p>Le boss délègue chaque pas de jeu à sa phase actuelle, et change de phase selon ses points
- * de vie. Chaque phase garde son propre état (attaque en cours, minuteurs).</p>
- */
+/** Une phase du boss (pattern State) : ce qu'il fait tant qu'il est dans cette phase. */
 public interface BossPhase {
 
     /**
      * Fait agir le boss pendant un pas de jeu.
      *
-     * @param boss  le boss
+     * @param boss le boss
      * @param world le monde, pour le joueur, les murs et les cibles
-     * @param dt    durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     void update(Boss boss, World world, float dt);
 

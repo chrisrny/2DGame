@@ -13,7 +13,7 @@ public record Circle(Vec2 center, float radius) {
     /**
      * Vérifie que le cercle est valide.
      *
-     * @throws NullPointerException     si le centre est {@code null}
+     * @throws NullPointerException si le centre est {@code null}
      * @throws IllegalArgumentException si le rayon est négatif
      */
     public Circle {

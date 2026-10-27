@@ -5,8 +5,8 @@ import game.model.entity.Player;
 import game.model.world.World;
 
 /**
- * Le joueur attaque : le coup part dès le premier pas, puis le joueur reste immobile
- * jusqu'à la fin de l'attaque ({@link Player#ATTACK_DURATION}).
+ * Le joueur attaque : le coup part dès le premier pas, puis le joueur reste immobile jusqu'à la fin
+ * de l'attaque ({@link Player#ATTACK_DURATION}).
  */
 public final class AttackingState implements PlayerState {
 

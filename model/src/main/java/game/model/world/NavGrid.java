@@ -11,16 +11,6 @@ import java.util.PriorityQueue;
 
 /**
  * Grille de navigation : elle permet aux ennemis de contourner les murs pour rejoindre le joueur.
- *
- * <p>La map est découpée en cases de {@link #CELL} unités. Une case est praticable si un ennemi
- * de rayon {@code clearance} peut se tenir en son centre sans toucher de mur. Quand la cible
- * (le joueur) change de case, la grille calcule pour chaque case la longueur du plus court
- * chemin jusqu'à elle (algorithme de Dijkstra, en 8 directions). C'est une « carte de flux » :
- * calculée une seule fois pour tous les ennemis, elle indique à chacun dans quelle direction
- * aller, où qu'il soit.</p>
- *
- * <p>Pour éviter un trajet en escalier de case en case, l'ennemi suit le chemin sur plusieurs
- * cases et vise la plus lointaine qu'il peut atteindre en ligne droite sans toucher de mur.</p>
  */
 public final class NavGrid {
 
@@ -48,8 +38,8 @@ public final class NavGrid {
     /**
      * Crée la grille d'une map.
      *
-     * @param arena     les limites de la map
-     * @param walls     les murs et obstacles
+     * @param arena les limites de la map
+     * @param walls les murs et obstacles
      * @param clearance rayon des ennemis pour lesquels une case doit être praticable
      */
     public NavGrid(Rect arena, List<Rect> walls, float clearance) {
@@ -67,8 +57,8 @@ public final class NavGrid {
     }
 
     /**
-     * Met à jour la carte de flux vers une cible. Le calcul n'est refait que si la cible a
-     * changé de case.
+     * Met à jour la carte de flux vers une cible. Le calcul n'est refait que si la cible a changé
+     * de case.
      *
      * @param target la position à rejoindre, en général celle du joueur
      */
@@ -84,7 +74,7 @@ public final class NavGrid {
     /**
      * Le point à viser pour se rapprocher de la cible en contournant les murs.
      *
-     * @param from   position de l'ennemi
+     * @param from position de l'ennemi
      * @param radius rayon de l'ennemi, pour vérifier qu'il passe en ligne droite jusqu'au point
      * @param target la cible donnée à {@link #updateTarget}, renvoyée si aucun chemin n'existe
      * @return le point à viser maintenant
@@ -142,8 +132,7 @@ public final class NavGrid {
         return cell >= 0 && distance[cell] != UNREACHABLE;
     }
 
-    // Dijkstra depuis la case cible. La case de départ est acceptée même si elle n'est pas
-    // praticable (le joueur collé à un mur) ; ensuite, on ne passe que par des cases praticables.
+    // Dijkstra depuis la case cible.
     private void computeDistances(int source) {
         Arrays.fill(distance, UNREACHABLE);
         if (source < 0) {
@@ -185,9 +174,8 @@ public final class NavGrid {
         return best;
     }
 
-    // Un ennemi collé à un mur peut se trouver sur une case non praticable : on prend alors la
-    // case voisine, à deux cases au plus, la plus proche de la cible et en vue. On ne demande
-    // qu'une ligne de vue : collé au mur, aucun passage « avec marge » ne partirait de lui.
+    // Un ennemi collé à un mur peut se trouver sur une case non praticable : on prend alors la case
+    // voisine, à deux cases au plus, la plus proche de la cible et en vue.
     private int startCell(Vec2 from) {
         int cell = cellOf(from);
         if (cell >= 0 && distance[cell] != UNREACHABLE) {
@@ -214,8 +202,7 @@ public final class NavGrid {
         return best;
     }
 
-    // Voisin d'une case. En diagonale, on refuse de couper un coin : les deux cases d'à côté
-    // doivent être praticables, sinon l'ennemi frotterait contre l'angle du mur.
+    // Voisin d'une case.
     private int neighbour(int cell, int dx, int dy) {
         int col = cell % cols + dx;
         int row = cell / cols + dy;

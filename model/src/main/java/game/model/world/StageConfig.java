@@ -6,23 +6,19 @@ import java.util.Objects;
 /**
  * La description d'un stage : ses vagues, ce qu'il faut tuer pour le finir et sa difficulté.
  *
- * <p>Les vagues arrivent dans l'ordre. Si la dernière est vaincue avant que le joueur ait tué
- * {@code killsToClear} ennemis, elle revient jusqu'à ce que le compte soit atteint. Un stage
- * sans vague (celui du boss) ne fait rien apparaître de lui-même.</p>
- *
- * @param number       numéro du stage, à partir de 1
- * @param waves        les vagues, dans l'ordre d'apparition
+ * @param number numéro du stage, à partir de 1
+ * @param waves les vagues, dans l'ordre d'apparition
  * @param killsToClear nombre d'ennemis à tuer pour finir le stage
- * @param multiplier   multiplicateur des points de vie et des dégâts des ennemis du stage
+ * @param multiplier multiplicateur des points de vie et des dégâts des ennemis du stage
  */
 public record StageConfig(int number, List<Wave> waves, int killsToClear, float multiplier) {
 
     /**
      * Vérifie le stage et fait une copie non modifiable des vagues.
      *
-     * @throws NullPointerException     si {@code waves} est {@code null}
+     * @throws NullPointerException si {@code waves} est {@code null}
      * @throws IllegalArgumentException si le numéro, le nombre d'ennemis à tuer ou le
-     *                                  multiplicateur ne sont pas strictement positifs
+     *     multiplicateur ne sont pas strictement positifs
      */
     public StageConfig {
         waves = List.copyOf(Objects.requireNonNull(waves, "waves"));

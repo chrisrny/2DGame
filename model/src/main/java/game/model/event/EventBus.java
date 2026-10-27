@@ -5,14 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-/**
- * Bus d'événements du jeu (pattern Observer) : le modèle publie, la vue écoute.
- *
- * <p>Publier ne prévient personne tout de suite : l'événement est mis en file. Les écouteurs
- * sont prévenus quand on appelle {@link #flush()}, une fois à la fin de chaque pas de jeu.
- * Un événement publié pendant un {@code flush} est distribué au {@code flush} suivant : on
- * évite ainsi les boucles et les bugs d'ordre quand un écouteur publie à son tour.</p>
- */
+/** Bus d'événements du jeu (pattern Observer) : le modèle publie, la vue écoute. */
 public final class EventBus {
 
     private final List<Consumer<GameEvent>> listeners = new ArrayList<>();
@@ -45,9 +38,7 @@ public final class EventBus {
         listeners.remove(listener);
     }
 
-    /**
-     * Distribue à tous les écouteurs les événements en file, dans l'ordre de publication.
-     */
+    /** Distribue à tous les écouteurs les événements en file, dans l'ordre de publication. */
     public void flush() {
         List<GameEvent> toDeliver = pending;
         pending = new ArrayList<>();
@@ -58,11 +49,7 @@ public final class EventBus {
         }
     }
 
-    /**
-     * Nombre d'événements en attente de distribution.
-     *
-     * @return le nombre d'événements publiés depuis le dernier {@link #flush()}
-     */
+    /** Nombre d'événements en attente de distribution. */
     public int pendingCount() {
         return pending.size();
     }

@@ -11,19 +11,7 @@ import game.model.world.World;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Le boss de l'étage 3, l'Oni du quartier : il change de comportement selon ses points de vie.
- *
- * <p>Ce qu'il fait est délégué à sa phase actuelle ({@link BossPhase}, pattern State). Il
- * commence en {@link BossFirstPhase} et passe en phase 2 à {@link #SECOND_PHASE_THRESHOLD} de
- * ses points de vie. Toutes ses attaques sont annoncées : la vue dessine
- * {@link #currentAttackTelegraph()} avant chaque coup.</p>
- *
- * <p>Pendant tout le combat, il appelle aussi des Rôdeurs en renfort ({@link BossSummons}),
- * annoncés par {@link #summonTelegraphs()}.</p>
- *
- * <p>Comme le Chargeur, il ne blesse au contact que pendant sa charge.</p>
- */
+/** Le boss de l'étage 3, l'Oni du quartier : il change de comportement selon ses points de vie. */
 public final class Boss extends Enemy {
 
     /** Points de vie maximum. */
@@ -57,12 +45,12 @@ public final class Boss extends Enemy {
     /**
      * Crée le boss renforcé (ou affaibli) par le multiplicateur du stage et de la difficulté.
      *
-     * @param position   position d'apparition
+     * @param position position d'apparition
      * @param multiplier multiplicateur des points de vie et des dégâts
      */
     public Boss(Vec2 position, float multiplier) {
-        // Le comportement passé à Enemy renvoie vers la phase du boss : la Strategy des
-        // ennemis est ici branchée sur le State du boss.
+        // Le comportement passé à Enemy renvoie vers la phase du boss : la Strategy des ennemis est
+        // ici branchée sur le State du boss.
         super(position, MAX_HP, RADIUS, SPEED, CHARGE_DAMAGE, (self, world, dt) -> ((Boss) self).act(world, dt),
                 multiplier);
     }
@@ -101,11 +89,7 @@ public final class Boss extends Enemy {
         return phase.isCharging() ? super.contactDamage() : 0;
     }
 
-    /**
-     * L'attaque que le boss est en train d'annoncer, pour que la vue la dessine.
-     *
-     * @return l'annonce en cours, ou rien entre deux attaques
-     */
+    /** L'attaque que le boss est en train d'annoncer, pour que la vue la dessine. */
     public Optional<Telegraph> currentAttackTelegraph() {
         return phase.telegraph(this);
     }
@@ -113,9 +97,6 @@ public final class Boss extends Enemy {
     /**
      * Les renforts que le boss est en train d'invoquer, pour que la vue dessine leur point
      * d'arrivée avant qu'ils apparaissent.
-     *
-     * @return une annonce par Rôdeur à venir, vide hors invocation
-     * @see BossSummons
      */
     public List<Telegraph> summonTelegraphs() {
         return summons.telegraphs();

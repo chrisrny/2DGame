@@ -10,11 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Fabrique de reliques (pattern Factory) : c'est le seul endroit qui connaît toutes les
- * reliques du jeu et sait les créer. Le reste du code ne voit que l'interface {@link Relic}.
- *
- * <p>Le tirage utilise le {@link Random} de la partie : avec la même graine, les mêmes
- * reliques sont proposées dans le même ordre.</p>
+ * Fabrique de reliques (pattern Factory) : c'est le seul endroit qui connaît toutes les reliques du
+ * jeu et sait les créer.
  */
 public final class RelicFactory {
 
@@ -22,11 +19,7 @@ public final class RelicFactory {
         // Classe utilitaire : pas d'instance.
     }
 
-    /**
-     * Crée un exemplaire neuf de chaque relique du jeu, toujours dans le même ordre.
-     *
-     * @return les 8 reliques
-     */
+    /** Crée un exemplaire neuf de chaque relique du jeu, toujours dans le même ordre. */
     public static List<Relic> all() {
         return List.of(new SharpenedBlade(), new AshBoots(), new EmberHeart(),
                 new ShadowFeather(), new HunterEye(), new VampireFang(),
@@ -36,10 +29,11 @@ public final class RelicFactory {
     /**
      * Tire des reliques différentes que le joueur ne possède pas encore.
      *
-     * @param count  nombre de reliques voulues
+     * @param count nombre de reliques voulues
      * @param random le hasard de la partie
-     * @param owned  les reliques déjà possédées, reconnues par leur classe
-     * @return au plus {@code count} reliques ; moins s'il en reste moins, aucune s'il n'en reste pas
+     * @param owned les reliques déjà possédées, reconnues par leur classe
+     * @return au plus {@code count} reliques ; moins s'il en reste moins, aucune s'il n'en reste
+     *     pas
      * @throws IllegalArgumentException si {@code count} est négatif
      */
     public static List<Relic> draw(int count, Random random, Collection<Relic> owned) {

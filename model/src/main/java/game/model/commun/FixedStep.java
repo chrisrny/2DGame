@@ -1,17 +1,8 @@
 package game.model.commun;
 
 /**
- * Horloge à pas fixe : transforme le temps réel d'une image en un nombre de pas de jeu
- * de durée constante.
- *
- * <p>libGDX donne à chaque image un {@code delta} qui varie selon la machine et sa charge.
- * Si le modèle avançait de {@code delta}, le jeu ne se comporterait pas pareil d'une machine
- * à l'autre, et un test ne pourrait jamais rejouer exactement la même partie. On accumule
- * donc le temps reçu dans un « réservoir », et on en retire des tranches de {@link #DT}
- * tant qu'il y en a assez : une image peut ainsi faire 0, 1 ou plusieurs pas.</p>
- *
- * <p>Le nombre de pas par image est plafonné à {@link #MAX_STEPS} : si le jeu rame, on
- * préfère ralentir que de rattraper un retard qui ferait encore plus ramer.</p>
+ * Horloge à pas fixe : transforme le temps réel d'une image en un nombre de pas de jeu de durée
+ * constante.
  */
 public final class FixedStep {
 
@@ -43,11 +34,7 @@ public final class FixedStep {
         return steps;
     }
 
-    /**
-     * Temps restant dans le réservoir, pas encore consommé par un pas de jeu.
-     *
-     * @return le temps en attente, en secondes (toujours inférieur à {@link #DT} après un appel normal)
-     */
+    /** Temps restant dans le réservoir, pas encore consommé par un pas de jeu. */
     public float pending() {
         return accumulator;
     }

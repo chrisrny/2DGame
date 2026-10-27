@@ -7,17 +7,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * Les polices du jeu : Inter pour le texte (licence libre SIL OFL, voir {@code assets/fonts/OFL.txt})
- * et Shojumaru pour les titres ({@link #title()}).
- *
- * <p>La police par défaut de libGDX fait 15 pixels : agrandie à la taille de la fenêtre, elle
- * devient floue. Celle-ci est dessinée en grand (capitales de 70 pixels, générée par
- * {@code tools/generate_font.py}) et réduite à l'affichage avec des mipmaps : le texte reste
- * net quelle que soit la taille de la fenêtre.</p>
- *
- * <p>Pour ne rien changer aux mises en page existantes, les échelles se règlent comme avant :
- * à l'échelle 1, la police a la taille de la police par défaut de libGDX (capitales de 11
- * unités), et {@code font.getData().setScale(0.6f)} donne le même résultat qu'avant.</p>
+ * Les polices du jeu : Inter pour le texte (licence libre SIL OFL, voir {@code
+ * assets/fonts/OFL.txt}) et Shojumaru pour les titres ({@link #title()}).
  */
 public final class Fonts {
 
@@ -30,19 +21,14 @@ public final class Fonts {
     /**
      * Crée une police. Chaque écran ou élément d'interface crée la sienne et la libère dans son
      * {@code dispose} : la police libère aussi sa texture.
-     *
-     * @return une nouvelle police, à l'échelle 1
      */
     public static BitmapFont create() {
         return load("ui");
     }
 
     /**
-     * Crée la police des titres : Shojumaru (licence libre SIL OFL, voir
-     * {@code assets/fonts/OFL-Shojumaru.txt}), aux lettres taillées comme au pinceau. Elle sert aux
-     * noms (étages, boss, reliques) ; le reste du texte garde Inter, plus lisible en petit.
-     *
-     * @return une nouvelle police de titre, à l'échelle 1 (capitales de 11 unités)
+     * Crée la police des titres : Shojumaru (licence libre SIL OFL, voir {@code
+     * assets/fonts/OFL-Shojumaru.txt}), aux lettres taillées comme au pinceau.
      */
     public static BitmapFont title() {
         return load("title");

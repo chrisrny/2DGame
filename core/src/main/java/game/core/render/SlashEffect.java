@@ -11,17 +11,7 @@ import game.model.commun.Vec2;
 import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
 
-/**
- * Dessine le croissant de lame de l'attaque de base ({@code assets/sprites/slash.png}).
- *
- * <p>Le corps du héros ne fait que se retourner gauche/droite : c'est ce croissant qui montre
- * la vraie direction du coup, à 360°. Il est tourné vers la visée du début de l'attaque et
- * couvre la zone touchée par le modèle ({@link Player#attackZone()}) : ce qu'on voit, c'est ce
- * qui frappe.</p>
- *
- * <p>Il apparaît une image après le début de l'attaque, quand le bras part (l'image d'avant est
- * l'élan), et il est dessiné en lumière additive.</p>
- */
+/** Dessine le croissant de lame de l'attaque de base ({@code assets/sprites/slash.png}). */
 public final class SlashEffect implements Disposable {
 
     /** Taille d'une image de l'effet, en pixels. */
@@ -55,7 +45,7 @@ public final class SlashEffect implements Disposable {
      * Démarre l'effet au début d'une attaque et le fait avancer. À appeler une fois par image.
      *
      * @param player le joueur
-     * @param delta  temps écoulé depuis l'image précédente, en secondes
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(Player player, float delta) {
         boolean attacking = player.stateKind() == PlayerStateKind.ATTACKING;
@@ -69,20 +59,14 @@ public final class SlashEffect implements Disposable {
         active = attacking;
     }
 
-    /**
-     * Indique si l'effet est à l'écran en ce moment.
-     *
-     * @return {@code true} pendant la partie visible de l'attaque
-     */
+    /** Indique si l'effet est à l'écran en ce moment. */
     public boolean visible() {
         return active && time >= FRAME_DURATION;
     }
 
     /**
-     * Indique si le coup part vers le haut de l'écran : il faut alors le dessiner derrière le
-     * corps du héros.
-     *
-     * @return {@code true} si le croissant passe derrière le héros
+     * Indique si le coup part vers le haut de l'écran : il faut alors le dessiner derrière le corps
+     * du héros.
      */
     public boolean behindHero() {
         return aim.y() > BEHIND_THRESHOLD;
@@ -92,7 +76,7 @@ public final class SlashEffect implements Disposable {
      * Dessine le croissant autour du joueur. Le {@link SpriteBatch} doit déjà être ouvert ; le
      * mélange normal est remis à la fin.
      *
-     * @param batch  le pinceau d'images, réglé sur la caméra du monde
+     * @param batch le pinceau d'images, réglé sur la caméra du monde
      * @param center le centre du joueur
      */
     public void draw(SpriteBatch batch, Vec2 center) {
@@ -101,8 +85,8 @@ public final class SlashEffect implements Disposable {
         }
         TextureRegion frame = animation.getKeyFrame(time - FRAME_DURATION);
         float angle = (float) Math.toDegrees(Math.atan2(aim.y(), aim.x()));
-        // Vers la gauche, on retourne le croissant en hauteur : le geste balaie dans le même
-        // sens que le bras du héros retourné.
+        // Vers la gauche, on retourne le croissant en hauteur : le geste balaie dans le même sens
+        // que le bras du héros retourné.
         float scaleY = aim.x() < 0f ? -1f : 1f;
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
         batch.draw(frame, center.x() - ORIGIN_X, center.y() - ORIGIN_Y, ORIGIN_X, ORIGIN_Y,

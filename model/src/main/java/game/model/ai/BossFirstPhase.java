@@ -10,26 +10,7 @@ import game.model.event.GameEvent;
 import game.model.world.World;
 import java.util.Optional;
 
-/**
- * Phase 1 du boss : il alterne une frappe au sol et une charge, avec une pause entre les deux.
- *
- * <p>Chaque attaque est annoncée avant de frapper :</p>
- * <ul>
- *   <li><b>frappe au sol</b> : un cercle de rayon {@link #SLAM_RADIUS} apparaît là où se trouve
- *       le joueur et reste {@link #SLAM_WIND_UP} secondes, sans bouger ; puis tout ce qui est
- *       dedans prend {@link #SLAM_DAMAGE} dégâts. Le joueur qui sort du cercle à temps n'a rien ;</li>
- *   <li><b>charge</b> : la logique du Chargeur ({@link ChargerBehavior}) à
- *       {@link #CHARGE_SPEED}, plus vite que lui : approche, annonce, charge, étourdissement.
- *       Contrairement au Chargeur, il anticipe le déplacement du joueur
- *       ({@link #CHARGE_LEAD}) : s'écarter en ligne droite ne suffit pas.</li>
- * </ul>
- * <p>Entre deux attaques, le boss marche vers le joueur pendant {@link #PAUSE_DURATION} seconde.</p>
- *
- * <p>Le cycle des attaques est fixé ici ; ses réglages passent par des méthodes que la phase 2
- * redéfinit ({@link BossSecondPhase}, pattern Template Method) : durée de la pause, taille et
- * annonce de la frappe, vitesse, annonce et anticipation de la charge, et ce qui suit une
- * frappe.</p>
- */
+/** Phase 1 du boss : il alterne une frappe au sol et une charge, avec une pause entre les deux. */
 public class BossFirstPhase implements BossPhase {
 
     /** Rayon de la frappe au sol. */
@@ -151,9 +132,9 @@ public class BossFirstPhase implements BossPhase {
     /**
      * Ce qui suit une frappe au sol. En phase 1, rien.
      *
-     * @param boss  le boss
+     * @param boss le boss
      * @param world le monde où il se bat
-     * @param zone  la zone qui vient d'être frappée
+     * @param zone la zone qui vient d'être frappée
      */
     protected void afterSlam(Boss boss, World world, Circle zone) {
     }

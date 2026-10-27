@@ -6,19 +6,7 @@ import game.model.entity.Player;
 import game.model.world.World;
 import java.util.List;
 
-/**
- * Une relique : une amélioration que le joueur garde jusqu'à la fin de la partie.
- *
- * <p>Une relique ne modifie jamais les statistiques qu'on lui donne : {@link #apply(PlayerStats)}
- * en renvoie de nouvelles. Le joueur applique ses reliques une par une sur ses statistiques de
- * base pour obtenir ses statistiques réelles.</p>
- *
- * <p>Une relique peut aussi réagir à des moments du jeu : un coup qui touche
- * ({@link #onHit(Player)}), une attaque ({@link #onAttack(Player)}), une esquive
- * ({@link #onDodge(Player)}), et chaque pas de jeu ({@link #update(Player, World, float)}) pour
- * les effets qui durent. Toutes ces méthodes ne font rien par défaut : une relique ne redéfinit
- * que celles dont elle a besoin, et ajouter un moment ne change aucune relique existante.</p>
- */
+/** Une relique : une amélioration que le joueur garde jusqu'à la fin de la partie. */
 public interface Relic {
 
     /** @return le nom affiché au joueur */
@@ -36,8 +24,8 @@ public interface Relic {
     PlayerStats apply(PlayerStats stats);
 
     /**
-     * Appelé à chaque cible que le joueur touche. Par défaut, ne fait rien : seules les
-     * reliques qui réagissent aux coups redéfinissent cette méthode.
+     * Appelé à chaque cible que le joueur touche. Par défaut, ne fait rien : seules les reliques
+     * qui réagissent aux coups redéfinissent cette méthode.
      *
      * @param player le joueur qui vient de toucher une cible
      */
@@ -64,22 +52,18 @@ public interface Relic {
     }
 
     /**
-     * Appelé à chaque pas de jeu, après l'action du joueur, pour les effets qui durent.
-     * Par défaut, ne fait rien.
+     * Appelé à chaque pas de jeu, après l'action du joueur, pour les effets qui durent. Par défaut,
+     * ne fait rien.
      *
      * @param player le joueur qui possède la relique
-     * @param world  le monde, pour ses cibles et son bus d'événements
-     * @param dt     durée du pas, en secondes
+     * @param world le monde, pour ses cibles et son bus d'événements
+     * @param dt durée du pas, en secondes
      */
     default void update(Player player, World world, float dt) {
         // Rien par défaut.
     }
 
-    /**
-     * Zones de feu posées au sol par la relique, que la vue dessine. Par défaut, aucune.
-     *
-     * @return les zones actives en ce moment
-     */
+    /** Zones de feu posées au sol par la relique, que la vue dessine. Par défaut, aucune. */
     default List<Circle> fireZones() {
         return List.of();
     }

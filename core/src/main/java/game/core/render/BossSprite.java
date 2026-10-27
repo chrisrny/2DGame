@@ -18,14 +18,6 @@ import java.util.Optional;
 
 /**
  * Dessine l'Oni du quartier, le boss, avec sa feuille de sprites ({@code assets/sprites/boss.png}).
- *
- * <p>Comme le héros, il est dessiné de 3/4 et ne fait que se retourner gauche/droite. Sa pose est
- * choisie par {@link BossPoseTracker}. La massue levée suit l'avancement de l'annonce du coup :
- * le geste arrive en haut pile quand le coup part.</p>
- *
- * <p>La feuille a 8 lignes par phase (repos, marche, massue levée, impact, élan, charge, sonné,
- * touché), la phase 2 juste sous la phase 1, puis une ligne pour la mort. Le modèle retire le boss
- * mort de la liste des ennemis : la vue garde sa dernière position pour jouer la mort à sa place.</p>
  */
 public final class BossSprite implements Disposable {
 
@@ -97,12 +89,12 @@ public final class BossSprite implements Disposable {
     }
 
     /**
-     * Suit le boss s'il est là, et lance sa mort quand il disparaît de la liste des ennemis.
-     * À appeler une fois par image tant que la partie avance.
+     * Suit le boss s'il est là, et lance sa mort quand il disparaît de la liste des ennemis. À
+     * appeler une fois par image tant que la partie avance.
      *
      * @param enemies les ennemis encore en vie
-     * @param player  la position du joueur
-     * @param delta   temps écoulé depuis l'image précédente, en secondes
+     * @param player la position du joueur
+     * @param delta temps écoulé depuis l'image précédente, en secondes
      */
     public void update(List<Enemy> enemies, Vec2 player, float delta) {
         diedNow = false;
@@ -145,8 +137,8 @@ public final class BossSprite implements Disposable {
     /**
      * Dessine le boss vivant. Le {@link SpriteBatch} doit déjà être ouvert.
      *
-     * @param batch    le pinceau d'images
-     * @param boss     le boss
+     * @param batch le pinceau d'images
+     * @param boss le boss
      * @param position où le dessiner (sa position lissée, voir {@link MotionSmoothing})
      */
     public void draw(SpriteBatch batch, Boss boss, Vec2 position) {

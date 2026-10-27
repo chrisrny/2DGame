@@ -27,16 +27,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-/**
- * Le personnage contrôlé par le joueur.
- *
- * <p>Son comportement dépend de son état courant ({@link PlayerState}, pattern State) :
- * le joueur ne fait que détecter les appuis, suivre la visée et déléguer à cet état.</p>
- *
- * <p>Un coup reçu le fait passer en état touché ({@link HurtState}) et le rend invincible
- * pendant {@link #INVULNERABILITY_DURATION}. Quand ses points de vie tombent à zéro, il passe
- * en état mort quel que soit son état, et {@link GameEvent.PlayerDied} est publié une fois.</p>
- */
+/** Le personnage contrôlé par le joueur. */
 public final class Player implements Damageable {
 
     /** Rayon de la zone de collision du joueur, en unités. */
@@ -84,9 +75,9 @@ public final class Player implements Damageable {
      * Crée un joueur avec tous ses points de vie.
      *
      * @param position position de départ
-     * @param stats    statistiques de base du joueur, avant toute relique
-     * @param random   source de hasard de la partie (coups critiques), partagée et initialisée
-     *                 avec la graine de la partie pour que tout soit reproductible
+     * @param stats statistiques de base du joueur, avant toute relique
+     * @param random source de hasard de la partie (coups critiques), partagée et initialisée avec
+     *     la graine de la partie pour que tout soit reproductible
      */
     public Player(Vec2 position, PlayerStats stats, Random random) {
         this.position = Objects.requireNonNull(position, "position");
@@ -99,14 +90,9 @@ public final class Player implements Damageable {
     /**
      * Fait avancer le joueur d'un pas de jeu.
      *
-     * <p>Dans l'ordre : annoncer la mort si elle vient d'arriver, décompter les recharges et
-     * l'invincibilité, détecter les appuis, suivre la visée, laisser l'état courant décider de
-     * l'état suivant, faire agir cet état, utiliser les compétences, puis faire avancer les
-     * effets qui durent des reliques.</p>
-     *
      * @param intent ce que le joueur veut faire pendant ce pas
-     * @param world  la salle où se trouve le joueur
-     * @param dt     durée du pas, en secondes
+     * @param world la salle où se trouve le joueur
+     * @param dt durée du pas, en secondes
      */
     public void update(PlayerIntent intent, World world, float dt) {
         Objects.requireNonNull(intent, "intent");
@@ -129,11 +115,7 @@ public final class Player implements Damageable {
 
     /**
      * Fait avancer la recharge des compétences, puis utilise celles dont le bouton vient d'être
-     * enfoncé. Une compétence est instantanée et ne s'utilise qu'au repos ou en marchant : pas
-     * pendant une attaque, une esquive, un coup reçu, ni une fois mort.
-     *
-     * @param world le monde où se produit l'effet
-     * @param dt    durée du pas, en secondes
+     * enfoncé.
      */
     private void useSkills(World world, float dt) {
         skill1.update(dt);
@@ -152,12 +134,6 @@ public final class Player implements Damageable {
 
     /**
      * Publie {@link GameEvent.PlayerDied} au premier pas où le joueur est mort, et jamais ensuite.
-     *
-     * <p>La mort arrive dans {@link #receive(Hit)}, qui n'a pas accès au bus d'événements :
-     * elle est donc annoncée au pas suivant, ce qui laisse les événements distribués en fin
-     * de pas comme les autres.</p>
-     *
-     * @param world le monde, qui donne accès au bus d'événements
      */
     private void publishDeathOnce(World world) {
         if (!isAlive() && !deathPublished) {
@@ -167,10 +143,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Un bouton est « appuyé » au seul pas où il passe de relâché à enfoncé :
-     * une attaque part une fois par clic, même si le bouton reste enfoncé.
-     *
-     * @param intent l'intention de ce pas
+     * Un bouton est « appuyé » au seul pas où il passe de relâché à enfoncé : une attaque part une
+     * fois par clic, même si le bouton reste enfoncé.
      */
     private void detectPresses(PlayerIntent intent) {
         attackPressed = intent.attack() && !previousIntent.attack();
@@ -183,23 +157,17 @@ public final class Player implements Damageable {
     /**
      * Déplace le joueur pendant un pas. Utilisé par les états qui font bouger le joueur.
      *
-     * <p>Le déplacement vaut {@code direction × vitesse × dt} : la vitesse est en unités par
-     * seconde, quel que soit le nombre de pas. Une direction d'au plus 1 de long (garanti par
-     * {@link PlayerIntent}) empêche d'aller plus vite en diagonale. Le joueur glisse le long des
-     * murs et ne sort jamais de l'arène.</p>
-     *
      * @param direction direction du déplacement, de longueur 0 à 1
-     * @param world     la salle où se trouve le joueur
-     * @param dt        durée du pas, en secondes
+     * @param world la salle où se trouve le joueur
+     * @param dt durée du pas, en secondes
      */
     public void walk(Vec2 direction, World world, float dt) {
         moveBy(direction.scale(stats.speed() * dt), world);
     }
 
     /**
-     * Déplace le joueur d'un vecteur donné : il glisse le long des murs et ne sort jamais
-     * de l'arène. C'est le seul endroit où la position change ; la marche et l'esquive
-     * passent toutes deux par ici.
+     * Déplace le joueur d'un vecteur donné : il glisse le long des murs et ne sort jamais de
+     * l'arène.
      *
      * @param delta déplacement voulu pendant ce pas
      * @param world la salle où se trouve le joueur
@@ -210,10 +178,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Indique si une esquive peut commencer à ce pas : le bouton vient d'être enfoncé
-     * et la recharge d'esquive est terminée.
-     *
-     * @return {@code true} si le joueur peut esquiver maintenant
+     * Indique si une esquive peut commencer à ce pas : le bouton vient d'être enfoncé et la
+     * recharge d'esquive est terminée.
      */
     public boolean canStartDodge() {
         return dodgePressed && dodgeCooldownLeft <= 0f;
@@ -221,9 +187,6 @@ public final class Player implements Damageable {
 
     /**
      * Lance une esquive et relance sa recharge. Utilisé par les états qui autorisent l'esquive.
-     *
-     * <p>La direction est figée au départ : celle du déplacement si le joueur bouge,
-     * sinon celle du regard.</p>
      *
      * @param move direction de déplacement demandée à ce pas
      * @return l'état d'esquive dans lequel passer
@@ -238,10 +201,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Indique si une attaque peut commencer à ce pas : le bouton vient d'être enfoncé
-     * et la recharge est terminée.
-     *
-     * @return {@code true} si le joueur peut attaquer maintenant
+     * Indique si une attaque peut commencer à ce pas : le bouton vient d'être enfoncé et la
+     * recharge est terminée.
      */
     public boolean canStartAttack() {
         return attackPressed && attackCooldownLeft <= 0f;
@@ -249,8 +210,6 @@ public final class Player implements Damageable {
 
     /**
      * Zone touchée par l'attaque : un cercle juste devant le joueur, dans la direction du regard.
-     *
-     * @return un cercle de diamètre égal à la portée, collé au bord du joueur
      */
     public Circle attackZone() {
         float reach = stats.attackRange() / 2f;
@@ -259,13 +218,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Porte un coup : frappe toutes les cibles ennemies dans la zone d'attaque, relance
-     * la recharge, puis prévient chaque relique de l'attaque ({@link Relic#onAttack}).
-     * Utilisé par l'état d'attaque, une fois par attaque.
-     *
-     * <p>Chaque cible tire son propre critique. Le recul pousse la cible dans la direction
-     * joueur → cible. Chaque coup accepté publie un {@link GameEvent.EntityHit}, que la vue
-     * utilisera pour afficher les dégâts, puis prévient chaque relique ({@link Relic#onHit}).</p>
+     * Porte un coup : frappe toutes les cibles ennemies dans la zone d'attaque, relance la
+     * recharge, puis prévient chaque relique de l'attaque ({@link Relic#onAttack}).
      *
      * @param world la salle, qui sait quelles cibles sont dans la zone
      * @return le nombre de cibles réellement touchées
@@ -280,9 +234,9 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Frappe une deuxième fois la zone d'attaque, pour la relique Écho : mêmes cibles, même
-     * tirage de critique et mêmes reliques de coup qu'une attaque, mais la recharge n'est pas
-     * relancée et ce coup ne compte pas comme une attaque.
+     * Frappe une deuxième fois la zone d'attaque, pour la relique Écho : mêmes cibles, même tirage
+     * de critique et mêmes reliques de coup qu'une attaque, mais la recharge n'est pas relancée et
+     * ce coup ne compte pas comme une attaque.
      *
      * @param world la salle, qui sait quelles cibles sont dans la zone
      * @return le nombre de cibles réellement touchées
@@ -315,8 +269,7 @@ public final class Player implements Damageable {
 
     /**
      * Prévient chaque relique qu'une cible vient d'être touchée ({@link Relic#onHit}) : par
-     * l'attaque, mais aussi par l'Onde de choc ou une lame de l'Éventail. C'est ce qui fait
-     * soigner le Croc vampire à chaque coup, sorts compris.
+     * l'attaque, mais aussi par l'Onde de choc ou une lame de l'Éventail.
      */
     public void registerHit() {
         for (Relic relic : relics) {
@@ -324,29 +277,14 @@ public final class Player implements Damageable {
         }
     }
 
-    /**
-     * Ramène un centre à l'intérieur de l'arène, en tenant compte du rayon.
-     *
-     * @param center le centre à borner
-     * @param arena  les limites de l'arène (plus large et plus haute que le joueur)
-     * @return le centre le plus proche où le joueur est entièrement dans l'arène
-     */
+    /** Ramène un centre à l'intérieur de l'arène, en tenant compte du rayon. */
     private static Vec2 keepInside(Vec2 center, Rect arena) {
         float x = Math.clamp(center.x(), arena.x() + RADIUS, arena.right() - RADIUS);
         float y = Math.clamp(center.y(), arena.y() + RADIUS, arena.top() - RADIUS);
         return new Vec2(x, y);
     }
 
-    /**
-     * Applique un coup au joueur.
-     *
-     * <p>Le coup est ignoré si le joueur est mort, si c'est un tir ami, si l'état courant rend
-     * invincible (esquive) ou si le joueur vient déjà d'être touché (invincibilité après un coup).
-     * Sinon, les points de vie baissent : un coup mortel fait passer le joueur en état mort,
-     * les autres le font passer en état touché, avec le recul du coup et
-     * {@link #INVULNERABILITY_DURATION} d'invincibilité. Un coup reçu interrompt donc
-     * une attaque en cours.</p>
-     */
+    /** Applique un coup au joueur. */
     @Override
     public boolean receive(Hit hit) {
         Objects.requireNonNull(hit, "hit");
@@ -364,10 +302,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Indique si le joueur ignore les coups en ce moment : pendant une esquive, ou juste
-     * après avoir été touché.
-     *
-     * @return {@code true} si un coup serait ignoré maintenant
+     * Indique si le joueur ignore les coups en ce moment : pendant une esquive, ou juste après
+     * avoir été touché.
      */
     public boolean isInvulnerable() {
         return state.invulnerable() || invulnerableLeft > 0f;
@@ -375,9 +311,6 @@ public final class Player implements Damageable {
 
     /**
      * Ajoute une relique et recalcule les statistiques réelles.
-     *
-     * <p>Si la relique augmente les points de vie maximum, le joueur gagne aussi ces points
-     * de vie tout de suite : prendre une relique de vie ne doit pas ressembler à une perte.</p>
      *
      * @param relic la relique gagnée
      */
@@ -393,8 +326,8 @@ public final class Player implements Damageable {
     }
 
     /**
-     * Statistiques réelles : les statistiques de base, transformées par chaque relique dans
-     * l'ordre où elles ont été gagnées. Les statistiques de base ne sont jamais modifiées.
+     * Statistiques réelles : les statistiques de base, transformées par chaque relique dans l'ordre
+     * où elles ont été gagnées. Les statistiques de base ne sont jamais modifiées.
      */
     private PlayerStats computeStats() {
         PlayerStats result = baseStats;
@@ -481,20 +414,12 @@ public final class Player implements Damageable {
         return skill1;
     }
 
-    /**
-     * Le HUD traite les deux emplacements de la même façon : un emplacement peut être vide.
-     *
-     * @return la compétence du deuxième emplacement (l'Éventail de lames)
-     */
+    /** Le HUD traite les deux emplacements de la même façon : un emplacement peut être vide. */
     public Optional<Skill> skill2() {
         return Optional.of(skill2);
     }
 
-    /**
-     * Zones de feu posées par les reliques (Pas de braise), pour que la vue les dessine.
-     *
-     * @return les zones actives de toutes les reliques, éventuellement aucune
-     */
+    /** Zones de feu posées par les reliques (Pas de braise), pour que la vue les dessine. */
     public List<Circle> fireZones() {
         List<Circle> zones = new ArrayList<>();
         for (Relic relic : relics) {

@@ -28,9 +28,9 @@ public abstract class EndScreen extends MenuScreen {
     /**
      * Crée l'écran de fin.
      *
-     * @param main       le jeu, pour changer d'écran
-     * @param run        la partie terminée, dont on affiche le bilan
-     * @param title      le grand titre
+     * @param main le jeu, pour changer d'écran
+     * @param run la partie terminée, dont on affiche le bilan
+     * @param title le grand titre
      * @param titleColor la couleur du titre
      */
     protected EndScreen(Main main, Run run, String title, Color titleColor) {

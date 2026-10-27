@@ -4,14 +4,7 @@ import game.core.Main;
 import game.core.input.Gamepad.Button;
 import java.util.Objects;
 
-/**
- * Écran de pause, ouvert avec Échap (Start à la manette) pendant la partie.
- *
- * <p>La partie reste dessinée derrière, figée sous un voile : son écran est gardé de côté par
- * {@link Main#push}, et il n'est pas mis à jour tant que la pause est affichée. On choisit avec
- * les flèches (ou Z / S, la croix, le stick) et Entrée (A) : reprendre, options ou quitter vers le
- * titre. Échap (B ou Start) reprend directement.</p>
- */
+/** Écran de pause, ouvert avec Échap (Start à la manette) pendant la partie. */
 public final class PauseScreen extends MenuScreen {
 
     private static final String[] ITEMS = {"Reprendre", "Options", "Quitter"};

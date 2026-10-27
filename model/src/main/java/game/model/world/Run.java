@@ -16,22 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-/**
- * Une partie complète, du début à la victoire ou à la défaite.
- *
- * <p>C'est le point d'entrée du modèle : la vue l'appelle à chaque pas de jeu avec
- * l'intention du joueur, et lit son état pour dessiner.</p>
- *
- * <p>Une partie enchaîne les trois stages de {@link Stages#demo()} sur la même map, sans
- * téléportation : le joueur garde sa position, ses points de vie et son expérience. Quand un
- * stage est fini ({@link GameEvent.StageCleared}), une pause de {@link #STAGE_INTRO} secondes
- * sans vague annonce le suivant. Au stage 3, le boss apparaît dans son arène
- * ({@link MapLayout#bossArena()}). La partie est perdue à la mort
- * du joueur et gagnée à la mort du boss.</p>
- *
- * <p>La difficulté vient des réglages ({@link Settings}) : elle est lue au début de chaque
- * stage, donc un changement en pleine partie vaut à partir du stage suivant.</p>
- */
+/** Une partie complète, du début à la victoire ou à la défaite. */
 public final class Run {
 
     private final GameConfig config;
@@ -71,15 +56,15 @@ public final class Run {
      * Crée une partie qui suit les réglages du joueur : la difficulté de {@code settings} remplace
      * celle de {@code config}, et peut changer en cours de partie.
      *
-     * @param config   la graine du hasard et les statistiques du joueur
+     * @param config la graine du hasard et les statistiques du joueur
      * @param settings les réglages du joueur, partagés avec l'écran des options
      */
     public Run(GameConfig config, Settings settings) {
         this.config = Objects.requireNonNull(config, "config");
         this.settings = Objects.requireNonNull(settings, "settings");
         MapLayout layout = MapLayouts.main();
-        // Une seule source de hasard pour toute la partie, initialisée avec la graine :
-        // le joueur, les ennemis et les vagues doivent tous tirer leur hasard d'ici.
+        // Une seule source de hasard pour toute la partie, initialisée avec la graine : le joueur,
+        // les ennemis et les vagues doivent tous tirer leur hasard d'ici.
         this.random = new Random(config.seed());
         this.player = new Player(layout.center(), config.player(), random);
         this.map = new GameMap(layout, player, events, random);
@@ -104,8 +89,8 @@ public final class Run {
         }
     }
 
-    // Pendant l'annonce d'un nouveau stage, la map n'envoie aucune vague : l'ancien stage est
-    // fini et le nouveau n'a pas encore commencé.
+    // Pendant l'annonce d'un nouveau stage, la map n'envoie aucune vague : l'ancien stage est fini
+    // et le nouveau n'a pas encore commencé.
     private void updateStageIntro(float dt) {
         stageIntroLeft = Math.max(0f, stageIntroLeft - dt);
         if (nextStagePending && stageIntroLeft == 0f) {
@@ -130,20 +115,16 @@ public final class Run {
     /**
      * Fait avancer la partie d'un pas de jeu.
      *
-     * <p>Pendant un choix de relique, la partie est figée : rien ne bouge et le temps de jeu
-     * n'avance pas, jusqu'à {@link #chooseRelic(int)}. Après chaque pas, si le joueur vient de
-     * gagner un niveau, un choix de reliques est proposé.</p>
-     *
      * @param intent ce que le joueur veut faire pendant ce pas
-     * @param dt     durée du pas, en secondes (toujours {@code FixedStep.DT} dans le jeu)
+     * @param dt durée du pas, en secondes (toujours {@code FixedStep.DT} dans le jeu)
      */
     public void update(PlayerIntent intent, float dt) {
         Objects.requireNonNull(intent, "intent");
         if (isChoosingRelic()) {
             return;
         }
-        // Le chrono s'arrête à la fin de la partie : le modèle avance encore pendant
-        // l'END_DELAY de l'écran, mais le temps affiché reste celui de la mort.
+        // Le chrono s'arrête à la fin de la partie : le modèle avance encore pendant l'END_DELAY de
+        // l'écran, mais le temps affiché reste celui de la mort.
         if (!isOver()) {
             elapsed += dt;
         }
@@ -154,8 +135,8 @@ public final class Run {
     }
 
     /**
-     * Propose un choix de reliques pour le prochain niveau gagné, s'il y en a un. Un niveau
-     * gagné alors qu'il ne reste aucune relique à proposer est simplement passé.
+     * Propose un choix de reliques pour le prochain niveau gagné, s'il y en a un. Un niveau gagné
+     * alors qu'il ne reste aucune relique à proposer est simplement passé.
      */
     private void offerNextChoice() {
         while (pendingChoice.isEmpty() && player.isAlive() && experience.consumeLevelUp()) {
@@ -168,7 +149,7 @@ public final class Run {
      * propose le choix suivant si un autre niveau attend ; sinon, la partie reprend.
      *
      * @param index position de la relique choisie dans {@link #pendingChoice()}
-     * @throws IllegalStateException     si aucun choix n'est en cours
+     * @throws IllegalStateException si aucun choix n'est en cours
      * @throws IndexOutOfBoundsException si {@code index} ne désigne aucune relique proposée
      */
     public void chooseRelic(int index) {
@@ -223,11 +204,7 @@ public final class Run {
         return nextStagePending ? 0 : map.kills();
     }
 
-    /**
-     * Temps restant de l'annonce du stage. Tant qu'il est positif, la vue affiche « Stage N ».
-     *
-     * @return le temps restant, en secondes, ou 0 s'il n'y a pas d'annonce en cours
-     */
+    /** Temps restant de l'annonce du stage. Tant qu'il est positif, la vue affiche « Stage N ». */
     public float stageIntroLeft() {
         return stageIntroLeft;
     }
@@ -243,8 +220,8 @@ public final class Run {
     }
 
     /**
-     * @return {@code true} si la partie est gagnée : boss mort et joueur encore en vie, ou
-     *         victoire forcée par la triche de démo
+     * @return {@code true} si la partie est gagnée : boss mort et joueur encore en vie, ou victoire
+     *     forcée par la triche de démo
      */
     public boolean isWon() {
         return !forcedLoss && (forcedWin || (boss != null && !boss.isAlive() && player.isAlive()));
@@ -262,8 +239,8 @@ public final class Run {
     }
 
     /**
-     * Triche de démo (F10) : perd la partie tout de suite, pour montrer l'écran de défaite.
-     * Sans effet sur une partie déjà finie.
+     * Triche de démo (F10) : perd la partie tout de suite, pour montrer l'écran de défaite. Sans
+     * effet sur une partie déjà finie.
      */
     public void forceLose() {
         if (!isOver()) {
@@ -284,10 +261,8 @@ public final class Run {
     }
 
     /**
-     * Le temps de jeu écoulé depuis le début de la partie. Il n'avance pas pendant un choix
-     * de relique et s'arrête quand la partie est finie.
-     *
-     * @return le temps de jeu écoulé, en secondes
+     * Le temps de jeu écoulé depuis le début de la partie. Il n'avance pas pendant un choix de
+     * relique et s'arrête quand la partie est finie.
      */
     public float elapsed() {
         return elapsed;

@@ -9,17 +9,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import game.model.world.Run;
 
-/**
- * Le chrono de la run : le temps de jeu écoulé, en mm:ss, en haut au centre de l'écran.
- *
- * <p>Le chrono ne compte rien lui-même : il affiche {@link Run#elapsed()}. C'est le modèle qui
- * fait avancer ce temps, et il ne l'avance pas en pause (la partie n'est plus mise à jour),
- * pendant un choix de relique ni après la fin de la partie. Le chrono s'arrête donc tout seul
- * aux bons moments, et l'écran de fin affiche le même temps.</p>
- *
- * <p>À l'étage du boss, la barre de PV du boss occupe le haut de l'écran : le chrono descend
- * alors juste en dessous.</p>
- */
+/** Le chrono de la run : le temps de jeu écoulé, en mm:ss, en haut au centre de l'écran. */
 public final class RunTimer implements Disposable {
 
     /** Distance entre le haut de l'écran et le haut du chrono, en unités. */
@@ -44,7 +34,7 @@ public final class RunTimer implements Disposable {
     /**
      * Crée le chrono.
      *
-     * @param width  largeur de l'écran logique, en unités
+     * @param width largeur de l'écran logique, en unités
      * @param height hauteur de l'écran logique, en unités
      */
     public RunTimer(float width, float height) {
@@ -54,7 +44,7 @@ public final class RunTimer implements Disposable {
     /**
      * Adapte le chrono à la nouvelle taille de la fenêtre.
      *
-     * @param width  largeur de la fenêtre, en pixels
+     * @param width largeur de la fenêtre, en pixels
      * @param height hauteur de la fenêtre, en pixels
      */
     public void resize(int width, int height) {
@@ -88,11 +78,8 @@ public final class RunTimer implements Disposable {
     }
 
     /**
-     * Met une durée au format mm:ss. Les secondes entamées ne comptent pas (59,9 s donne
-     * « 00:59 »), et une durée négative donne « 00:00 ». Au-delà de 99 minutes, les minutes
-     * prennent simplement plus de chiffres.
-     *
-     * <p>Sert au chrono en jeu et à l'écran de fin, pour qu'ils affichent le même temps.</p>
+     * Met une durée au format mm:ss. Les secondes entamées ne comptent pas (59,9 s donne « 00:59
+     * »), et une durée négative donne « 00:00 ».
      *
      * @param seconds la durée, en secondes
      * @return la durée au format mm:ss, par exemple « 01:01 » pour 61 secondes

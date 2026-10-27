@@ -3,9 +3,9 @@ package game.model.commun;
 /**
  * Rectangle aligné sur les axes : un mur, un obstacle, une porte ou l'arène entière.
  *
- * @param x      abscisse du coin bas gauche
- * @param y      ordonnée du coin bas gauche
- * @param width  largeur, positive ou nulle
+ * @param x abscisse du coin bas gauche
+ * @param y ordonnée du coin bas gauche
+ * @param width largeur, positive ou nulle
  * @param height hauteur, positive ou nulle
  */
 public record Rect(float x, float y, float width, float height) {
@@ -21,20 +21,12 @@ public record Rect(float x, float y, float width, float height) {
         }
     }
 
-    /**
-     * Abscisse du bord droit.
-     *
-     * @return {@code x + width}
-     */
+    /** Abscisse du bord droit. */
     public float right() {
         return x + width;
     }
 
-    /**
-     * Ordonnée du bord haut.
-     *
-     * @return {@code y + height}
-     */
+    /** Ordonnée du bord haut. */
     public float top() {
         return y + height;
     }

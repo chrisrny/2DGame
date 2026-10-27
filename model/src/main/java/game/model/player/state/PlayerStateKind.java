@@ -1,11 +1,6 @@
 package game.model.player.state;
 
-/**
- * Nature de l'état du joueur, vue de l'extérieur du modèle.
- *
- * <p>La vue dessine le joueur selon cette valeur, sans connaître les classes d'état.
- * Chaque nouvel état ajoute sa valeur.</p>
- */
+/** Nature de l'état du joueur, vue de l'extérieur du modèle. */
 public enum PlayerStateKind {
     /** Immobile. */
     IDLE,

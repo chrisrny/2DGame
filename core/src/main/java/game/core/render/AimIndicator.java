@@ -10,15 +10,8 @@ import game.model.entity.Player;
 import game.model.player.state.PlayerStateKind;
 
 /**
- * Petite flèche qui tourne autour du héros, dans la direction de sa visée
- * ({@code assets/sprites/aim.png}).
- *
- * <p>Le corps du héros ne se retourne que vers la gauche ou la droite (voir {@link PlayerSprite}) :
- * sans cette flèche, on ne voit pas quand il vise vers le haut ou vers le bas. Elle suit
- * {@link Player#facing()}, la direction que prendront le prochain coup et les compétences.</p>
- *
- * <p>Elle est dessinée après la nuit, comme une information d'interface : elle reste lisible
- * loin des feux.</p>
+ * Petite flèche qui tourne autour du héros, dans la direction de sa visée ({@code
+ * assets/sprites/aim.png}).
  */
 public final class AimIndicator implements Disposable {
 
@@ -46,10 +39,10 @@ public final class AimIndicator implements Disposable {
     }
 
     /**
-     * Dessine la flèche autour du joueur, sauf s'il est mort. Le {@link SpriteBatch} doit déjà
-     * être ouvert, en mélange normal.
+     * Dessine la flèche autour du joueur, sauf s'il est mort. Le {@link SpriteBatch} doit déjà être
+     * ouvert, en mélange normal.
      *
-     * @param batch  le pinceau d'images, réglé sur la caméra du monde
+     * @param batch le pinceau d'images, réglé sur la caméra du monde
      * @param player le joueur
      * @param center où il est dessiné (sa position lissée, voir {@link MotionSmoothing})
      */

@@ -12,17 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * Un projectile en vol : flèche d'Archer, lame de l'Éventail du joueur, projectile du boss.
- *
- * <p>À chaque pas, il avance en ligne droite et disparaît dans trois cas : sa durée de vie
- * est écoulée, il entre dans un mur (l'eau ne l'arrête pas : il passe au-dessus), ou il touche une cible de l'autre faction (qui reçoit
- * un {@link Hit}). Une cible qui refuse le coup, par exemple le joueur pendant son esquive,
- * est traversée : c'est ce qui permet d'esquiver les tirs.</p>
- *
- * <p>Un projectile perçant ({@code pierce > 1}) traverse ses premières cibles : il en touche
- * jusqu'à {@code pierce}, chacune une seule fois, puis disparaît.</p>
- */
+/** Un projectile en vol : flèche d'Archer, lame de l'Éventail du joueur, projectile du boss. */
 public class Projectile {
 
     /** Vitesse du recul infligé à la cible touchée, en unités par seconde. */
@@ -44,9 +34,9 @@ public class Projectile {
      *
      * @param position position de départ
      * @param velocity vitesse, en unités par seconde
-     * @param radius   rayon de la zone de collision
-     * @param faction  faction de celui qui tire
-     * @param damage   dégâts infligés à la cible touchée
+     * @param radius rayon de la zone de collision
+     * @param faction faction de celui qui tire
+     * @param damage dégâts infligés à la cible touchée
      * @param lifetime durée de vie maximale, en secondes
      */
     public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime) {
@@ -58,11 +48,12 @@ public class Projectile {
      *
      * @param position position de départ
      * @param velocity vitesse, en unités par seconde
-     * @param radius   rayon de la zone de collision
-     * @param faction  faction de celui qui tire
-     * @param damage   dégâts infligés à chaque cible touchée
+     * @param radius rayon de la zone de collision
+     * @param faction faction de celui qui tire
+     * @param damage dégâts infligés à chaque cible touchée
      * @param lifetime durée de vie maximale, en secondes
-     * @param pierce   nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins 1
+     * @param pierce nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins
+     *     1
      */
     public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime,
             int pierce) {
@@ -74,12 +65,13 @@ public class Projectile {
      *
      * @param position position de départ
      * @param velocity vitesse, en unités par seconde
-     * @param radius   rayon de la zone de collision
-     * @param faction  faction de celui qui tire
-     * @param damage   dégâts infligés à chaque cible touchée
+     * @param radius rayon de la zone de collision
+     * @param faction faction de celui qui tire
+     * @param damage dégâts infligés à chaque cible touchée
      * @param lifetime durée de vie maximale, en secondes
-     * @param pierce   nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins 1
-     * @param onHit    appelé à chaque cible touchée : le tireur en est prévenu (reliques du joueur)
+     * @param pierce nombre de cibles différentes qu'il peut toucher avant de disparaître, au moins
+     *     1
+     * @param onHit appelé à chaque cible touchée : le tireur en est prévenu (reliques du joueur)
      */
     public Projectile(Vec2 position, Vec2 velocity, float radius, Faction faction, int damage, float lifetime,
             int pierce, Runnable onHit) {
@@ -97,11 +89,11 @@ public class Projectile {
     }
 
     /**
-     * Fait avancer le projectile d'un pas de jeu, puis vérifie s'il doit disparaître.
-     * Un projectile déjà disparu ne fait plus rien.
+     * Fait avancer le projectile d'un pas de jeu, puis vérifie s'il doit disparaître. Un projectile
+     * déjà disparu ne fait plus rien.
      *
      * @param world le monde, pour ses murs, ses cibles et son bus d'événements
-     * @param dt    durée du pas, en secondes
+     * @param dt durée du pas, en secondes
      */
     public void update(World world, float dt) {
         if (!alive) {
@@ -116,8 +108,8 @@ public class Projectile {
         hitTargets(world);
     }
 
-    // Les murs sont épais (16 u au moins) et un projectile avance de quelques unités par pas :
-    // il ne peut pas traverser un mur entre deux pas.
+    // Les murs sont épais (16 u au moins) et un projectile avance de quelques unités par pas : il
+    // ne peut pas traverser un mur entre deux pas.
     private boolean hitsWall(World world) {
         Circle box = hitbox();
         return world.solidWalls().stream().anyMatch(wall -> Collisions.overlaps(box, wall));
