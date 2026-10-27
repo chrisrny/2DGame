@@ -135,7 +135,7 @@ jamais de la vue.
 | **Redéfinition** | `Shockwave` et `BladeFan` redéfinissent `activate()` de `Skill` ; `BossSecondPhase` redéfinit les réglages de `BossFirstPhase` |
 | **Surcharge** | [`Gamepad.justPressed(Button)`](../core/src/main/java/game/core/input/Gamepad.java) et `justPressed(Direction)` ; trois constructeurs de [`Projectile`](../model/src/main/java/game/model/combat/Projectile.java) |
 | **Encapsulation** | Aucun attribut public modifiable dans le projet : l'état ne change que par une méthode qui applique une règle (par exemple `Player.receive(Hit)` vérifie l'invincibilité) |
-| **Objets immuables** | 12 records, dont `Vec2`, `Hit`, `PlayerIntent`, `PlayerStats` et `Wave` : un vecteur ou un coup partagé ne peut pas être modifié par erreur |
+| **Objets immuables** | 21 records, dont `Vec2`, `Hit`, `PlayerIntent`, `PlayerStats` et `Wave` : un vecteur ou un coup partagé ne peut pas être modifié par erreur |
 
 ## 5. Tests
 
